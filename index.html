@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<!--[if IE 7]><html lang="en" ng-app="myApp" class="no-js ie7 oldIE ie"><![endif]-->
+<!--[if IE 8]><html lang="en" ng-app="myApp" class="no-js ie8 oldIE ie"><![endif]-->
+<!--[if IE 9]><html lang="en" ng-app="myApp" class="no-js ie9 ie"><![endif]-->
+<!--[if gt IE 9|!IE]><!--><html ng-app="myApp" class="no-js"><!-- <![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<title>reStart Boilerplate in AngularJS</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		
+		<!-- JS Libraries -->
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" type="text/javascript"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js" type="text/javascript"></script>
+
+		<!-- Angular scripts (to be concatenated and minified) -->
+		<script src="app/App.js" type="text/javascript"></script>
+		<script src="app/HeaderCtrl.js" type="text/javascript"></script>
+		<script src="app/HomeCtrl.js" type="text/javascript"></script>
+		<script src="app/SubCtrl.js" type="text/javascript"></script>
+		<script src="app/Directives.js" type="text/javascript"></script>
+
+		<!-- Modernizr JS (includes HTML5 shim) -->
+		<script src="assets/js/libs/modernizr.js"></script>
+
+		<!-- Stylesheets -->
+		<link href="assets/css/styles.css" rel="stylesheet" media="all">
+	</head>
+
+	<body ng-app="myApp">
+		<div class="wrapper-overflow">
+			<div class="wrapper-canvas">
+			
+			<!-- HEADER -->
+				<header id="header-global" class="header-global clearfix" ng-controller="HeaderCtrl">
+					<a class="toggle-offcanvas">Menu</a>
+					
+					<h1 class="title-global">{{json.title}}</h1>
+					
+					<nav id="nav-global" class="nav-global" role="navigation">
+						<ul>
+							<li><a ng-class="{active: indexIsActive('/')}" ng-href="/">Home</a></li>
+							<li><a ng-class="{active: navIsActive('/subpage')}" ng-href="/subpage">Subpage</a></li>
+						</ul>
+					</nav>
+				</header>
+
+			<!-- CONTENT (Angular View) -->
+				<div id="wrapper-view" class="wrapper-view" ng-view></div>
+
+			<!-- FOOTER -->
+				<footer id="footer-global" class="footer-global clearfix">
+					<p>GNU Public License 2013 | <a href="https://github.com/kmaida/restart-angular">GitHub</a></p>
+				</footer>
+
+			</div> <!-- /.wrapper-canvas -->
+		</div> <!-- /.wrapper-overflow -->
+		
+		<!-- JavaScript (to be concatenated and minified) -->	
+		<script src="assets/js/libs/jRespond.js"></script>
+		<script src="assets/js/script.js"></script>
+	</body>
+</html>
