@@ -20,9 +20,6 @@ footer, header, hgroup, menu, nav, section {
 	margin: 0; padding: 0;
 	border: 0;
 	border-radius: 0;	/* for iOS */
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
 	font-weight: inherit; font-style: inherit; font-family: inherit;
 	line-height: 1;
 	text-decoration: none;
@@ -35,6 +32,11 @@ caption, th, td { text-align: left; font-weight: normal; }
 sup, sub { line-height: 1; }
 h1, h2, h3, h4, h5, h6 { font-weight: normal; }
 article, aside, canvas, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; }
+*,*:before,*:after {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
 
 /*--------------------
 	   BASICS
