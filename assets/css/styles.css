@@ -84,6 +84,24 @@ textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded
 }
 
 /*--------------------
+	   FONTS
+--------------------*/
+
+/* Full @font-face declaration */
+
+@media only screen and (max-width: 320px), screen and (max-device-width: 720px) and (orientation:portrait), screen and (max-device-width: 1280px) and (orientation:landscape) {
+	/* for mobile devices, only load SVG font
+	see: http://stackoverflow.com/questions/20890489/font-face-declarations-dont-work-in-android-4-3-internet-browser
+
+	@font-face {
+		font-family: 'FontName';
+		src: url('../fonts/FontName.svg#FontName') format('svg');
+		font-weight: normal;
+		font-style: normal;
+	} */
+}
+
+/*--------------------
 	LAYOUT FUNCTION
 --------------------*/
 
