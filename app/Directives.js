@@ -7,17 +7,14 @@
 app.directive('viewSwitch', function() {
 	return {
 		restrict: 'A',
+		scope: {},
 		link: function(scope, element, attrs) {
 			$(document.body)
 				.on('enter-large', function(e) {
-					scope.$apply(function() {
-						scope.viewformat = 'large';
-					});
+					scope.viewformat = 'large';
 				})
 				.on('enter-small', function(e) {
-					scope.$apply(function() {
-						scope.viewformat = 'small';
-					});
+					scope.viewformat = 'small';
 				});
 		}
 	};

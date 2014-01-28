@@ -2,12 +2,10 @@ var app = angular.module('myApp', [])
 	.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 		$routeProvider
 			.when('/', {
-				templateUrl: '/view/HomeView.html', 
-				controller: 'HomeCtrl'
+				templateUrl: '/view/HomeView.html'
 			})
 			.when('/subpage', {
-				templateUrl: '/view/SubView.html', 
-				controller: 'SubCtrl'
+				templateUrl: '/view/SubView.html'
 			})
 			.otherwise({
 				redirectTo: '/'
