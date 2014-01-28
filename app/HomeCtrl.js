@@ -2,9 +2,6 @@ app.controller('HomeCtrl', ['$scope', '$routeParams', 'GlobalObj', 'JSONdata', '
 	// put global variables in the scope
 	$scope.global = GlobalObj;
 
-	// get the viewport size onload and store it for use in the view - needed only if view is going to change dependent on size
-	$scope.viewformat = $scope.global.getviewformat();
-
 	// simple data binding example
 	$scope.name = 'Visitor';
 

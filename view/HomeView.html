@@ -9,8 +9,13 @@
 		<p><strong>{{json.title}}</strong> - {{json.summary}}</p>
 
 		<div id="wrapper-markupView" class="wrapper-markupView" ng-switch on="viewformat">
-			<section ng-switch-when="large" ng-include="'view/tpl/LargeTpl.html'"></section>
-			<section ng-switch-when="small" ng-include="'view/tpl/SmallTpl.html'"></section>
+			<div ng-switch-when="large">
+				<section ng-include src="'view/tpl/LargeTpl.html'"></section>
+			</div>
+			
+			<div ng-switch-when="small">
+				<section ng-include src="'view/tpl/SmallTpl.html'"></section>
+			</div>
 		</div>
 	</section>
 </article>

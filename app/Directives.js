@@ -7,14 +7,18 @@
 app.directive('viewSwitch', function() {
 	return {
 		restrict: 'A',
-		scope: {},
+		controller: 'ViewCtrl',
 		link: function(scope, element, attrs) {
 			$(document.body)
 				.on('enter-large', function(e) {
-					scope.viewformat = 'large';
+					scope.$apply(function() {
+						scope.viewformat = 'large';
+					});
 				})
 				.on('enter-small', function(e) {
-					scope.viewformat = 'small';
+					scope.$apply(function() {
+						scope.viewformat = 'small';
+					});
 				});
 		}
 	};
@@ -30,7 +34,7 @@ app.directive('directiveName', function() {
 			// watch for async data to become available and update
 			scope.$watch('json', function(json) {
 				if (json) {	// safeguard against watched data being undefined
-					console.log(json);
+					
 				}
 			}, true);
 		}
