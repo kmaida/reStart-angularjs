@@ -14,6 +14,16 @@ var app = angular.module('myApp', ['ngRoute'])
 			.html5Mode(true)
 			.hashPrefix('!');
 	}]);
+	
+// fetch JSON data to share between controllers
+app.service('JSONdata', ['$http', function($http) {
+	this.getDataAsync: function(callback) {
+		$http({
+			method: 'GET',
+			url: '/app/data/data.json'
+		}).success(callback);
+	}
+}]);
 
 // "global" variables to share between controllers
 app.factory('GlobalObj', function() {
@@ -25,18 +35,6 @@ app.factory('GlobalObj', function() {
 		}
 	};
 });
-
-// fetch JSON data to share between controllers
-app.factory('JSONdata', ['$http', function($http) {
-	return {
-		getDataAsync: function(callback) {
-			$http({
-				method: 'GET',
-				url: '/app/data/data.json'
-			}).success(callback);
-		}
-	};
-}]);
 
 // sample factory function
 app.factory('myFunc', function() {
