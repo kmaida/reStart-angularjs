@@ -1,26 +1,10 @@
 /*! jRespond.js v 0.10 | Author: Jeremy Fields [jeremy.fields@viget.com], 2013 | License: MIT */
 
-// Universal Module Definition
-;(function (window, name, fn) {
-	// Node module pattern
-    if (typeof module === "object" && module && typeof module.exports === "object") {
-        module.exports = fn;
-    } else {
-		// browser
-        window[name] = fn;
-
-        // AMD definition
-        if (typeof define === "function" && define.amd) {
-            define(name, [], function (module) {
-                return fn;
-            });
-        }
-    }
-}(this, 'jRespond', function(win,doc,undefined) {
+(function(win,doc,undefined) {
 
 	'use strict';
 
-	return function(breakpoints) {
+	win.jRespond = function(breakpoints) {
 
 		// array for registered functions
 		var mediaListeners = [];
@@ -31,7 +15,7 @@
 		// array of media query breakpoints; adjust as needed
 		var mediaBreakpoints = breakpoints;
 
-		// store the current breakpoint
+		// store the current breakpoint, store previous breakpoint
 		var curr = '';
 
 		// the previous breakpoint
@@ -156,7 +140,14 @@
 			for (var i = 0; i < mediaBreakpoints.length; i++) {
 
 				// if registered breakpoint found, break out of loop
-				if (width >= mediaBreakpoints[i]['enter'] && width <= mediaBreakpoints[i]['exit']) {
+				if (window.matchMedia && window.matchMedia(mediaBreakpoints[i]['mq']).matches) {
+					// Default to testing against matchMedia
+					foundBrkpt = true;
+
+					break;
+				} else if (width >= mediaBreakpoints[i]['enter'] && width <= mediaBreakpoints[i]['exit']) {
+					// if matchMedia isn't supported or the test fails, test against the browser width
+					// (standard matchMedia polyfill still fails against min-width/max-width tests in OldIE)
 					foundBrkpt = true;
 
 					break;
@@ -229,9 +220,10 @@
 		// return
 		return {
 			addFunc: function(elm) { addFunction(elm); },
-			getBreakpoint: function() { return curr; }
+			getBreakpoint: function() { return curr; },
+			getPrvBreakpoint: function() { return prev; }
 		};
 
 	};
 
-}(this,this.document)));
+}(this,this.document));
