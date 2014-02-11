@@ -10,6 +10,6 @@ app.controller('HomeCtrl', ['$scope', '$routeParams', 'GlobalObj', 'JSONdata', '
 		$scope.json = data;
 	});
 
-	// call a factory function
-	$scope.thisDone = myFunc.doThis('boo');
+	// call a service
+	myFunc.doThis('boo');
 }]);

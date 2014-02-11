@@ -17,10 +17,12 @@ var res = {
 		var jRes = jRespond([
 				{
 					label: 'small',
+					mq: 'screen and (max-width: 640px)',
 					enter: 0,
 					exit: 640
 				},{
 					label: 'large',
+					mq: 'screen and (min-width: 641px)',
 					enter: 641,
 					exit: 100000
 				}
