@@ -31,7 +31,7 @@ app.factory('GlobalObj', function() {
 		greeting: 'Hello',
 		getviewformat: function() {
 			var win = window,
-				matchMediaSupported = (typeof win.matchMedia != undefined || typeof win.msMatchMedia != undefined),
+				matchMediaSupported = (window.matchMedia || window.msMatchMedia),
 				viewport;
 				
 			if (win.matchMedia('screen and (min-width: 641px)').matches || !matchMediaSupported && $(win).width() > 640) {
