@@ -1,4 +1,4 @@
-var app = angular.module('myApp', ['ngRoute'])
+var app = angular.module('myApp', ['ngRoute', 'ngResource', 'ngSanitize'])
 	.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 		$routeProvider
 			.when('/', {
@@ -25,7 +25,7 @@ app.service('JSONdata', ['$http', function($http) {
 	}
 }]);
 
-// "global" variables to share between controllers
+// "global" object to share between controllers
 app.factory('GlobalObj', function() {
 	return {
 		greeting: 'Hello',
