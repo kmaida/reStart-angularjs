@@ -237,9 +237,11 @@ window.Modernizr = (function( window, document, undefined ) {
           props = (prop + ' ' + (domPrefixes).join(ucProp + ' ') + ucProp).split(' ');
           return testDOMProps(props, prefixed, elem);
         }
-    }    tests['flexbox'] = function() {
-      return testPropsAll('flexWrap');
-    };    tests['canvas'] = function() {
+    }    
+    tests['flexbox'] = function() {
+      return testPropsAll('flexBasis', '1px', true);
+    };    
+    tests['canvas'] = function() {
         var elem = document.createElement('canvas');
         return !!(elem.getContext && elem.getContext('2d'));
     };
