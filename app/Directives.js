@@ -2,8 +2,8 @@
 // Angular's built-in <a> directive automatically implements preventDefault on links that don't have an href attribute
 // Complex JavaScript DOM manipulation should always be done in directives, and $apply should never be used in a controller! Simpler DOM manipulation should be in the view.
 
-/*--- For template switching based on viewport size - updates as viewport is resized ---*/
-/*--- In the view controller, set a default viewformat size based on the screen width onload ---*/
+// For template switching based on viewport size - updates as viewport is resized
+// In the view controller, set a default viewformat size based on the screen width onload
 app.directive('viewSwitch', function() {
 	return {
 		restrict: 'A',
