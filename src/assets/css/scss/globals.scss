@@ -1,11 +1,3 @@
-/*
- * reStart Boilerplate / reStart Angular
- * Author: Kim Maida 
- * Author URI: <http://kim-maida.com>
- * Source: <https://github.com/kmaida/reStart-boilerplate-php> | <https://github.com/kmaida/reStart-angular>
- * License: GNU Public License
-*/
-
 /*--------------------
 	  CSS RESET
 --------------------*/
@@ -33,9 +25,7 @@ sup, sub { line-height: 1; }
 h1, h2, h3, h4, h5, h6 { font-weight: normal; }
 article, aside, canvas, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; }
 *,*:before,*:after {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
+	@include box-sizing();
 }
 
 /*--------------------
@@ -112,19 +102,14 @@ textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded
 /*------------------------------------------------------------------------- Off-canvas Functionality --*/
 
 .nav-global {
-	-webkit-backface-visibility: hidden;
-	-moz-backface-visibility: hidden;
-	backface-visibility: hidden;
+	@include backface-visibility();
 	box-shadow: inset -8px 0 8px -6px rgba(0,0,0,0.2);
 	display: none;	/* deal with FOUC */
 	height: 100%;
 	overflow: hidden;
 	position: absolute;
 		top: 0;
-	-webkit-transform: translate3d(-100%,0,0);
-	-moz-transform: translate3d(-100%,0,0);
-	-o-transform: translate3d(-100%,0,0);
-	transform: translate3d(-100%,0,0);
+	@include translate3d(-100%,0,0);
 	width: 85%;
 }
 .nav-closed .nav-global,
@@ -134,26 +119,15 @@ textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded
 	.no-csstransforms3d .nav-closed .nav-global { left: -100%; }
 	.no-csstransforms3d .nav-open .nav-global { left: 0; }
 .wrapper-canvas {
-	-webkit-backface-visibility: hidden;
-	-moz-backface-visibility: hidden;
-	backface-visibility: hidden;
+	@include backface-visibility();
 	position: relative;
 		left: 0;
-	-webkit-transition: -webkit-transform 250ms ease;
-	-moz-transition: -moz-transform 250ms ease;
-	-o-transition: -o-transform 250ms ease;
-	transition: transform 250ms ease;
-	-webkit-transform: translate3d(0,0,0);
-	-moz-transform: translate3d(0,0,0);
-	-o-transform: translate3d(0,0,0);
-	transform: translate3d(0,0,0);
+	@include transition-transform(250ms ease);
+	@include translate3d(0,0,0);
 	width: 100%;
 }
 	.csstransforms3d .nav-open .wrapper-canvas {
-		-webkit-transform: translate3d(85%,0,0);
-		-moz-transform: translate3d(85%,0,0);
-		-o-transform: translate3d(85%,0,0);
-		transform: translate3d(85%,0,0);
+		@include translate3d(85%,0,0);
 	}
 	.no-csstransforms3d .nav-open .wrapper-canvas { left: 85%; }
 
@@ -224,21 +198,12 @@ article {
 	.nav-global {
 		display: block;
 		position: relative;
-		-webkit-transform: none;
-		-moz-transform: none;
-		-o-transform: none;
-		transform: none;
+		@include transform(none);
 		width: 100%;
 	}
 	.wrapper-canvas {
-		-webkit-transition: none;
-		-moz-transition: none;
-		-o-transition: none;
-		transition: none;
-		-webkit-transform: none;
-		-moz-transform: none;
-		-o-transform: none;
-		transform: none;
+		@include transition(none);
+		@include transform(none);
 	}
 	.toggle-offcanvas {
 		display: none;
