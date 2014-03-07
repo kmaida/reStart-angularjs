@@ -3,6 +3,16 @@ module.exports = function(grunt) {
 	// Project configuration
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
+		imagemin: {
+			dist: {
+				files: [{
+					expand: true,
+					cwd: 'src/assets/img/',
+					src: ['**/*.{png,jpg,gif}'],
+					dest: 'dist/'
+				}]
+			}
+		},
 		uglify: {
 			options: {
 				banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %> */'
@@ -36,11 +46,12 @@ module.exports = function(grunt) {
 	});
 	
 	// Load the plugins that provide the tasks
+	grunt.loadNpmTasks('grunt-contrib-imagemin');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-sass');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	
 	// Default task(s)
-	grunt.registerTask('default', ['watch', 'sass']);
+	grunt.registerTask('default', ['sass', 'imagemin', 'watch']);
 
 };
