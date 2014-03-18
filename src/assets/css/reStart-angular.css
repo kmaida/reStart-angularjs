@@ -202,7 +202,7 @@ textarea {
   	} */
 }
 /*--------------------
-	LAYOUT FUNCTION
+   LAYOUT FUNCTION
 --------------------*/
 /* line 98, scss/globals.scss */
 .wrapper-overflow {
@@ -239,16 +239,6 @@ textarea {
 }
 
 /* line 119, scss/globals.scss */
-.no-csstransforms3d .nav-closed .nav-global {
-  left: -100%;
-}
-
-/* line 120, scss/globals.scss */
-.no-csstransforms3d .nav-open .nav-global {
-  left: 0;
-}
-
-/* line 121, scss/globals.scss */
 .wrapper-canvas {
   -webkit-backface-visibility: hidden;
   -moz-backface-visibility: hidden;
@@ -267,7 +257,7 @@ textarea {
   width: 100%;
 }
 
-/* line 129, scss/globals.scss */
+/* line 127, scss/globals.scss */
 .csstransforms3d .nav-open .wrapper-canvas {
   -webkit-transform: translate3d(85%, 0, 0);
   -moz-transform: translate3d(85%, 0, 0);
@@ -276,7 +266,15 @@ textarea {
   transform: translate3d(85%, 0, 0);
 }
 
-/* line 132, scss/globals.scss */
+/* line 131, scss/globals.scss */
+.no-csstransforms3d .nav-closed .nav-global {
+  left: -100%;
+}
+/* line 133, scss/globals.scss */
+.no-csstransforms3d .nav-open .nav-global {
+  left: 0;
+}
+/* line 134, scss/globals.scss */
 .no-csstransforms3d .nav-open .wrapper-canvas {
   left: 85%;
 }
@@ -284,19 +282,19 @@ textarea {
 /*--------------------
 	 PRESENTATION
 --------------------*/
-/* line 138, scss/globals.scss */
+/* line 142, scss/globals.scss */
 body {
   background: #eee;
   font: normal 16px/1.2 'Helvetica Neue', Helvetica, Arial, Verdana, sans-serif;
 }
 
-/* line 142, scss/globals.scss */
+/* line 146, scss/globals.scss */
 .wrapper-canvas {
   background: #fff;
 }
 
 /*------------------------------------------------------------------------- Header --*/
-/* line 151, scss/globals.scss */
+/* line 155, scss/globals.scss */
 .toggle-offcanvas {
   background: #ccc;
   float: left;
@@ -305,36 +303,35 @@ body {
   width: 15%;
 }
 
-/* line 158, scss/globals.scss */
+/* line 162, scss/globals.scss */
 .title-global {
   text-align: center;
 }
 
-/* line 161, scss/globals.scss */
+/* line 165, scss/globals.scss */
 .nav-global .active {
   font-weight: bold;
 }
 
 /*------------------------------------------------------------------------- Navigation --*/
-/* line 167, scss/globals.scss */
+/* line 171, scss/globals.scss */
 .nav-global {
   padding: 3%;
 }
-
-/* line 170, scss/globals.scss */
+/* line 174, scss/globals.scss */
 .nav-global .active a {
   color: #900;
   font-weight: bold;
 }
 
 /*------------------------------------------------------------------------- Content --*/
-/* line 177, scss/globals.scss */
+/* line 182, scss/globals.scss */
 article {
   padding: 3%;
 }
 
 /*------------------------------------------------------------------------- Footer --*/
-/* line 183, scss/globals.scss */
+/* line 188, scss/globals.scss */
 .footer-global {
   padding: 3%;
   text-align: center;
@@ -346,7 +343,7 @@ article {
 /*------------------------------------------------------------------------- Large View --*/
 @media screen and (min-width: 641px) {
   /*-- Layout Function --*/
-  /* line 198, scss/globals.scss */
+  /* line 203, scss/globals.scss */
   .nav-global {
     display: block;
     position: relative;
@@ -358,7 +355,7 @@ article {
     width: 100%;
   }
 
-  /* line 204, scss/globals.scss */
+  /* line 209, scss/globals.scss */
   .wrapper-canvas {
     -webkit-transition: none;
     -moz-transition: none;
@@ -371,19 +368,19 @@ article {
     transform: none;
   }
 
-  /* line 208, scss/globals.scss */
+  /* line 213, scss/globals.scss */
   .toggle-offcanvas {
     display: none;
   }
 
   /*-- Presentation --*/
-  /* line 214, scss/globals.scss */
+  /* line 219, scss/globals.scss */
   .nav-global {
     background: #ccc;
     box-shadow: none;
   }
 
-  /* line 221, scss/globals.scss */
+  /* line 225, scss/globals.scss */
   .nav-global,
   article,
   .footer-global {
@@ -392,33 +389,33 @@ article {
 }
 /*------------------------------------------------------------------------- Print --*/
 @media print {
-  /* line 230, scss/globals.scss */
+  /* line 234, scss/globals.scss */
   * {
     background: #fff;
   }
 
-  /* line 231, scss/globals.scss */
+  /* line 235, scss/globals.scss */
   body {
     color: #000;
     font: normal 16px/1.4 Georgia, 'Times New Roman', serif;
   }
 
   /*-- Hidden Elements --*/
-  /* line 239, scss/globals.scss */
+  /* line 243, scss/globals.scss */
   .header-global,
   .footer-global {
     display: none;
   }
 
   /*-- Show link URLs --*/
-  /* line 244, scss/globals.scss */
+  /* line 248, scss/globals.scss */
   a:link,
   a:visited {
     color: blue;
     text-decoration: underline;
   }
 
-  /* line 249, scss/globals.scss */
+  /* line 253, scss/globals.scss */
   a:link:after,
   a:visited:after {
     content: " [" attr(href) "] ";
