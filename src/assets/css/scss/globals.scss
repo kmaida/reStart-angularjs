@@ -130,7 +130,7 @@ textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded
 .no-csstransforms3d {
 	.nav-closed .nav-global { left: -100%; }
 	.nav-open {
-		.nav-global { left: 0; }
+		.nav-global { left: -85%; }
 		.wrapper-canvas { left: 85%; }
 	}
 }

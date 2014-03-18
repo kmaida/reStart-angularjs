@@ -272,7 +272,7 @@ textarea {
 }
 /* line 133, scss/globals.scss */
 .no-csstransforms3d .nav-open .nav-global {
-  left: 0;
+  left: -85%;
 }
 /* line 134, scss/globals.scss */
 .no-csstransforms3d .nav-open .wrapper-canvas {
