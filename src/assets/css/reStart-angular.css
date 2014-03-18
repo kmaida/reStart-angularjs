@@ -373,14 +373,19 @@ article {
     display: none;
   }
 
+  /* line 216, scss/globals.scss */
+  .no-csstransforms3d .nav-open .nav-global {
+    left: 0;
+  }
+
   /*-- Presentation --*/
-  /* line 219, scss/globals.scss */
+  /* line 220, scss/globals.scss */
   .nav-global {
     background: #ccc;
     box-shadow: none;
   }
 
-  /* line 225, scss/globals.scss */
+  /* line 226, scss/globals.scss */
   .nav-global,
   article,
   .footer-global {
@@ -389,33 +394,33 @@ article {
 }
 /*------------------------------------------------------------------------- Print --*/
 @media print {
-  /* line 234, scss/globals.scss */
+  /* line 235, scss/globals.scss */
   * {
     background: #fff;
   }
 
-  /* line 235, scss/globals.scss */
+  /* line 236, scss/globals.scss */
   body {
     color: #000;
     font: normal 16px/1.4 Georgia, 'Times New Roman', serif;
   }
 
   /*-- Hidden Elements --*/
-  /* line 243, scss/globals.scss */
+  /* line 244, scss/globals.scss */
   .header-global,
   .footer-global {
     display: none;
   }
 
   /*-- Show link URLs --*/
-  /* line 248, scss/globals.scss */
+  /* line 249, scss/globals.scss */
   a:link,
   a:visited {
     color: blue;
     text-decoration: underline;
   }
 
-  /* line 253, scss/globals.scss */
+  /* line 254, scss/globals.scss */
   a:link:after,
   a:visited:after {
     content: " [" attr(href) "] ";
