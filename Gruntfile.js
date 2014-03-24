@@ -35,6 +35,14 @@ module.exports = function(grunt) {
 				files: {
 					'src/assets/css/<%= pkg.name %>.css': 'src/assets/css/scss/styles.scss'
 				}
+				/*
+				options: {
+					style: 'compressed'
+				},
+				files: {
+					'dist/css/<%= pkg.name %>.min.css': 'src/assets/css/scss/styles.scss'
+				}
+				*/
 			}
 		},
 		watch: {
