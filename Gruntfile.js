@@ -19,10 +19,10 @@ module.exports = function(grunt) {
 			},
 			dist: {
 				files: {
-					'dist/ng-<%= pkg.name %>.min.js': ['src/app/**/*.js'],
-					'dist/modernizr.min.js': ['src/assets/js/libs/modernizr.js'],
-					'dist/libs.min.js': ['src/assets/js/libs/**/*.js', '!src/assets/js/libs/modernizr.js'],
-					'dist/<%= pkg.name %>.min.js': ['src/assets/js/**/*.js', '!src/assets/js/libs/*']
+					'dist/js/ng-<%= pkg.name %>.min.js': ['src/app/**/*.js'],
+					'dist/js/libs/modernizr.min.js': ['src/assets/js/libs/modernizr.js'],
+					'dist/js/libs/libs.min.js': ['src/assets/js/libs/**/*.js', '!src/assets/js/libs/modernizr.js'],
+					'dist/js/<%= pkg.name %>.min.js': ['src/assets/js/**/*.js', '!src/assets/js/libs/*']
 				}
 			}
 		},
