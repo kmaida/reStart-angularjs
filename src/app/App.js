@@ -29,6 +29,8 @@ app.service('JSONdata', ['$http', function($http) {
 app.factory('GlobalObj', function() {
 	return {
 		greeting: 'Hello',
+		
+		// get the viewformat and account for webkit bug with JS width calculations by using matchmedia
 		getviewformat: function() {
 			var win = window,
 				matchMediaSupported = (win.matchMedia || win.msMatchMedia),
