@@ -1,4 +1,6 @@
 module.exports = function(grunt) {
+	// Matchdep plugin
+	require("matchdep").filterDev("grunt-*").forEach(grunt.loadNpmTasks);
 
 	// Project configuration
 	grunt.initConfig({
@@ -9,7 +11,7 @@ module.exports = function(grunt) {
 					expand: true,
 					cwd: 'src/assets/img/',
 					src: ['**/*.{png,jpg,gif}'],
-					dest: 'dist/img/'
+					dest: 'dist/assets/img/'
 				}]
 			}
 		},
@@ -19,15 +21,15 @@ module.exports = function(grunt) {
 			},
 			dist: {
 				files: {
-					'dist/js/ng-<%= pkg.name %>.min.js': ['src/app/**/*.js'],
-					'dist/js/libs/modernizr.min.js': ['src/assets/js/libs/modernizr.js'],
-					'dist/js/libs/libs.min.js': ['src/assets/js/libs/**/*.js', '!src/assets/js/libs/modernizr.js'],
-					'dist/js/<%= pkg.name %>.min.js': ['src/assets/js/**/*.js', '!src/assets/js/libs/*']
+					'dist/app/ng-<%= pkg.name %>.min.js': ['src/app/**/*.js'],
+					'dist/assets/js/libs/modernizr.min.js': ['src/assets/js/libs/modernizr.js'],
+					'dist/assets/js/libs/libs.min.js': ['src/assets/js/libs/**/*.js', '!src/assets/js/libs/modernizr.js'],
+					'dist/assets/js/<%= pkg.name %>.min.js': ['src/assets/js/**/*.js', '!src/assets/js/libs/*']
 				}
 			}
 		},
 		sass: {
-			dist: {
+			dev: {
 				options: {
 					style: 'expanded',
 					lineNumbers: true
@@ -35,31 +37,29 @@ module.exports = function(grunt) {
 				files: {
 					'src/assets/css/<%= pkg.name %>.css': 'src/assets/css/scss/styles.scss'
 				}
-				/*
+			},
+			dist: {
 				options: {
 					style: 'compressed'
 				},
 				files: {
-					'dist/css/<%= pkg.name %>.min.css': 'src/assets/css/scss/styles.scss'
+					'dist/assets/css/<%= pkg.name %>.min.css': 'src/assets/css/scss/styles.scss'
 				}
-				*/
 			}
 		},
 		watch: {
+			options: {
+				livereload: true
+			},
 			css: {
 				files:  ['**/*.scss'],
-				tasks: ['sass']
+				tasks: ['sass:dev']
 			}
 		}
 	});
 	
-	// Load the plugins that provide the tasks
-	grunt.loadNpmTasks('grunt-contrib-imagemin');
-	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-contrib-sass');
-	grunt.loadNpmTasks('grunt-contrib-watch');
-	
 	// Default task(s)
-	grunt.registerTask('default', ['sass', 'watch']);
+	grunt.registerTask('default', ['sass:dev', 'watch']);
+	grunt.registerTask('production', ['imagemin', 'uglify', 'sass:dist']);
 
 };
