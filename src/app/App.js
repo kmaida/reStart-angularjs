@@ -38,10 +38,12 @@ app.factory('GlobalObj', function() {
 				matchMediaSupported = (win.matchMedia || win.msMatchMedia),
 				viewport;
 				
-			if (win.matchMedia('screen and (min-width: 641px)').matches || !matchMediaSupported && $(win).width() > 640) {
-				viewport = 'large';
+			if (matchMediaSupported) {
+				// matchMedia is supported
+				viewport = win.matchMedia('screen and (min-width: 641px)').matches ? 'large' : 'small';
 			} else {
-				viewport = 'small';
+				// matchMedia is not supported
+				viewport = $(win).width() > 640 ? 'large' : 'small';
 			}
 			
 			return viewport;
