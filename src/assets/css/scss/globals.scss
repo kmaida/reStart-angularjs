@@ -58,6 +58,17 @@ textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded
 .clearfix:after { clear: both; }
 .ie7 .clearfix { zoom: 1; }
 
+/*-- ng-cloak: prevent FOUC before Angular JavaScript loads --*/
+
+[ng\:cloak],
+[ng-cloak],
+[data-ng-cloak],
+[x-ng-cloak],
+.ng-cloak,
+.x-ng-cloak {
+	display: none !important;
+}
+
 /*-- Image Replacement --*/
 
 .ir {
