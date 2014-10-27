@@ -11,7 +11,9 @@ var app = angular.module('myApp', ['ngRoute', 'ngResource', 'ngSanitize'])
 				redirectTo: '/'
 			});
 		$locationProvider
-			.html5Mode(true)
+			.html5Mode({
+				enabled: true
+			})
 			.hashPrefix('!');
 	}]);
 	
