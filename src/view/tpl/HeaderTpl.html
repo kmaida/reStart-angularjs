@@ -1,0 +1,12 @@
+<header id="header-global" class="header-global clearfix" ng-controller="HeaderCtrl">
+	<a class="toggle-offcanvas">Menu</a>
+
+	<h1 class="title-global">{{json.title}}</h1>
+
+	<nav id="nav-global" class="nav-global" role="navigation">
+		<ul>
+			<li><a ng-class="{active: indexIsActive('/')}" ng-href="/">Home</a></li>
+			<li><a ng-class="{active: navIsActive('/subpage')}" ng-href="/subpage">Subpage</a></li>
+		</ul>
+	</nav>
+</header>
