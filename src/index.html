@@ -22,7 +22,18 @@
 			<div class="wrapper-canvas">
 			
 			<!-- HEADER -->
-				<header header></header>
+				<header id="header-global" class="header-global clearfix" ng-controller="HeaderCtrl" nav-control>
+					<a class="toggle-offcanvas" ng-click="toggleNav()">Menu</a>
+
+					<h1 class="title-global">{{json.title}}</h1>
+
+					<nav id="nav-global" class="nav-global" role="navigation">
+						<ul>
+							<li><a ng-class="{active: indexIsActive('/')}" ng-href="/">Home</a></li>
+							<li><a ng-class="{active: navIsActive('/subpage')}" ng-href="/subpage">Subpage</a></li>
+						</ul>
+					</nav>
+				</header>
 
 			<!-- CONTENT (Angular View) -->
 				<div id="wrapper-view" class="wrapper-view" ng-view></div>
@@ -54,12 +65,12 @@
 		<script src="/app/core/controllers/SubCtrl.js" type="text/javascript"></script>
 		
 		<!-- ..directives -->
+		<script src="/app/core/directives/NavControlDir.js" type="text/javascript"></script>
 		<script src="/app/ui/directives/ViewSwitchDir.js" type="text/javascript"></script>
 		<script src="/app/ui/directives/RepeatCompleteDir.js" type="text/javascript"></script>
 		<script src="/app/ui/directives/SampleDir.js" type="text/javascript"></script>
 		
-		<!-- JavaScript (to be concatenated and minified) -->	
-		<script src="/assets/js/libs/jRespond.js"></script>
+		<!-- JavaScript (to be concatenated and minified) -->
 		<script src="/assets/js/script.js"></script>
 	</body>
 </html>

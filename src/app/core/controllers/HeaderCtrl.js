@@ -8,10 +8,10 @@ app.controller('HeaderCtrl', ['$scope', '$location', '$routeParams', 'JSONdata',
 	$scope.indexIsActive = function(path) {
 		// path should be '/'
 		return $location.path() === path;
-	}
+	};
 	$scope.navIsActive = function(path) {
 		return $location.path().substr(0, path.length) === path;
-	}
+	};
 	
 	// apply body class based on url
 	$scope.$on('$locationChangeSuccess', function(event, newUrl, oldUrl) {

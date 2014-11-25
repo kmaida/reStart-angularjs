@@ -1,4 +1,4 @@
-app.controller('SubCtrl', ['$scope', '$routeParams', 'GlobalObj', 'JSONdata', 'myFunc', function($scope, $routeParams, GlobalObj, JSONdata, myFunc) {
+app.controller('SubCtrl', ['$scope', 'GlobalObj', 'JSONdata', function($scope, GlobalObj, JSONdata) {
 	// put global variables in the scope
 	$scope.global = GlobalObj;
 
