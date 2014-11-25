@@ -1,4 +1,4 @@
-var app = angular.module('myApp', ['ngRoute', 'ngResource', 'ngSanitize'])
+var app = angular.module('myApp', ['ngRoute', 'ngResource', 'ngSanitize', 'mediaCheck'])
 	.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 		$routeProvider
 			.when('/', {
@@ -49,11 +49,4 @@ app.factory('GlobalObj', function() {
 			return viewport;
 		}
 	};
-});
-
-// sample service function
-app.service('myFunc', function() {
-	this.doThis = function(param) {
-		console.log(param);
-	}
 });
