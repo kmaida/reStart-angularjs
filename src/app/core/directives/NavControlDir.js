@@ -34,9 +34,7 @@ app.directive('navControl', ['mediaCheck', '$timeout', function(mediaCheck, $tim
 				},
 				exit: function() {
 					$timeout(function() {
-						$scope.toggleNav = function () {
-							return false;
-						};
+						$scope.toggleNav = null;
 					});
 
 					$body.removeClass('nav-closed nav-open');

@@ -30,23 +30,6 @@ app.service('JSONdata', ['$http', function($http) {
 // "global" object to share between controllers
 app.factory('GlobalObj', function() {
 	return {
-		greeting: 'Hello',
-		
-		// get the viewformat and account for webkit bug with JS width calculations by using matchmedia
-		getviewformat: function() {
-			var win = window,
-				matchMediaSupported = (win.matchMedia || win.msMatchMedia),
-				viewport;
-				
-			if (matchMediaSupported) {
-				// matchMedia is supported
-				viewport = win.matchMedia('screen and (min-width: 641px)').matches ? 'large' : 'small';
-			} else {
-				// matchMedia is not supported
-				viewport = $(win).width() > 640 ? 'large' : 'small';
-			}
-			
-			return viewport;
-		}
+		greeting: 'Hello'
 	};
 });
