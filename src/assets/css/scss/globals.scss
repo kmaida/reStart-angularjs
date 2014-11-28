@@ -29,6 +29,16 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 }
 
 /*--------------------
+	   VARIABLES
+--------------------*/
+
+/*-- Media Queries --*/
+
+// Use: @media #{$mq-large} {}
+$mq-small: 'screen and (max-width: 640px)';
+$mq-large: 'screen and (min-width: 641px)';
+
+/*--------------------
 	   BASICS
 --------------------*/
 
@@ -106,6 +116,9 @@ textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded
    LAYOUT FUNCTION
 --------------------*/
 
+body {
+	min-width: 320px;
+}
 .wrapper-overflow {
 	overflow: hidden;	/* necessary to handle offcanvas scrollbar behavior */
 }
@@ -207,7 +220,7 @@ article {
 
 /*------------------------------------------------------------------------- Large View --*/
 
-@media screen and (min-width: 641px) {
+@media #{$mq-large} {
 	
 	/*-- Layout Function --*/
 	
