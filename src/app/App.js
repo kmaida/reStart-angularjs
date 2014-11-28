@@ -16,23 +16,6 @@ var app = angular.module('myApp', ['ngRoute', 'ngResource', 'ngSanitize', 'media
 			})
 			.hashPrefix('!');
 	}]);
-	
-// fetch JSON data to share between controllers
-app.service('JSONdata', ['$http', function($http) {
-	this.getDataAsync = function(callback) {
-		$http({
-			method: 'GET',
-			url: '/app/data/data.json'
-		}).success(callback);
-	}
-}]);
-
-// "global" object to share between controllers
-app.factory('GlobalObj', function() {
-	return {
-		greeting: 'Hello'
-	};
-});
 
 // media query constants
 app.constant('MQ', {
