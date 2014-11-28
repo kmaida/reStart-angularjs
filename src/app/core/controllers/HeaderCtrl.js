@@ -1,6 +1,6 @@
-app.controller('HeaderCtrl', ['$scope', '$location', '$routeParams', 'JSONData', function($scope, $location, $routeParams, JSONData) {
+app.controller('HeaderCtrl', ['$scope', '$location', '$routeParams', 'JSONdata', function($scope, $location, $routeParams, JSONdata) {
 	// get the data from JSON
-	JSONData.getDataAsync(function(data) {
+	JSONdata.getDataAsync(function(data) {
 		$scope.json = data;
 	});
 

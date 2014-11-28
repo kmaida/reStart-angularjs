@@ -28,6 +28,10 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 	@include box-sizing();
 }
 
+/*--------------------
+	   BASICS
+--------------------*/
+
 /*-- Normalize --*/
 
 i, em { font-style: italic; }
@@ -43,10 +47,6 @@ pre,code { background: #eee; border: 1px solid #ccc; font-family: Consolas, 'Luc
 input, select, textarea { border: 1px solid #ccc; font-family: inherit; font-size: inherit; padding: 3px 6px; }
 input, select { vertical-align: middle; }
 textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded in IE */
-
-/*--------------------
-	   BASICS
---------------------*/
 
 /*-- Clearfix --*/
 
@@ -85,16 +85,6 @@ textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded
 }
 
 /*--------------------
-	   VARIABLES
---------------------*/
-
-/*-- Media Queries --*/
-
-// Use: @media #{$mq-large} {}
-$mq-small: 'screen and (max-width: 640px)';
-$mq-large: 'screen and (min-width: 641px)';
-
-/*--------------------
 	   FONTS
 --------------------*/
 
@@ -116,9 +106,6 @@ $mq-large: 'screen and (min-width: 641px)';
    LAYOUT FUNCTION
 --------------------*/
 
-body {
-	min-width: 320px;
-}
 .wrapper-overflow {
 	overflow: hidden;	/* necessary to handle offcanvas scrollbar behavior */
 }
@@ -220,7 +207,7 @@ article {
 
 /*------------------------------------------------------------------------- Large View --*/
 
-@media #{$mq-large} {
+@media screen and (min-width: 641px) {
 	
 	/*-- Layout Function --*/
 	

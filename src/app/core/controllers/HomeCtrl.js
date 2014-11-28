@@ -1,4 +1,4 @@
-app.controller('HomeCtrl', ['$scope', 'GlobalObj', 'JSONData', function($scope, GlobalObj, JSONData) {
+app.controller('HomeCtrl', ['$scope', 'GlobalObj', 'JSONdata', function($scope, GlobalObj, JSONdata) {
 	// put global variables in the scope
 	$scope.global = GlobalObj;
 
@@ -6,7 +6,7 @@ app.controller('HomeCtrl', ['$scope', 'GlobalObj', 'JSONData', function($scope, 
 	$scope.name = 'Visitor';
 
 	// get the data from JSON
-	JSONData.getDataAsync(function(data) {
+	JSONdata.getDataAsync(function(data) {
 		$scope.json = data;
 	});
 }]);

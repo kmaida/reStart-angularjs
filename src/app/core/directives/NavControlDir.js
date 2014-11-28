@@ -1,4 +1,4 @@
-app.directive('navControl', ['mediaCheck', 'MQ', '$timeout', function(mediaCheck, MQ, $timeout) {
+app.directive('navControl', ['mediaCheck', '$timeout', function(mediaCheck, $timeout) {
 	return {
 		restrict: 'A',
 		link: function($scope, $element, $attrs) {
@@ -16,7 +16,7 @@ app.directive('navControl', ['mediaCheck', 'MQ', '$timeout', function(mediaCheck
 
 			mediaCheck.init({
 				scope: $scope,
-				mq: MQ.SMALL,
+				mq: '(max-width: 640px)',
 				enter: function() {
 					closeNav();
 

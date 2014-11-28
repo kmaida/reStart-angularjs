@@ -1,9 +1,9 @@
-app.controller('SubCtrl', ['$scope', 'GlobalObj', 'JSONData', function($scope, GlobalObj, JSONData) {
+app.controller('SubCtrl', ['$scope', 'GlobalObj', 'JSONdata', function($scope, GlobalObj, JSONdata) {
 	// put global variables in the scope
 	$scope.global = GlobalObj;
 
 	// get the data from JSON
-	JSONData.getDataAsync(function(data) {
+	JSONdata.getDataAsync(function(data) {
 		$scope.json = data;
 	});
 }]);
