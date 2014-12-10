@@ -8,6 +8,8 @@
 		
 		<p><strong>{{json.title}}</strong> - {{json.summary}}</p>
 
+		<p ng-bind-html="stringOfHTML | trustAsHTML"></p>
+
 		<div id="wrapper-markupView" class="wrapper-markupView" ng-switch on="viewformat">
 			<div ng-switch-when="large">
 				<section ng-include src="'view/tpl/LargeTpl.html'"></section>
