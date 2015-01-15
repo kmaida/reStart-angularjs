@@ -1,4 +1,4 @@
-app.directive('navControl', ['mediaCheck', 'MQ', '$timeout', function(mediaCheck, MQ, $timeout) {
+myApp.directive('navControl', ['mediaCheck', 'MQ', '$timeout', function(mediaCheck, MQ, $timeout) {
 	function navControlLink($scope, $element, $attrs) {
 		var $body = angular.element('body'),
 			openNav = function() {

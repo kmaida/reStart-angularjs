@@ -1,5 +1,5 @@
 // For events based on viewport size - updates as viewport is resized
-app.directive('viewSwitch', ['mediaCheck', 'MQ', '$timeout', function(mediaCheck, MQ, $timeout) {
+myApp.directive('viewSwitch', ['mediaCheck', 'MQ', '$timeout', function(mediaCheck, MQ, $timeout) {
 	function viewSwitchCtrl($scope) {
 		mediaCheck.init({
 			scope: $scope,

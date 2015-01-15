@@ -12,7 +12,7 @@
 			};
 */
 
-app.directive('repeatComplete', function($rootScope) {
+myApp.directive('repeatComplete', function($rootScope) {
 	 
 	// Because we can have multiple ng-repeat directives in
 	// the same container, we need a way to differentiate

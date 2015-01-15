@@ -3,7 +3,7 @@
 // Complex JavaScript DOM manipulation should always be done in directives, and $apply should never be used in a controller! Simpler DOM manipulation should be in the view.
 
 /*--- Sample Directive with a $watch ---*/
-app.directive('directiveName', function() {
+myApp.directive('directiveName', function() {
 	function directiveNameLink($scope, $element, $attrs) {
 		// watch for async data to become available and update
 		$scope.$watch('json', function(json) {
