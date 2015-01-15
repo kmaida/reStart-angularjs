@@ -3,7 +3,7 @@ app.service('JSONData', ['$http', function($http) {
 	this.getDataAsync = function(callback) {
 		$http({
 			method: 'GET',
-			url: '/app/data/data.json'
+			url: '/ng-app/data/data.json'
 		}).success(callback);
 	}
 }]);

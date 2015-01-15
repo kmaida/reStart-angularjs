@@ -2,10 +2,10 @@ var app = angular.module('myApp', ['ngRoute', 'ngResource', 'ngSanitize', 'media
 	.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 		$routeProvider
 			.when('/', {
-				templateUrl: '/view/HomeView.html'
+				templateUrl: 'ng-app/ui/view/HomeView.html'
 			})
 			.when('/subpage', {
-				templateUrl: '/view/SubView.html'
+				templateUrl: 'ng-app/ui/view/SubView.html'
 			})
 			.otherwise({
 				redirectTo: '/'

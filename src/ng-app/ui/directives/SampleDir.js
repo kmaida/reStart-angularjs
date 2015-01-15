@@ -6,7 +6,7 @@
 app.directive('directiveName', function() {
 	return {
 		restrict: 'A',
-		templateUrl: 'view/tpl/TemplateTpl.html',
+		templateUrl: 'ng-app/ui/view/tpl/TemplateTpl.html',
 		transclude: true,
 		link: function(scope, element, attrs) {
 			// watch for async data to become available and update
