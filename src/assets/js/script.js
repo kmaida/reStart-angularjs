@@ -1,6 +1,8 @@
+'use strict';
+
 //------------------------------------------------------------- General app functionality
 
-var helpers = {
+window.helpers = {
 
 /*--- Init functions ---*/
 	init: function() {
