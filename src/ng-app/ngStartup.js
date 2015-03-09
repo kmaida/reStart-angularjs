@@ -4,10 +4,10 @@ var myApp = angular.module('myApp', ['ngRoute', 'ngResource', 'ngSanitize', 'med
 myApp.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	$routeProvider
 		.when('/', {
-			templateUrl: 'ng-app/ui/view/HomeView.html'
+			templateUrl: 'ng-app/home/Home.view.html'
 		})
 		.when('/subpage', {
-			templateUrl: 'ng-app/ui/view/SubView.html'
+			templateUrl: 'ng-app/sub/Sub.view.html'
 		})
 		.otherwise({
 			redirectTo: '/'
@@ -21,6 +21,6 @@ myApp.config(['$routeProvider', '$locationProvider', function($routeProvider, $l
 
 // media query constants
 myApp.constant('MQ', {
-	SMALL: '(max-width: 640px)',
-	LARGE: '(min-width: 641px)'
+	SMALL: '(max-width: 768px)',
+	LARGE: '(min-width: 769px)'
 });

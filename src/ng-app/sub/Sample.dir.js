@@ -15,7 +15,7 @@ myApp.directive('directiveName', function() {
 
 	return {
 		restrict: 'A',
-		templateUrl: 'ng-app/ui/view/tpl/TemplateTpl.html',
+		templateUrl: 'ng-app/sub/sample.tpl.html',
 		transclude: true,
 		link: directiveNameLink
 	};

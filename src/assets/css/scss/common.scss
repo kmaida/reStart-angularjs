@@ -35,8 +35,8 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 /*-- Media Queries --*/
 
 // Use: @media #{$mq-large} {}
-$mq-small: 'screen and (max-width: 640px)';
-$mq-large: 'screen and (min-width: 641px)';
+$mq-small: 'screen and (max-width: 768px)';
+$mq-large: 'screen and (min-width: 769px)';
 
 /*--------------------
 	   BASICS
