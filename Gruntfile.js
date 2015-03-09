@@ -52,7 +52,7 @@ module.exports = function(grunt) {
 				livereload: true
 			},
 			css: {
-				files:  ['**/*.scss'],
+				files: ['**/*.scss'],
 				tasks: ['sass:dev']
 			}
 		}
@@ -61,5 +61,4 @@ module.exports = function(grunt) {
 	// Default task(s)
 	grunt.registerTask('default', ['sass:dev', 'watch']);
 	grunt.registerTask('production', ['imagemin', 'uglify', 'sass:dist']);
-
 };
