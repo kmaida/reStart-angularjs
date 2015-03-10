@@ -1,17 +1,21 @@
-myApp.controller('HomeCtrl', ['GlobalObj', 'JSONData', function(GlobalObj, JSONData) {
-	// controllerAs ViewModel
-	var vm = this;
+(function() {
+	'use strict';
 
-	// put global variables in scope
-	vm.global = GlobalObj;
+	myApp.controller('HomeCtrl', ['GlobalObj', 'JSONData', function (GlobalObj, JSONData) {
+		// controllerAs ViewModel
+		var vm = this;
 
-	// simple data binding example
-	vm.name = 'Visitor';
+		// put global variables in scope
+		vm.global = GlobalObj;
 
-	vm.stringOfHTML = '<strong>Some bold text</strong> bound as HTML with a <a href="#">link</a>!';
+		// simple data binding example
+		vm.name = 'Visitor';
 
-	// get the data from JSON
-	JSONData.getDataAsync(function(data) {
-		vm.json = data;
-	});
-}]);
+		vm.stringOfHTML = '<strong>Some bold text</strong> bound as HTML with a <a href="#">link</a>!';
+
+		// get the data from JSON
+		JSONData.getDataAsync(function (data) {
+			vm.json = data;
+		});
+	}]);
+})();

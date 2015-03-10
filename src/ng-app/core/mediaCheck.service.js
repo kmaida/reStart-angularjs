@@ -1,131 +1,137 @@
-var angularMediaCheck = angular.module('mediaCheck', []);
+(function() {
+	'use strict';
 
-angularMediaCheck.service('mediaCheck', ['$window', '$timeout', function($window, $timeout) {
-	this.init = function(options) {
-		var $scope = options['scope'],
-			query = options['mq'],
-			debounce = options['debounce'],
-			$win = angular.element($window),
-			breakpoints,
-			createListener = void 0,
-			hasMatchMedia = $window.matchMedia !== undefined && !!$window.matchMedia('!').addListener,
-			mqListListener,
-			mmListener,
-			debounceResize,
-			mq = void 0,
-			mqChange = void 0,
-			debounceSpeed = !!debounce ? debounce : 250;
+	var angularMediaCheck = angular.module('mediaCheck', []);
 
-		if (hasMatchMedia) {
-			mqChange = function(mq) {
-				if (mq.matches && typeof options.enter === 'function') {
-					options.enter(mq);
-				} else {
-					if (typeof options.exit === 'function') {
-						options.exit(mq);
-					}
-				}
-				if (typeof options.change === 'function') {
-					options.change(mq);
-				}
-			};
+	angularMediaCheck.service('mediaCheck', ['$window', '$timeout', function ($window, $timeout) {
+		this.init = function (options) {
+			var $scope = options['scope'],
+				query = options['mq'],
+				debounce = options['debounce'],
+				$win = angular.element($window),
+				breakpoints,
+				createListener = void 0,
+				hasMatchMedia = $window.matchMedia !== undefined && !!$window.matchMedia('!').addListener,
+				mqListListener,
+				mmListener,
+				debounceResize,
+				mq = void 0,
+				mqChange = void 0,
+				debounceSpeed = !!debounce ? debounce : 250;
 
-			createListener = function() {
-				mq = $window.matchMedia(query);
-				mqListListener = function() { return mqChange(mq) };
-
-				mq.addListener(mqListListener);
-
-				// bind to the orientationchange event and fire mqChange
-				$win.bind('orientationchange', mqListListener);
-
-				// cleanup listeners when $scope is $destroyed
-				$scope.$on('$destroy', function() {
-					mq.removeListener(mqListListener);
-					$win.unbind('orientationchange', mqListListener);
-				});
-
-				return mqChange(mq);
-			};
-
-			return createListener();
-
-		} else {
-			breakpoints = {};
-
-			mqChange = function(mq) {
-				if (mq.matches) {
-					if (!!breakpoints[query] === false && (typeof options.enter === 'function')) {
+			if (hasMatchMedia) {
+				mqChange = function (mq) {
+					if (mq.matches && typeof options.enter === 'function') {
 						options.enter(mq);
-					}
-				} else {
-					if (breakpoints[query] === true || breakpoints[query] == null) {
+					} else {
 						if (typeof options.exit === 'function') {
 							options.exit(mq);
 						}
 					}
-				}
-
-				if ((mq.matches && (!breakpoints[query]) || (!mq.matches && (breakpoints[query] === true || breakpoints[query] == null)))) {
 					if (typeof options.change === 'function') {
 						options.change(mq);
 					}
-				}
+				};
 
-				return breakpoints[query] = mq.matches;
-			};
+				createListener = function () {
+					mq = $window.matchMedia(query);
+					mqListListener = function () {
+						return mqChange(mq)
+					};
 
-			var convertEmToPx = function(value) {
-				var emElement = document.createElement('div');
+					mq.addListener(mqListListener);
 
-				emElement.style.width = '1em';
-				emElement.style.position = 'absolute';
-				document.body.appendChild(emElement);
-				px = value * emElement.offsetWidth;
-				document.body.removeChild(emElement);
+					// bind to the orientationchange event and fire mqChange
+					$win.bind('orientationchange', mqListListener);
 
-				return px;
-			};
+					// cleanup listeners when $scope is $destroyed
+					$scope.$on('$destroy', function () {
+						mq.removeListener(mqListListener);
+						$win.unbind('orientationchange', mqListListener);
+					});
 
-			var getPXValue = function(width, unit) {
-				var value;
-				value = void 0;
-				switch (unit) {
-					case 'em':
-						value = convertEmToPx(width);
-						break;
-					default:
-						value = width;
-				}
-				return value;
-			};
+					return mqChange(mq);
+				};
 
-			breakpoints[query] = null;
+				return createListener();
 
-			mmListener = function() {
-				var parts = query.match(/\((.*)-.*:\s*([\d\.]*)(.*)\)/),
-					constraint = parts[1],
-					value = getPXValue(parseInt(parts[2], 10), parts[3]),
-					fakeMatchMedia = {},
-					windowWidth = $window.innerWidth || document.documentElement.clientWidth;
+			} else {
+				breakpoints = {};
 
-				fakeMatchMedia.matches = constraint === 'max' && value > windowWidth || constraint === 'min' && value < windowWidth;
+				mqChange = function (mq) {
+					if (mq.matches) {
+						if (!!breakpoints[query] === false && (typeof options.enter === 'function')) {
+							options.enter(mq);
+						}
+					} else {
+						if (breakpoints[query] === true || breakpoints[query] == null) {
+							if (typeof options.exit === 'function') {
+								options.exit(mq);
+							}
+						}
+					}
 
-				return mqChange(fakeMatchMedia);
-			};
+					if ((mq.matches && (!breakpoints[query]) || (!mq.matches && (breakpoints[query] === true || breakpoints[query] == null)))) {
+						if (typeof options.change === 'function') {
+							options.change(mq);
+						}
+					}
 
-			var fakeMatchMediaResize = function() {
-				clearTimeout(debounceResize);
-				debounceResize = $timeout(mmListener, debounceSpeed);
-			};
+					return breakpoints[query] = mq.matches;
+				};
 
-			$win.bind('resize', fakeMatchMediaResize);
+				var convertEmToPx = function (value) {
+					var emElement = document.createElement('div');
 
-			$scope.$on('$destroy', function() {
-				$win.unbind('resize', fakeMatchMediaResize);
-			});
+					emElement.style.width = '1em';
+					emElement.style.position = 'absolute';
+					document.body.appendChild(emElement);
+					px = value * emElement.offsetWidth;
+					document.body.removeChild(emElement);
 
-			return mmListener();
-		}
-	};
-}]);
+					return px;
+				};
+
+				var getPXValue = function (width, unit) {
+					var value;
+					value = void 0;
+					switch (unit) {
+						case 'em':
+							value = convertEmToPx(width);
+							break;
+						default:
+							value = width;
+					}
+					return value;
+				};
+
+				breakpoints[query] = null;
+
+				mmListener = function () {
+					var parts = query.match(/\((.*)-.*:\s*([\d\.]*)(.*)\)/),
+						constraint = parts[1],
+						value = getPXValue(parseInt(parts[2], 10), parts[3]),
+						fakeMatchMedia = {},
+						windowWidth = $window.innerWidth || document.documentElement.clientWidth;
+
+					fakeMatchMedia.matches = constraint === 'max' && value > windowWidth || constraint === 'min' && value < windowWidth;
+
+					return mqChange(fakeMatchMedia);
+				};
+
+				var fakeMatchMediaResize = function () {
+					clearTimeout(debounceResize);
+					debounceResize = $timeout(mmListener, debounceSpeed);
+				};
+
+				$win.bind('resize', fakeMatchMediaResize);
+
+				$scope.$on('$destroy', function () {
+					$win.unbind('resize', fakeMatchMediaResize);
+				});
+
+				return mmListener();
+			}
+		};
+	}]);
+})();

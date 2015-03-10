@@ -1,12 +1,17 @@
-myApp.controller('SubCtrl', ['GlobalObj', 'JSONData', function(GlobalObj, JSONData) {
-	// controllerAs ViewModel
-	var vm = this;
+(function() {
+	'use strict';
 
-	// put global variables in the scope
-	vm.global = GlobalObj;
+	myApp.controller('SubCtrl', ['GlobalObj', 'JSONData', function(GlobalObj, JSONData) {
+		// controllerAs ViewModel
+		var vm = this;
 
-	// get the data from JSON
-	JSONData.getDataAsync(function(data) {
-		vm.json = data;
-	});
-}]);
+		// put global variables in the scope
+		vm.global = GlobalObj;
+
+		// get the data from JSON
+		JSONData.getDataAsync(function(data) {
+			vm.json = data;
+		});
+	}]);
+
+})();
