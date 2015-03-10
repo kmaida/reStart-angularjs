@@ -1,7 +1,7 @@
 reStart-angular
 ==========
 
-Mobile-first responsive framework in AngularJS
+A mbile-first responsive framework in AngularJS; moving toward adherence to the [https://github.com/johnpapa/angular-styleguide](Angular Styleguide).
 
 Supports modern browsers and IE9+
 
