@@ -10,7 +10,7 @@
 
 		<p ng-bind-html="home.stringOfHTML | trustAsHTML"></p>
 
-		<div id="wrapper-markupView" class="wrapper-markupView" ng-switch on="vm.viewformat">
+		<div id="wrapper-markupView" class="wrapper-markupView" ng-switch on="vs.viewformat">
 			<div ng-switch-when="large">
 				<section ng-include src="'ng-app/home/large.tpl.html'"></section>
 			</div>

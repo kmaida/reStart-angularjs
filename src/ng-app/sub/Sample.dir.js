@@ -6,7 +6,10 @@
 (function() {
 	'use strict';
 
-	myApp.directive('directiveName', function () {
+	myApp.directive('directiveName', directiveName);
+
+	function directiveName() {
+
 		function directiveNameLink($scope, $element, $attrs) {
 			// watch for async data to become available and update
 			$scope.$watch('json', function (json) {
@@ -22,5 +25,6 @@
 			transclude: true,
 			link: directiveNameLink
 		};
-	});
+	}
+
 })();

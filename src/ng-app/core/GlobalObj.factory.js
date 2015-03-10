@@ -2,9 +2,11 @@
 (function() {
 	'use strict';
 
-	myApp.factory('GlobalObj', function() {
+	myApp.factory('GlobalObj', GlobalObj);
+
+	function GlobalObj() {
 		return {
 			greeting: 'Hello'
 		};
-	});
+	}
 })();

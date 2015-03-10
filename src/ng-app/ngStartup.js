@@ -1,7 +1,9 @@
+'use strict';
+
 var myApp = angular.module('myApp', ['ngRoute', 'ngResource', 'ngSanitize', 'mediaCheck']);
 
 // routes
-myApp.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+myApp.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
 	$routeProvider
 		.when('/', {
 			templateUrl: 'ng-app/home/Home.view.html'

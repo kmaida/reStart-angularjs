@@ -2,22 +2,24 @@
 (function() {
 	'use strict';
 
-	myApp.directive('viewSwitch', ['mediaCheck', 'MQ', '$timeout', function (mediaCheck, MQ, $timeout) {
+	myApp.directive('viewSwitch', ['mediaCheck', 'MQ', '$timeout', viewSwitch]);
+
+	function viewSwitch(mediaCheck, MQ, $timeout) {
 		function viewSwitchCtrl($scope) {
 			// controllerAs ViewModel
-			var vm = this;
+			var vs = this;
 
 			mediaCheck.init({
 				scope: $scope,
 				mq: MQ.SMALL,
 				enter: function () {
 					$timeout(function () {
-						vm.viewformat = 'small';
+						vs.viewformat = 'small';
 					});
 				},
 				exit: function () {
 					$timeout(function () {
-						vm.viewformat = 'large';
+						vs.viewformat = 'large';
 					});
 				}
 			});
@@ -26,8 +28,8 @@
 		return {
 			restrict: 'EA',
 			controller: viewSwitchCtrl,
-			controllerAs: 'vm',
+			controllerAs: 'vs',
 			// bindToController: true <-- use if isolate scope
 		};
-	}]);
+	}
 })();

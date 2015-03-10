@@ -2,12 +2,14 @@
 (function() {
 	'use strict';
 
-	myApp.service('JSONData', ['$http', function($http) {
+	myApp.service('JSONData', ['$http', JSONData]);
+
+	function JSONData($http) {
 		this.getDataAsync = function(callback) {
 			$http({
 				method: 'GET',
 				url: '/ng-app/data/data.json'
 			}).success(callback);
 		}
-	}]);
+	}
 })();

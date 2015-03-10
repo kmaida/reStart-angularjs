@@ -1,47 +1,55 @@
-myApp.directive('navControl', ['mediaCheck', 'MQ', '$timeout', function(mediaCheck, MQ, $timeout) {
-	function navControlLink($scope, $element, $attrs) {
-		var $body = angular.element('body'),
-			openNav = function() {
-				$body
-					.removeClass('nav-closed')
-					.addClass('nav-open');
-			},
-			closeNav = function() {
-				$body
-					.removeClass('nav-open')
-					.addClass('nav-closed');
-			};
+(function() {
+	'use strict';
 
-		mediaCheck.init({
-			scope: $scope,
-			mq: MQ.SMALL,
-			enter: function() {
-				closeNav();
+	myApp.directive('navControl', ['mediaCheck', 'MQ', '$timeout', navControl]);
 
-				$timeout(function() {
-					$scope.toggleNav = function() {
-						if ($body.hasClass('nav-closed')) {
-							openNav();
-						} else {
-							closeNav();
-						}
-					};
-				});
+	function navControl(mediaCheck, MQ, $timeout) {
 
-				$scope.$on('$locationChangeSuccess', closeNav);
-			},
-			exit: function() {
-				$timeout(function() {
-					$scope.toggleNav = null;
-				});
+		function navControlLink($scope, $element, $attrs) {
+			var body = angular.element('body'),
+				openNav = function () {
+					body
+						.removeClass('nav-closed')
+						.addClass('nav-open');
+				},
+				closeNav = function () {
+					body
+						.removeClass('nav-open')
+						.addClass('nav-closed');
+				};
 
-				$body.removeClass('nav-closed nav-open');
-			}
-		});
+			mediaCheck.init({
+				scope: $scope,
+				mq: MQ.SMALL,
+				enter: function () {
+					closeNav();
+
+					$timeout(function () {
+						$scope.toggleNav = function () {
+							if ($body.hasClass('nav-closed')) {
+								openNav();
+							} else {
+								closeNav();
+							}
+						};
+					});
+
+					$scope.$on('$locationChangeSuccess', closeNav);
+				},
+				exit: function () {
+					$timeout(function () {
+						$scope.toggleNav = null;
+					});
+
+					body.removeClass('nav-closed nav-open');
+				}
+			});
+		}
+
+		return {
+			restrict: 'A',
+			link: navControlLink
+		};
 	}
 
-	return {
-		restrict: 'A',
-		link: navControlLink
-	};
-}]);
+})();
