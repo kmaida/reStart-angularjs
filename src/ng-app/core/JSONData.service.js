@@ -2,7 +2,7 @@
 (function() {
 	'use strict';
 
-	myApp.service('JSONData', ['$http', JSONData]);
+	angular.module('myApp').service('JSONData', ['$http', JSONData]);
 
 	function JSONData($http) {
 		this.getDataAsync = function(callback) {

@@ -1,7 +1,7 @@
 (function() {
 	'use strict';
 
-	myApp.directive('navControl', ['mediaCheck', 'MQ', '$timeout', navControl]);
+	angular.module('myApp').directive('navControl', ['mediaCheck', 'MQ', '$timeout', navControl]);
 
 	function navControl(mediaCheck, MQ, $timeout) {
 
@@ -26,7 +26,7 @@
 
 					$timeout(function () {
 						$scope.toggleNav = function () {
-							if ($body.hasClass('nav-closed')) {
+							if (body.hasClass('nav-closed')) {
 								openNav();
 							} else {
 								closeNav();

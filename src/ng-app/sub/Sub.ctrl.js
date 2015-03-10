@@ -1,7 +1,7 @@
 (function() {
 	'use strict';
 
-	myApp.controller('SubCtrl', ['GlobalObj', 'JSONData', SubCtrl]);
+	angular.module('myApp').controller('SubCtrl', ['GlobalObj', 'JSONData', SubCtrl]);
 
 	function SubCtrl(GlobalObj, JSONData) {
 		// controllerAs ViewModel

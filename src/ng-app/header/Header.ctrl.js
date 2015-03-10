@@ -1,7 +1,7 @@
 (function() {
 	'use strict';
 
-	myApp.controller('HeaderCtrl', ['$scope', '$location', '$routeParams', 'JSONData', HeaderCtrl]);
+	angular.module('myApp').controller('HeaderCtrl', ['$scope', '$location', '$routeParams', 'JSONData', HeaderCtrl]);
 
 	function HeaderCtrl($scope, $location, $routeParams, JSONData) {
 		// controllerAs ViewModel

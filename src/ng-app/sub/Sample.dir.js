@@ -6,7 +6,7 @@
 (function() {
 	'use strict';
 
-	myApp.directive('directiveName', directiveName);
+	angular.module('myApp').directive('directiveName', directiveName);
 
 	function directiveName() {
 

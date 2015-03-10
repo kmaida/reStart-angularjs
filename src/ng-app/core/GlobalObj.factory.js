@@ -2,7 +2,7 @@
 (function() {
 	'use strict';
 
-	myApp.factory('GlobalObj', GlobalObj);
+	angular.module('myApp').factory('GlobalObj', GlobalObj);
 
 	function GlobalObj() {
 		return {

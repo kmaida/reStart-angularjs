@@ -1,7 +1,7 @@
 (function() {
 	'use strict';
 
-	myApp.filter('trustAsHTML', ['$sce', trustAsHTML]);
+	angular.module('myApp').filter('trustAsHTML', ['$sce', trustAsHTML]);
 
 	function trustAsHTML($sce) {
 		return function (text) {
