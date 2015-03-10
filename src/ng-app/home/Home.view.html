@@ -1,16 +1,16 @@
 <article id="wrapper-content" class="wrapper-content wrapper-home" view-switch>
-	<section id="content-main" class="content-main content-home clearfix" ng-controller="HomeCtrl" ng-cloak>
+	<section id="content-main" class="content-main content-home clearfix" ng-controller="HomeCtrl as home" ng-cloak>
 		<p>
 			<label>Name:</label>
-			<input type="text" ng-model="name" />
+			<input type="text" ng-model="home.name" />
 		</p>
-		<h2>{{global.greeting}}, {{name}}!</h2>
+		<h2>{{home.global.greeting}}, {{home.name}}!</h2>
 		
-		<p><strong>{{json.title}}</strong> - {{json.summary}}</p>
+		<p><strong>{{home.json.title}}</strong> - {{home.json.summary}}</p>
 
-		<p ng-bind-html="stringOfHTML | trustAsHTML"></p>
+		<p ng-bind-html="home.stringOfHTML | trustAsHTML"></p>
 
-		<div id="wrapper-markupView" class="wrapper-markupView" ng-switch on="viewformat">
+		<div id="wrapper-markupView" class="wrapper-markupView" ng-switch on="vs.viewformat">
 			<div ng-switch-when="large">
 				<section ng-include src="'ng-app/home/large.tpl.html'"></section>
 			</div>

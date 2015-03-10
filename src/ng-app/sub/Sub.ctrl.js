@@ -1,9 +1,12 @@
-myApp.controller('SubCtrl', ['$scope', 'GlobalObj', 'JSONData', function($scope, GlobalObj, JSONData) {
+myApp.controller('SubCtrl', ['GlobalObj', 'JSONData', function(GlobalObj, JSONData) {
+	// controllerAs ViewModel
+	var vm = this;
+
 	// put global variables in the scope
-	$scope.global = GlobalObj;
+	vm.global = GlobalObj;
 
 	// get the data from JSON
 	JSONData.getDataAsync(function(data) {
-		$scope.json = data;
+		vm.json = data;
 	});
 }]);
