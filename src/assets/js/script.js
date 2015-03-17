@@ -1,16 +1,25 @@
 'use strict';
 
-//------------------------------------------------------------- General app functionality
+window.helpers = (function() {
 
-window.helpers = {
+	init();
 
-/*--- Init functions ---*/
-	init: function() {
-		helpers.fixBrowsers();
-	},
+	/***
+	 * function init()
+	 *
+	 * Initialize functions
+	 */
+	function init() {
+		fixBrowsers();
+	}
 
-/*--- Fix browser weirdness ---*/
-	fixBrowsers: function() {
+	/***
+	 * function fixBrowsers()
+	 *
+	 * Fix browser weirdness
+	 * Correct Modernizr bugs
+	 */
+	function fixBrowsers() {
 		var ua = navigator.userAgent.toLowerCase(),
 			chrome = ua.lastIndexOf('chrome/') > 0,
 			$html = $('html');
@@ -25,11 +34,5 @@ window.helpers = {
 					.addClass('csstransforms3d');
 			}
 		}
-	}	
-};
-
-//------------------------------------------------------------- Initialize
-
-$(function() {
-	helpers.init();
-});
+	}
+})();
