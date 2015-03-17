@@ -3,8 +3,25 @@
 
 	angular.module('myApp').directive('navControl', ['mediaCheck', 'MQ', '$timeout', navControl]);
 
+	/**
+	 * function navControl()
+	 *
+	 * @param mediaCheck
+	 * @param MQ
+	 * @param $timeout
+	 * @returns {{restrict: string, link: navControlLink}}
+	 */
 	function navControl(mediaCheck, MQ, $timeout) {
 
+		/**
+		 * function navControlLink()
+		 *
+		 * @param $scope
+		 * @param $element
+		 * @param $attrs
+		 *
+		 * navControl directive link function
+		 */
 		function navControlLink($scope, $element, $attrs) {
 			var body = angular.element('body'),
 				openNav = function () {

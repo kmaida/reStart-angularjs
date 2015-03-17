@@ -7,7 +7,7 @@ window.helpers = (function() {
 	/***
 	 * function init()
 	 *
-	 * Initialize functions
+	 * Initialize public window.helpers functions
 	 */
 	function init() {
 		fixBrowsers();
