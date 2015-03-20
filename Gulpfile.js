@@ -58,14 +58,13 @@ gulp.task('styles', function() {
 			cascade: false
 		}))
 		.pipe(sourcemaps.write())
-		.pipe(gulp.dest('./src/assets/css/'))
 		.pipe(isProduction ? minifyCSS() : gutil.noop() )
-		.pipe(isProduction ? gulp.dest('./src/assets/css/') : gutil.noop() );
+		.pipe(gulp.dest('./src/assets/css/'));
 });
 
 // JS Libs
 gulp.task('jsLibs', function() {
-	return gulp.src(['./src/assets/js/libs/jquery.js', './src/assets/js/libs/angular.js', './src/assets/js/libs/**/*.js', '!./src/assets/js/libs/libs.js'])
+	return gulp.src(['./src/assets/js/libs/jquery.js', './src/assets/js/libs/angular.js', './src/assets/js/libs/**/*.js', '!./src/assets/js/libs/modernizr.min.js', '!./src/assets/js/libs/libs.js'])
 		.pipe(debug({title: 'jsLibs'}))
 		.pipe(concat('libs.js'))
 		//.pipe(isProduction ? uglify() : gutil.noop() )	// to unminify libs in dev, uncomment this and comment out the next line instead
@@ -97,4 +96,4 @@ gulp.task('jsAngular', function() {
 
 // Build task
 // use "gulp --prod" to trigger production/build mode from commandline
-gulp.task('default', ['jsLibs', 'js', 'jsAngular']);
+gulp.task('default', ['styles', 'jsLibs', 'js', 'jsAngular']);
