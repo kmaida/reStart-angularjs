@@ -11,7 +11,14 @@ Supports modern browsers and IE9+
 
 Demo available at [http://restart-angular.kim-maida.com](http://restart-angular.kim-maida.com)
 
+* v0.2.0
 * closures with IIFEs
 * single responsibility
 * modular
 * (mostly) flat file structure
+* fixed minification issues
+
+To Do
+
+* Clean up Gruntfile
+* Split routes into modules
