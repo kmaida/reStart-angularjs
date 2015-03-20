@@ -1,7 +1,11 @@
 (function() {
 	'use strict';
 
-	angular.module('myApp').controller('HomeCtrl', ['GlobalObj', 'JSONData', HomeCtrl]);
+	angular
+		.module('myApp')
+		.controller('HomeCtrl', HomeCtrl);
+
+	HomeCtrl.$inject = ['GlobalObj', 'JSONData'];
 
 	function HomeCtrl(GlobalObj, JSONData) {
 		// controllerAs ViewModel

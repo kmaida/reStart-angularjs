@@ -6,9 +6,13 @@
 (function() {
 	'use strict';
 
-	angular.module('myApp').directive('directiveName', directiveName);
+	angular
+		.module('myApp')
+		.directive('directiveName', directiveName);
 
 	function directiveName() {
+
+		directiveNameLink.$inject = ['$scope', '$element', '$attrs'];
 
 		function directiveNameLink($scope, $element, $attrs) {
 			// watch for async data to become available and update

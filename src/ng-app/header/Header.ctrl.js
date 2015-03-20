@@ -1,19 +1,23 @@
 (function() {
 	'use strict';
 
-	angular.module('myApp').controller('HeaderCtrl', ['$scope', '$location', '$routeParams', 'JSONData', HeaderCtrl]);
+	angular
+		.module('myApp')
+		.controller('HeaderCtrl', HeaderCtrl);
 
-	function HeaderCtrl($scope, $location, $routeParams, JSONData) {
+	HeaderCtrl.$inject = ['$scope', '$location', 'JSONData'];
+
+	function HeaderCtrl($scope, $location, JSONData) {
 		// controllerAs ViewModel
 		var header = this;
 
 		// get the data from JSON
-		JSONData.getDataAsync(function (data) {
+		JSONData.getDataAsync(function(data) {
 			header.json = data;
 		});
 
 		// apply class to currently active nav item
-		header.indexIsActive = function (path) {
+		header.indexIsActive = function(path) {
 			// path should be '/'
 			return $location.path() === path;
 		};
@@ -22,7 +26,7 @@
 		};
 
 		// apply body class based on url (TODO: consider moving to a factory)
-		$scope.$on('$locationChangeSuccess', function (event, newUrl, oldUrl) {
+		$scope.$on('$locationChangeSuccess', function(event, newUrl, oldUrl) {
 			var getBodyClass = function (url) {
 					var bodyClass = url.substr(url.lastIndexOf('/') + 1);
 

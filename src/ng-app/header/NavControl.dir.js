@@ -1,7 +1,11 @@
 (function() {
 	'use strict';
 
-	angular.module('myApp').directive('navControl', ['mediaCheck', 'MQ', '$timeout', navControl]);
+	angular
+		.module('myApp')
+		.directive('navControl', navControl);
+
+	navControl.$inject = ['mediaCheck', 'MQ', '$timeout'];
 
 	/**
 	 * function navControl()
@@ -12,6 +16,8 @@
 	 * @returns {{restrict: string, link: navControlLink}}
 	 */
 	function navControl(mediaCheck, MQ, $timeout) {
+
+		navControlLink.$inject = ['$scope', '$element', '$attrs'];
 
 		/**
 		 * function navControlLink()

@@ -2,7 +2,11 @@
 (function() {
 	'use strict';
 
-	angular.module('myApp').directive('viewSwitch', ['mediaCheck', 'MQ', '$timeout', viewSwitch]);
+	angular
+		.module('myApp')
+		.directive('viewSwitch', viewSwitch);
+
+	viewSwitch.$inject = ['mediaCheck', 'MQ', '$timeout'];
 
 	function viewSwitch(mediaCheck, MQ, $timeout) {
 		function viewSwitchCtrl($scope) {
