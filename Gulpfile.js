@@ -67,18 +67,15 @@ gulp.task('styles', function() {
 gulp.task('jsLibs', function() {
 	return gulp.src(['./src/assets/js/libs/jquery.js', './src/assets/js/libs/angular.js', './src/assets/js/libs/**/*.js', '!./src/assets/js/libs/libs.js'])
 		.pipe(debug({title: 'jsLibs'}))
-		.pipe(sourcemaps.init())
 		.pipe(concat('libs.js'))
-
 		//.pipe(isProduction ? uglify() : gutil.noop() )	// to unminify libs in dev, uncomment this and comment out the next line instead
 		.pipe(uglify())
-
 		.pipe(gulp.dest('./src/assets/js/libs/'));
 });
 
 // JS
 gulp.task('js', function() {
-	return gulp.src(['./src/assets/js/**/*.js', '!./src/assets/js/scripts.js', '!./src/assets/libs'])
+	return gulp.src(['./src/assets/js/**/*.js', '!./src/assets/js/scripts.js', '!./src/assets/js/libs/*'])
 		.pipe(debug({title: 'js'}))
 		.pipe(sourcemaps.init())
 		.pipe(concat('scripts.js'))
