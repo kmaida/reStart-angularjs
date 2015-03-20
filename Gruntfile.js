@@ -21,12 +21,12 @@ module.exports = function(grunt) {
 			},
 			dev: {
 				files: {
-					'src/ng-app/ng-<%= pkg.name %>.min.js': ['src/ng-app/ngStartup.js', 'src/ng-app/**/*.js', '!src/ng-app/**/*.min.js']
+					'src/ng-app/ng-<%= pkg.name %>.js': ['src/ng-app/ngStartup.js', 'src/ng-app/**/*.js', '!src/ng-app/**/*.min.js']
 				}
 			},
 			dist: {
 				files: {
-					'dist/ng-app/ng-<%= pkg.name %>.min.js': ['src/ng-app/ngStartup.js', 'src/ng-app/**/*.js', '!src/ng-app/**/*.min.js'],
+					'src/ng-app/ng-<%= pkg.name %>.js': ['src/ng-app/ngStartup.js', 'src/ng-app/**/*.js', '!src/ng-app/**/ng-<%= pkg.name %>.js'],
 					'dist/assets/js/libs/modernizr.min.js': ['src/assets/js/libs/modernizr.js'],
 					'dist/assets/js/libs/libs.min.js': ['src/assets/js/libs/**/*.js', '!src/assets/js/libs/modernizr.js'],
 					'dist/assets/js/<%= pkg.name %>.min.js': ['src/assets/js/**/*.js', '!src/assets/js/libs/*']

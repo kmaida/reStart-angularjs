@@ -1,6 +1,7 @@
 {
 	"name": "reStart-angular",
 	"version": "0.2.0",
+    "author": "Kim Maida",
 	"description": "Mobile first responsive AngularJS boilerplate",
 	"main": "index.html",
 	"repository": {
@@ -15,13 +16,10 @@
 	"bugs": {
 		"url": "https://github.com/kmaida/reStart-angular/issues"
 	},
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
 	"homepage": "https://github.com/kmaida/reStart-angular",
-	"devDependencies": {
-		"grunt": "~0.4.2",
-		"grunt-contrib-watch": "~0.5.3",
-		"grunt-contrib-uglify": "~0.2.2",
-		"grunt-contrib-sass": "~0.7.2",
-		"grunt-contrib-imagemin": "~0.5.0",
-		"matchdep": "*"
-	}
+    "dependencies": {},
+	"devDependencies": {}
 }
