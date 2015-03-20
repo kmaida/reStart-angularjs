@@ -12,7 +12,7 @@
 			};
 */
 
-angular.module('myApp').directive('repeatComplete', function($rootScope) {
+angular.module('myApp').directive('repeatComplete', ['$rootScope', function($rootScope) {
 	 
 	// Because we can have multiple ng-repeat directives in
 	// the same container, we need a way to differentiate
@@ -58,8 +58,6 @@ angular.module('myApp').directive('repeatComplete', function($rootScope) {
 		// once, so save a referene to the un-watcher.
 		var unbindWatcher = parentScope.$watch(function() {
 		 
-			console.info('Digest running.');
-			 
 			// Now that we're in a digest, check to see
 			// if there are any ngRepeat items being
 			// rendered. Since we want to know when the
@@ -99,4 +97,4 @@ angular.module('myApp').directive('repeatComplete', function($rootScope) {
 		restrict: "A"
 	});
 	 
-});
+}]);

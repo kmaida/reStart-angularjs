@@ -9,6 +9,9 @@
 	viewSwitch.$inject = ['mediaCheck', 'MQ', '$timeout'];
 
 	function viewSwitch(mediaCheck, MQ, $timeout) {
+
+		viewSwitchCtrl.$inject = ['$scope'];
+		
 		function viewSwitchCtrl($scope) {
 			// controllerAs ViewModel
 			var vs = this;

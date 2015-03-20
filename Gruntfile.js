@@ -19,9 +19,14 @@ module.exports = function(grunt) {
 			options: {
 				banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - <%= grunt.template.today("yyyy-mm-dd") %> */'
 			},
+			dev: {
+				files: {
+					'src/ng-app/ng-<%= pkg.name %>.min.js': ['src/ng-app/ngStartup.js', 'src/ng-app/**/*.js']
+				}
+			},
 			dist: {
 				files: {
-					'dist/ng-app/ng-<%= pkg.name %>.min.js': ['src/ng-app/**/*.js'],
+					'dist/ng-app/ng-<%= pkg.name %>.min.js': ['src/ng-app/ngStartup.js', 'src/ng-app/**/*.js'],
 					'dist/assets/js/libs/modernizr.min.js': ['src/assets/js/libs/modernizr.js'],
 					'dist/assets/js/libs/libs.min.js': ['src/assets/js/libs/**/*.js', '!src/assets/js/libs/modernizr.js'],
 					'dist/assets/js/<%= pkg.name %>.min.js': ['src/assets/js/**/*.js', '!src/assets/js/libs/*']
@@ -59,6 +64,6 @@ module.exports = function(grunt) {
 	});
 	
 	// Default task(s)
-	grunt.registerTask('default', ['sass:dev', 'watch']);
-	grunt.registerTask('production', ['imagemin', 'uglify', 'sass:dist']);
+	grunt.registerTask('default', ['sass:dev', 'uglify:dev', 'watch']);
+	grunt.registerTask('production', ['imagemin', 'uglify:dist', 'sass:dist']);
 };
