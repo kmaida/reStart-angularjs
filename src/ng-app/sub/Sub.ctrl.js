@@ -3,11 +3,11 @@
 
 	angular
 		.module('myApp')
-		.controller('SubCtrl', SubCtrl);
+		.controller('SubCtrl', subCtrl);
 
-	SubCtrl.$inject = ['GlobalObj', 'JSONData'];
+	subCtrl.$inject = ['GlobalObj', 'JSONData'];
 
-	function SubCtrl(GlobalObj, JSONData) {
+	function subCtrl(GlobalObj, JSONData) {
 		// controllerAs ViewModel
 		var sub = this;
 

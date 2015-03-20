@@ -3,11 +3,11 @@
 
 	angular
 		.module('myApp')
-		.controller('HeaderCtrl', HeaderCtrl);
+		.controller('HeaderCtrl', headerCtrl);
 
-	HeaderCtrl.$inject = ['$scope', '$location', 'JSONData'];
+	headerCtrl.$inject = ['$scope', '$location', 'JSONData'];
 
-	function HeaderCtrl($scope, $location, JSONData) {
+	function headerCtrl($scope, $location, JSONData) {
 		// controllerAs ViewModel
 		var header = this;
 

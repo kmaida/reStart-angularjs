@@ -59,6 +59,10 @@ module.exports = function(grunt) {
 			css: {
 				files: ['**/*.scss'],
 				tasks: ['sass:dev']
+			},
+			js: {
+				files: ['src/ng-app/**/*.js'],
+				tasks: ['uglify:dev']
 			}
 		}
 	});

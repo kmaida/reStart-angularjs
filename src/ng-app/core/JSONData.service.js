@@ -4,11 +4,11 @@
 
 	angular
 		.module('myApp')
-		.service('JSONData', JSONData);
+		.service('JSONData', jsonData);
 
-	JSONData.$inject = ['$http'];
+	jsonData.$inject = ['$http'];
 
-	function JSONData($http) {
+	function jsonData($http) {
 		this.getDataAsync = function(callback) {
 			$http({
 				method: 'GET',
