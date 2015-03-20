@@ -1,25 +1,32 @@
 {
-	"name": "reStart-angular",
-	"version": "0.2.0",
-    "author": "Kim Maida",
-	"description": "Mobile first responsive AngularJS boilerplate",
-	"main": "index.html",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/kmaida/reStart-angular.git"
-	},
-	"keywords": [
-		"angular"
-	],
-	"author": "Kim Maida",
-	"license": "GNU Public License",
-	"bugs": {
-		"url": "https://github.com/kmaida/reStart-angular/issues"
-	},
-    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1"
-    },
-	"homepage": "https://github.com/kmaida/reStart-angular",
-    "dependencies": {},
-	"devDependencies": {}
+  "name": "reStart-angular",
+  "version": "0.2.0",
+  "author": "Kim Maida",
+  "description": "Mobile first responsive AngularJS boilerplate",
+  "main": "index.html",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kmaida/reStart-angular.git"
+  },
+  "keywords": [
+    "angular"
+  ],
+  "license": "GNU Public License",
+  "bugs": {
+    "url": "https://github.com/kmaida/reStart-angular/issues"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "homepage": "https://github.com/kmaida/reStart-angular",
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-autoprefixer": "^2.1.0",
+    "gulp-concat": "^2.5.2",
+    "gulp-ruby-sass": "^1.0.0-alpha.3",
+    "gulp-uglify": "^1.1.0",
+    "gulp-util": "^3.0.4",
+    "gulp-watch": "^4.2.0"
+  }
 }
