@@ -1,15 +1,12 @@
 // Dev dependencies
 var gulp = require('gulp'),
-	debug = require('gulp-debug'),
 	gutil = require('gulp-util'),
 	uglify = require('gulp-uglify'),
 	sass = require('gulp-sass'),
 	sourcemaps = require('gulp-sourcemaps'),
 	minifyCSS = require('gulp-minify-css'),
 	autoprefixer = require('gulp-autoprefixer'),
-	concat = require('gulp-concat'),
-	webserver = require('gulp-webserver'),
-	livereload = require('gulp-livereload');
+	concat = require('gulp-concat');
 
 /*
 	Install required Gulp Plugins:
@@ -27,11 +24,10 @@ var gulp = require('gulp'),
 	npm install gulp-minify-css --save-dev
 	npm install gulp-autoprefixer --save-dev
 	npm install gulp-concat --save-dev
-	npm install gulp-webserver --save-dev
-	npm install gulp-livereload --save-dev
+	npm install gulp-watch --save-dev
 
 	To install all of the above at one time, run the following line at the command prompt:
-	npm install gulp gulp-debug gulp-util gulp-uglify gulp-sass gulp-sourcemaps gulp-minify-css gulp-autoprefixer gulp-concat gulp-webserver gulp-livereload --save-dev
+	npm install gulp gulp-util gulp-uglify gulp-sass gulp-sourcemaps gulp-minify-css gulp-autoprefixer gulp-concat --save-dev
  */
 
 // Use "gulp --prod" to trigger production/build mode from commandline
@@ -50,7 +46,6 @@ function errorHandler(err){
 // Compile SCSS
 gulp.task('styles', function() {
 	return gulp.src('./src/assets/css/scss/styles.scss')
-		.pipe(debug({title: 'styles'}))
 		.pipe(sourcemaps.init())
 		.pipe(sass({ style: 'expanded' }))
 		.pipe(autoprefixer({
@@ -65,7 +60,6 @@ gulp.task('styles', function() {
 // JS Libs
 gulp.task('jsLibs', function() {
 	return gulp.src(['./src/assets/js/libs/jquery.js', './src/assets/js/libs/angular.js', './src/assets/js/libs/**/*.js', '!./src/assets/js/libs/modernizr.min.js', '!./src/assets/js/libs/libs.js'])
-		.pipe(debug({title: 'jsLibs'}))
 		.pipe(concat('libs.js'))
 		//.pipe(isProduction ? uglify() : gutil.noop() )	// to unminify libs in dev, uncomment this and comment out the next line instead
 		.pipe(uglify())
@@ -75,7 +69,6 @@ gulp.task('jsLibs', function() {
 // JS
 gulp.task('js', function() {
 	return gulp.src(['./src/assets/js/**/*.js', '!./src/assets/js/scripts.js', '!./src/assets/js/libs/*'])
-		.pipe(debug({title: 'js'}))
 		.pipe(sourcemaps.init())
 		.pipe(concat('scripts.js'))
 		.pipe(sourcemaps.write())
@@ -86,7 +79,6 @@ gulp.task('js', function() {
 // AngularJS
 gulp.task('jsAngular', function() {
 	return gulp.src(['./src/ng-app/ngStartup.js', './src/ng-app/**/*.js', '!./src/ng-app/ng-app.js'])
-		.pipe(debug({title: 'jsAngular'}))
 		.pipe(sourcemaps.init())
 		.pipe(concat('ng-app.js'))
 		.pipe(sourcemaps.write())
@@ -94,6 +86,13 @@ gulp.task('jsAngular', function() {
 		.pipe(gulp.dest('./src/ng-app/'));
 });
 
-// Build task
+// default build task
 // use "gulp --prod" to trigger production/build mode from commandline
-gulp.task('default', ['styles', 'jsLibs', 'js', 'jsAngular']);
+gulp.task('default', ['styles', 'jsLibs', 'js', 'jsAngular'], function() {
+	if (!isProduction) {
+		gulp.watch('./src/assets/css/scss/**/*.scss', ['styles']);
+		gulp.watch('./src/assets/js/libs/**/*.js', ['jsLibs']);
+		gulp.watch(['./src/assets/js/**/*.js', '!./src/assets/js/scripts.js', '!./src/assets/js/libs/*'], ['js']);
+		gulp.watch(['./src/ng-app/**/*.js', '!./src/ng-app/ng-app.js'], ['jsAngular']);
+	}
+});

@@ -17,7 +17,7 @@ footer, header, hgroup, menu, nav, section {
 	text-decoration: none;
 	vertical-align: baseline;
 }
-html { overflow-y: scroll; }
+html { overflow-y: scroll; -webkit-text-size-adjust: 100%; }
 ol, ul { list-style: none; }
 table { border-collapse: collapse; border-spacing: 0; }
 caption, th, td { text-align: left; font-weight: normal; }
