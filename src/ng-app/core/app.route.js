@@ -1,6 +1,14 @@
 // routes
-angular.module('myApp')
-	.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
+(function() {
+	'use strict';
+
+	angular
+		.module('myApp')
+		.config(appRoutes);
+
+	appRoutes.$inject = ['$routeProvider', '$locationProvider'];
+
+	function appRoutes($routeProvider, $locationProvider) {
 		$routeProvider
 			.when('/', {
 				templateUrl: 'ng-app/home/Home.view.html'
@@ -16,4 +24,5 @@ angular.module('myApp')
 				enabled: true
 			})
 			.hashPrefix('!');
-	}]);
+	}
+})();

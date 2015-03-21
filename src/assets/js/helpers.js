@@ -1,7 +1,7 @@
 'use strict';
 
 window.helpers = (function() {
-	
+
 	init();
 
 	/***
