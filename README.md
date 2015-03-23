@@ -6,8 +6,9 @@ A mobile-first responsive framework in AngularJS; moving toward adherence to the
 Supports modern browsers and IE9+
 
 * Node >= 0.10  
-* AngularJS v1.3.14  
+* AngularJS v1.3.15  
 * jQuery v2.1.3 
+* Gulp 
 
 Demo available at [http://restart-angular.kim-maida.com](http://restart-angular.kim-maida.com)
 
@@ -20,5 +21,5 @@ Demo available at [http://restart-angular.kim-maida.com](http://restart-angular.
 
 To Do
 
-* Clean up Gruntfile
-* Split routes into modules
+* Add image minification task to Gulp 
+* Add error handlers to Gulp pipes 

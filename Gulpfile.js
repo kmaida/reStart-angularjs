@@ -41,6 +41,7 @@ if (gutil.env.prod) {
 }
 
 // Standard error handler
+// TODO: add .on('error', errorHandler) to pipes as necessary
 function errorHandler(err){
 	gutil.beep();
 	gutil.log(gutil.colors.red('Error: '), err.message);
