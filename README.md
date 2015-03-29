@@ -16,10 +16,8 @@ Demo available at [http://restart-angular.kim-maida.com](http://restart-angular.
 * closures with IIFEs
 * single responsibility
 * modular
-* (mostly) flat file structure
-* fixed minification issues
+* Sass
 
 To Do
 
-* Add image minification task to Gulp 
-* Add error handlers to Gulp pipes 
+* Add image minification task to Gulp

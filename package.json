@@ -9,7 +9,7 @@
     "url": "https://github.com/kmaida/reStart-angular.git"
   },
   "keywords": [
-    "angular"
+    "angular", "sass", "gulp", "responsive"
   ],
   "license": "GNU Public License",
   "bugs": {
