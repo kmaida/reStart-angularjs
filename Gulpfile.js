@@ -41,7 +41,6 @@ if (gutil.env.prod) {
 }
 
 // Standard error handler
-// TODO: add .on('error', errorHandler) to pipes as necessary
 function errorHandler(err){
 	gutil.beep();
 	gutil.log(gutil.colors.red('Error: '), err.message);
@@ -51,11 +50,11 @@ function errorHandler(err){
 gulp.task('styles', function() {
 	return gulp.src(path.css.src + 'styles.scss')
 		.pipe(sourcemaps.init())
-		.pipe(sass({ style: 'expanded' }))
+		.pipe(sass({ style: 'expanded' })).on('error', errorHandler)
 		.pipe(autoprefixer({
 			browsers: ['last 2 versions', '> 1%'],
 			cascade: false
-		}))
+		})).on('error', errorHandler)
 		.pipe(sourcemaps.write())
 		.pipe(isProduction ? minifyCSS() : gutil.noop() )
 		.pipe(gulp.dest(path.css.dest));
@@ -67,7 +66,7 @@ gulp.task('js', function() {
 		.pipe(sourcemaps.init())
 		.pipe(concat('scripts.js'))
 		.pipe(sourcemaps.write())
-		.pipe(isProduction ? uglify() : gutil.noop() )
+		.pipe(isProduction ? uglify() : gutil.noop() ).on('error', errorHandler)
 		.pipe(gulp.dest(path.js.dest));
 });
 
@@ -86,7 +85,7 @@ gulp.task('jsAngular', function() {
 		.pipe(sourcemaps.init())
 		.pipe(concat('ng-app.js'))
 		.pipe(sourcemaps.write())
-		.pipe(isProduction ? uglify() : gutil.noop() )
+		.pipe(isProduction ? uglify() : gutil.noop() ).on('error', errorHandler)
 		.pipe(gulp.dest(path.jsAngular.dest));
 });
 

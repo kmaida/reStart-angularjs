@@ -1,0 +1,85 @@
+/*--------------------
+	  CSS RESET
+--------------------*/
+
+html, body, div, span, h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins,
+kbd, q, s, samp, small, strong, tt, var, dl, dt,
+dd, ol, ul, li, fieldset, form, input, button, textarea, label, legend, table, caption,
+tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	margin: 0; padding: 0;
+	border: 0;
+	border-radius: 0;	/* for iOS */
+	font-weight: inherit; font-style: inherit; font-family: inherit;
+	line-height: 1;
+	text-decoration: none;
+	vertical-align: baseline;
+}
+html { overflow-y: scroll; -webkit-text-size-adjust: 100%; }
+ol, ul { list-style: none; }
+table { border-collapse: collapse; border-spacing: 0; }
+caption, th, td { text-align: left; font-weight: normal; }
+sup, sub { line-height: 1; }
+h1, h2, h3, h4, h5, h6 { font-weight: normal; }
+article, aside, canvas, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; }
+*,*:before,*:after {
+	box-sizing: border-box;
+}
+
+/*--------------------
+	   BASICS
+--------------------*/
+
+/*-- Normalize --*/
+
+em { font-style: italic; }
+strong { font-weight: bold; }
+q:lang(en) { quotes: '&#8220;' '&#8221;' '&#8216;' '&#8217;'; }
+h1, h2, h3, h4, h5, h6, p { margin-bottom: 15px; }
+ul { list-style: outside disc; padding-left: 24px; }
+ol { list-style: outside decimal; padding-left: 24px; }
+a, label, input[type=button], input[type=submit], button { cursor: pointer; }
+del { text-decoration: line-through; }
+abbr[title], dfn[title] { border-bottom: 1px dotted; cursor: help; }
+pre,code { background: #eee; border: 1px solid #ccc; font-family: Consolas, 'Lucida Console', 'Courier New', serif; padding: 2%; }
+input, select, textarea { border: 1px solid #ccc; font-family: inherit; font-size: inherit; padding: 3px 6px; }
+input, select { vertical-align: middle; }
+textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded in IE */
+
+/*-- Clearfix --*/
+
+.clearfix:before,
+.clearfix:after {
+	content: " ";
+	display: table;
+}
+.clearfix:after { clear: both; }
+.ie7 .clearfix { zoom: 1; }
+
+/*-- ng-cloak: prevent FOUC before Angular JavaScript loads --*/
+
+[ng\:cloak],
+[ng-cloak],
+[data-ng-cloak],
+[x-ng-cloak],
+.ng-cloak,
+.x-ng-cloak {
+	display: none !important;
+}
+
+/*-- Image Replacement --*/
+
+.ir {
+	overflow: hidden;
+	text-indent: 200%;
+	white-space: nowrap;
+}
+
+/*-- Inline link touch targets --*/
+
+.touch p a {
+	margin: 0 -.5em;
+	padding: 0 .5em;
+}

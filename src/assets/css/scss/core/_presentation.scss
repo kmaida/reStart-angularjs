@@ -1,0 +1,22 @@
+/*--------------------
+	 PRESENTATION
+--------------------*/
+
+body {
+	background: $color-bg-light;
+	color: $color-text;
+	font: normal 16px/1.2 'Helvetica Neue', Helvetica, Arial, Verdana, sans-serif;
+}
+.wrapper-canvas {
+	background: $color-bg;
+}
+
+/*------------------------------------------------------------------------- Content --*/
+
+article {
+	padding: $padding-screen-small;
+
+	@include mq-large {
+		padding: $padding-screen-large;
+	}
+}

@@ -1,0 +1,34 @@
+/*--------------------
+	    HEADER
+--------------------*/
+
+.header-global {
+
+}
+.title-global {
+	text-align: center;
+}
+
+/*------------------------------------------------------------------------- Navigation --*/
+
+.toggle-offcanvas {
+	background: $color-module-bg;
+	float: left;
+	padding: 3% 0;
+	text-align: center;
+	width: 15%;
+}
+.nav-global {
+	box-shadow: inset -8px 0 8px -6px rgba(0,0,0,0.2);
+	padding: $padding-screen-small;
+
+	.active {
+		font-weight: bold;
+	}
+
+	@include mq-large {
+		background: $color-module-bg;
+		box-shadow: none;
+		padding: $padding-screen-large;
+	}
+}

@@ -1,0 +1,31 @@
+/*--------------------
+	   PRINT
+--------------------*/
+
+@media print {
+
+	* { background: #fff; }
+	body {
+		color: #000;
+		font: normal 16px/1.4 Georgia, 'Times New Roman', serif;
+	}
+
+	/*-- Hidden Elements --*/
+
+	.header-global,
+	.footer-global { display: none; }
+
+	/*-- Show link URLs --*/
+
+	a:link,
+	a:visited {
+		color: blue;
+		text-decoration: underline;
+	}
+	a:link:after,
+	a:visited:after {
+		content:" [" attr(href) "] ";
+		font-size: 75%;
+	}
+
+}

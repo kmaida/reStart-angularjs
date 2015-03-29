@@ -6,5 +6,15 @@
  * License: GNU Public License
 */
 
-@import 'mixins.scss';
-@import 'common.scss';
+/*-- Core --*/
+@import 'core/mixins';
+@import 'core/variables';
+@import 'core/normalize';
+@import 'core/fonts';
+@import 'core/presentation';
+@import 'core/layout';
+@import 'core/print';
+
+/*-- Modules --*/
+@import 'modules/header';
+@import 'modules/footer';

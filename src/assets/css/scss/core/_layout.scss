@@ -1,0 +1,72 @@
+/*--------------------
+   LAYOUT FUNCTION
+--------------------*/
+
+body {
+	min-width: 320px;
+}
+.wrapper-overflow {
+	overflow: hidden;	/* necessary to handle offcanvas scrollbar behavior */
+}
+
+/*------------------------------------------------------------------------- Off-canvas Functionality --*/
+
+.nav-global {
+	backface-visibility: hidden;
+	display: none;	/* deal with FOUC */
+	height: 100%;
+	overflow-y: auto;
+	position: absolute;
+	top: 0;
+	transform: translate3d(-100%,0,0);
+	width: 85%;
+
+	@include mq-large {
+		display: block;
+		position: relative;
+		transform: none;
+		width: 100%;
+	}
+}
+.nav-closed .nav-global,
+.nav-open .nav-global  {
+	display: block;	/* deal with FOUC */
+}
+.wrapper-canvas {
+	backface-visibility: hidden;
+	position: relative;
+	left: 0;
+	transition: transform 250ms ease;
+	transform: translate3d(0,0,0);
+	width: 100%;
+
+	@include mq-large {
+		transition: none;
+		transform: none;
+	}
+}
+.csstransforms3d .nav-open .wrapper-canvas {
+	transform: translate3d(85%,0,0);
+}
+.no-csstransforms3d {
+	.nav-closed .nav-global {
+		left: -100%;
+	}
+	.nav-open {
+		.nav-global {
+			left: -85%;
+
+			@include mq-large {
+				left: 0;
+			}
+		}
+		.wrapper-canvas {
+			left: 85%;
+		}
+	}
+}
+.toggle-offcanvas {
+	@include mq-large {
+		display: none;
+	}
+}
