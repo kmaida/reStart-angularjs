@@ -18,22 +18,22 @@
 	</head>
 
 	<body ng-cloak>
-		<div class="wrapper-overflow">
-			<div class="wrapper-canvas">
+		<div class="layout-overflow">
+			<div class="layout-canvas">
 			
 			<!-- HEADER -->
 				<div ng-include="'ng-app/header/header.tpl.html'"></div>
 
 			<!-- CONTENT (Angular View) -->
-				<div id="wrapper-view" class="wrapper-view" ng-view autoscroll="true"></div>
+				<div id="layout-view" class="layout-view" ng-view autoscroll="true"></div>
 
 			<!-- FOOTER -->
 				<footer id="footer-global" class="footer-global clearfix">
 					<p>GNU Public License 2014 | <a href="https://github.com/kmaida/restart-angular">GitHub</a></p>
 				</footer>
 
-			</div> <!-- /.wrapper-canvas -->
-		</div> <!-- /.wrapper-overflow -->
+			</div> <!-- /.layout-canvas -->
+		</div> <!-- /.layout-overflow -->
 
 		<!-- JS Libraries -->
 		<script src="/assets/js/libs/libs.js"></script>

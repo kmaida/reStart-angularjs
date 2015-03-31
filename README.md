@@ -21,3 +21,4 @@ Demo available at [http://restart-angular.kim-maida.com](http://restart-angular.
 To Do
 
 * Add image minification task to Gulp
+* Update CSS to be more functionality-focused
