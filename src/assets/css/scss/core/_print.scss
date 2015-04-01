@@ -4,7 +4,9 @@
 
 @media print {
 
-	* { background: #fff; }
+	* {
+		background: #fff;
+	}
 	body {
 		color: #000;
 		font: normal 16px/1.4 Georgia, 'Times New Roman', serif;
@@ -12,8 +14,10 @@
 
 	/*-- Hidden Elements --*/
 
-	.header-global,
-	.footer-global { display: none; }
+	.header,
+	.footer {
+		display: none;
+	}
 
 	/*-- Show link URLs --*/
 

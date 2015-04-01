@@ -1,5 +1,5 @@
-<article id="wrapper-content" class="wrapper-content wrapper-home" view-switch>
-	<section id="content-main" class="content-main content-home clearfix" ng-controller="HomeCtrl as home" ng-cloak>
+<article id="content-wrapper" class="content-wrapper home-wrapper" view-switch>
+	<section id="content-main" class="content-main home-content clearfix" ng-controller="HomeCtrl as home" ng-cloak>
 		<p>
 			<label>Name:</label>
 			<input type="text" ng-model="home.name" />
@@ -10,7 +10,7 @@
 
 		<p ng-bind-html="home.stringOfHTML | trustAsHTML"></p>
 
-		<div id="wrapper-markupView" class="wrapper-markupView" ng-switch on="vs.viewformat">
+		<div id="markupView-wrapper" class="markupView-wrapper" ng-switch on="vs.viewformat">
 			<div ng-switch-when="large">
 				<section ng-include src="'ng-app/home/large.tpl.html'"></section>
 			</div>

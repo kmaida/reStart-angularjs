@@ -33,9 +33,17 @@ body {
 	}
 }
 
+/*-- Header --*/
+
+.toggle-offcanvas {
+	@include mq-large {
+		display: none;
+	}
+}
+
 /*-- Navigation --*/
 
-.nav-global {
+.nav {
 	backface-visibility: hidden;
 	display: none;	/* deal with FOUC */
 	height: 100%;
@@ -64,10 +72,5 @@ body {
 		@include mq-large {
 			left: 0;
 		}
-	}
-}
-.toggle-offcanvas {
-	@include mq-large {
-		display: none;
 	}
 }

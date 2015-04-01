@@ -13,7 +13,7 @@ body {
 
 /*------------------------------------------------------------------------- Content --*/
 
-article {
+.content-wrapper {
 	padding: $padding-screen-small;
 
 	@include mq-large {

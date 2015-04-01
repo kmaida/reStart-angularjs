@@ -9,8 +9,6 @@
 	text-align: center;
 }
 
-/*------------------------------------------------------------------------- Navigation --*/
-
 .toggle-offcanvas {
 	background: $color-module-bg;
 	float: left;
@@ -18,7 +16,10 @@
 	text-align: center;
 	width: 15%;
 }
-.nav-global {
+
+/*------------------------------------------------------------------------- Navigation --*/
+
+.nav {
 	box-shadow: inset -8px 0 8px -6px rgba(0,0,0,0.2);
 	padding: $padding-screen-small;
 
