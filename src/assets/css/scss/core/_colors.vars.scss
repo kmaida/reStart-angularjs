@@ -7,6 +7,7 @@
 $color-black: #000;
 $color-white: #fff;
 $color-black-almost: #333;
+$color-black-light: #555;
 $color-gray: #ccc;
 $color-gray-light: #eee;
 
@@ -15,7 +16,9 @@ $color-gray-light: #eee;
 $color-bg-light: $color-gray-light;
 $color-bg: $color-white;
 $color-module-bg: $color-gray;
+$color-nav-bg: $color-black-light;
 $color-text: $color-black-almost;
+$color-link-contrast: $color-white;
 
 /*------------------------------------------------------------------------- Padding --*/
 

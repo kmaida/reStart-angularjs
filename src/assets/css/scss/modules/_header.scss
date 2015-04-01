@@ -5,16 +5,13 @@
 .header {
 
 }
-.title-global {
-	text-align: center;
-}
 
 /*-- Menu toggle --*/
 
 .toggle-offcanvas {
-	background: #ccc;
+	background: $color-nav-bg;
 	height: 50px;
-	padding: 23px 13px;
+	padding: 23.5px 13px;
 	position: absolute;
 	text-align: center;
 	width: 50px;
@@ -26,7 +23,7 @@
 		border-radius: 1px;
 		content: '';
 		display: block;
-		height: 4px;
+		height: 3px;
 		position: absolute;
 		transition: all 250ms ease-in-out;
 		width: 24px;
@@ -68,8 +65,12 @@
 	}
 
 	@include mq-large {
-		background: $color-module-bg;
+		background: $color-nav-bg;
 		box-shadow: none;
 		padding: $padding-screen-large;
+
+		a {
+			color: $color-link-contrast;
+		}
 	}
 }

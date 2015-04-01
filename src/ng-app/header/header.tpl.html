@@ -1,8 +1,6 @@
 <div ng-controller="HeaderCtrl as header" nav-control>
 	<a class="toggle-offcanvas" ng-click="toggleNav()"><span></span></a>
 
-	<h1 class="title-global">{{header.json.title}}</h1>
-
 	<nav id="nav" class="nav" role="navigation">
 		<ul class="nav-list">
 			<li><a ng-class="{active: header.indexIsActive('/')}" ng-href="/">Home</a></li>
