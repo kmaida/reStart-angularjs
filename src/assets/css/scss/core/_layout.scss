@@ -26,10 +26,10 @@ body {
 		transform: none;
 	}
 	.csstransforms3d .nav-open & {
-		transform: translate3d(85%,0,0);
+		transform: translate3d(270px,0,0);
 	}
 	.no-csstransforms3d .nav-open & {
-		left: 85%;
+		left: 270px;
 	}
 }
 
@@ -51,7 +51,7 @@ body {
 	position: absolute;
 	top: 0;
 	transform: translate3d(-100%,0,0);
-	width: 85%;
+	width: 270px;
 
 	@include mq-large {
 		display: block;
@@ -67,7 +67,7 @@ body {
 		left: -100%;
 	}
 	.no-csstransforms3d .nav-open & {
-		left: -85%;
+		left: -270px;
 
 		@include mq-large {
 			left: 0;

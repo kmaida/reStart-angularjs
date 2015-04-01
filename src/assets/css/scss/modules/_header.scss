@@ -9,12 +9,52 @@
 	text-align: center;
 }
 
+/*-- Menu toggle --*/
+
 .toggle-offcanvas {
-	background: $color-module-bg;
-	float: left;
-	padding: 3% 0;
+	background: #ccc;
+	height: 50px;
+	padding: 23px 13px;
+	position: absolute;
 	text-align: center;
-	width: 15%;
+	width: 50px;
+
+	span,
+	span:before,
+	span:after {
+		background: $color-white;
+		border-radius: 1px;
+		content: '';
+		display: block;
+		height: 4px;
+		position: absolute;
+		transition: all 250ms ease-in-out;
+		width: 24px;
+	}
+	span {
+		&:before {
+			top: -9px;
+		}
+		&:after {
+			bottom: -9px;
+		}
+	}
+	.nav-open & {
+		span {
+			background: transparent;
+
+			&:before,
+			&:after {
+				top: 0;
+			}
+			&:before {
+				transform: rotate(45deg);
+			}
+			&:after {
+				transform: rotate(-45deg);
+			}
+		}
+	}
 }
 
 /*------------------------------------------------------------------------- Navigation --*/
