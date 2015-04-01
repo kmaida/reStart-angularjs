@@ -7,8 +7,11 @@
 */
 
 /*-- Core --*/
-@import 'core/mixins';
-@import 'core/variables';
+
+@import 'core/colors.vars';
+@import 'core/layout.vars';
+@import 'core/responsive.vars.mixins';
+
 @import 'core/normalize';
 @import 'core/fonts';
 @import 'core/presentation';
@@ -16,5 +19,6 @@
 @import 'core/print';
 
 /*-- Modules --*/
+
 @import 'modules/header';
 @import 'modules/footer';

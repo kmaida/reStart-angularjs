@@ -22,20 +22,19 @@
 			<div class="layout-canvas">
 			
 			<!-- HEADER -->
-				<div ng-include="'ng-app/header/header.tpl.html'"></div>
+				<header id="header" class="header clearfix" ng-include="'ng-app/header/header.tpl.html'"></header>
 
 			<!-- CONTENT (Angular View) -->
 				<div id="layout-view" class="layout-view" ng-view autoscroll="true"></div>
 
 			<!-- FOOTER -->
-				<footer id="footer-global" class="footer-global clearfix">
-					<p>GNU Public License 2014 | <a href="https://github.com/kmaida/restart-angular">GitHub</a></p>
-				</footer>
+				<footer id="footer" class="footer clearfix" ng-include="'ng-app/footer/footer.tpl.html'"></footer>
 
 			</div> <!-- /.layout-canvas -->
 		</div> <!-- /.layout-overflow -->
 
 		<!-- JS Libraries -->
+		<!-- concatenated and minified -->
 		<script src="/assets/js/libs/libs.js"></script>
 
 		<!-- Angular app JS -->
@@ -43,6 +42,7 @@
 		<script src="/ng-app/ng-app.js"></script>
 		
 		<!-- JavaScript -->
+		<!-- dev: concatenated; production: concatenated and minified -->
 		<script src="/assets/js/scripts.js"></script>
 	</body>
 </html>

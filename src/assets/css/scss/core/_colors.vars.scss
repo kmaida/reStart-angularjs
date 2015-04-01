@@ -1,10 +1,9 @@
 /*--------------------
-	   VARIABLES
+	COLOR VARIABLES
 --------------------*/
 
-/*------------------------------------------------------------------------- Colors --*/
-
 /*-- Color definitions --*/
+
 $color-black: #000;
 $color-white: #fff;
 $color-black-almost: #333;
@@ -12,15 +11,11 @@ $color-gray: #ccc;
 $color-gray-light: #eee;
 
 /*-- Color by function --*/
+
 $color-bg-light: $color-gray-light;
 $color-bg: $color-white;
 $color-module-bg: $color-gray;
 $color-text: $color-black-almost;
-
-/*------------------------------------------------------------------------- Media Queries --*/
-
-$mq-small: 'screen and (max-width: 767px)';
-$mq-large: 'screen and (min-width: 768px)';
 
 /*------------------------------------------------------------------------- Padding --*/
 

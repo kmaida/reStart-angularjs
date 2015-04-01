@@ -1,4 +1,7 @@
-// Dev dependencies
+/**
+ * Dev dependencies
+ */
+
 var gulp = require('gulp'),
 	gutil = require('gulp-util'),
 	uglify = require('gulp-uglify'),
@@ -8,7 +11,10 @@ var gulp = require('gulp'),
 	autoprefixer = require('gulp-autoprefixer'),
 	concat = require('gulp-concat');
 
-// Paths
+/**
+ * File paths
+ */
+
 var basePath = {
 	src: './src',
 	dest: './src'
@@ -33,21 +39,39 @@ var path = {
 	}
 };
 
-// Run "gulp --prod" to trigger production/build mode
+/**
+ * Run "gulp --prod" to trigger production/build mode
+ */
+
 var isProduction = false;
 
 if (gutil.env.prod) {
 	isProduction = true;
 }
 
-// Standard error handler
+/**
+ * function errorHandler(err)
+ *
+ * @param err
+ */
+
 function errorHandler(err){
 	gutil.beep();
 	gutil.log(gutil.colors.red('Error: '), err.message);
 }
 
-// Compile SCSS
-gulp.task('styles', function() {
+/**
+ * function styles()
+ *
+ * Init sourcemaps
+ * Compile Sass
+ * Run autoprefixer
+ * Write sourcemaps
+ * Minify (if production)
+ * Save
+ */
+
+function styles() {
 	return gulp.src(path.css.src + 'styles.scss')
 		.pipe(sourcemaps.init())
 		.pipe(sass({ style: 'expanded' })).on('error', errorHandler)
@@ -58,39 +82,79 @@ gulp.task('styles', function() {
 		.pipe(sourcemaps.write())
 		.pipe(isProduction ? minifyCSS() : gutil.noop() )
 		.pipe(gulp.dest(path.css.dest));
-});
+}
 
-// JS
-gulp.task('js', function() {
+/**
+ * function js()
+ *
+ * Init sourcemaps
+ * Concatenate JS files
+ * Write sourcemaps
+ * Uglify / minify (if production)
+ * Save
+ */
+
+function js() {
 	return gulp.src([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'libs/*'])
 		.pipe(sourcemaps.init())
 		.pipe(concat('scripts.js'))
 		.pipe(sourcemaps.write())
-		.pipe(isProduction ? uglify() : gutil.noop() ).on('error', errorHandler)
+		.pipe(isProduction ? uglify() : gutil.noop() )
 		.pipe(gulp.dest(path.js.dest));
-});
+}
 
-// JS Libs
-gulp.task('jsLibs', function() {
+/**
+ * function jsLibs()
+ *
+ * Concatenate JS vendor files / libraries
+ * Uglify / minify
+ * Save
+ */
+
+function jsLibs() {
 	return gulp.src([path.jsLibs.src + 'jquery.js', path.jsLibs.src + 'angular.js', path.jsLibs.src + '**/*.js', '!' + path.jsLibs.src + 'modernizr.min.js', '!' + path.jsLibs.src + 'libs.js'])
 		.pipe(concat('libs.js'))
 		//.pipe(isProduction ? uglify() : gutil.noop() )	// to unminify libs in dev, uncomment this and comment out the next line instead
 		.pipe(uglify())
 		.pipe(gulp.dest(path.jsLibs.dest));
-});
+}
 
-// AngularJS
-gulp.task('jsAngular', function() {
+/**
+ * function jsAngular()
+ *
+ * Init sourcemaps
+ * Concatenate Angular JS files
+ * Write sourcemaps
+ * Uglify / minify (if production)
+ * Save
+ */
+
+function jsAngular() {
 	return gulp.src([path.jsAngular.src + 'ngStartup.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'ng-app.js'])
 		.pipe(sourcemaps.init())
 		.pipe(concat('ng-app.js'))
 		.pipe(sourcemaps.write())
-		.pipe(isProduction ? uglify() : gutil.noop() ).on('error', errorHandler)
+		.pipe(isProduction ? uglify() : gutil.noop() )
 		.pipe(gulp.dest(path.jsAngular.dest));
-});
+}
 
-// default build task
-// use "gulp --prod" to trigger production/build mode from commandline
+/**
+ * Gulp tasks
+ */
+
+gulp.task('styles', styles);
+gulp.task('js', js);
+gulp.task('jsLibs', jsLibs);
+gulp.task('jsAngular', jsAngular);
+
+/**
+ * Default build task
+ *
+ * If not production, watch for file changes and execute the appropriate task
+ *
+ * Use "gulp --prod" to trigger production/build mode from commandline
+ */
+
 gulp.task('default', ['styles', 'jsLibs', 'js', 'jsAngular'], function() {
 	if (!isProduction) {
 		gulp.watch(path.css.src + '**/*.scss', ['styles']);

@@ -1,4 +1,4 @@
-<header id="header-global" class="header-global clearfix" ng-controller="HeaderCtrl as header" nav-control>
+<div ng-controller="HeaderCtrl as header" nav-control>
 	<a class="toggle-offcanvas" ng-click="toggleNav()">Menu</a>
 
 	<h1 class="title-global">{{header.json.title}}</h1>
@@ -9,4 +9,4 @@
 			<li><a ng-class="{active: header.navIsActive('/subpage')}" ng-href="/subpage">Subpage</a></li>
 		</ul>
 	</nav>
-</header>
+</div>

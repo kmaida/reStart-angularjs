@@ -21,6 +21,7 @@ Demo available at [http://restart-angular.kim-maida.com](http://restart-angular.
 To Do
 
 - [ ] Add image minification task to Gulp
+- [x] Modify Gulpfile to use named functions for tasks
 - [ ] Update CSS to be more functionality-focused
   - [x] Change layout classes
   - [ ] Change "global" classes for better modularity

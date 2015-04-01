@@ -1,0 +1,16 @@
+/*--------------------
+	  RESPONSIVE
+--------------------*/
+
+/*-- Variables --*/
+
+$mq-small: 'screen and (max-width: 767px)';
+$mq-large: 'screen and (min-width: 768px)';
+
+/*-- Mixins --*/
+
+@mixin mq-large() {
+	@media #{$mq-large} {
+		@content;
+	}
+}
