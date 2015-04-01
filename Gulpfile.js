@@ -29,9 +29,9 @@ var path = {
 		src: basePath.src + '/assets/js/',
 		dest: basePath.dest + '/assets/js/'
 	},
-	jsLibs: {
-		src: basePath.src + '/assets/js/libs/',
-		dest: basePath.dest + '/assets/js/libs/'
+	jsVendor: {
+		src: basePath.src + '/assets/js/vendor/',
+		dest: basePath.dest + '/assets/js/vendor/'
 	},
 	jsAngular: {
 		src: basePath.src + '/ng-app/',
@@ -95,7 +95,7 @@ function styles() {
  */
 
 function js() {
-	return gulp.src([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'libs/*'])
+	return gulp.src([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'])
 		.pipe(sourcemaps.init())
 		.pipe(concat('scripts.js'))
 		.pipe(sourcemaps.write())
@@ -104,19 +104,19 @@ function js() {
 }
 
 /**
- * function jsLibs()
+ * function jsVendor()
  *
  * Concatenate JS vendor files / libraries
  * Uglify / minify
  * Save
  */
 
-function jsLibs() {
-	return gulp.src([path.jsLibs.src + 'jquery.js', path.jsLibs.src + 'angular.js', path.jsLibs.src + '**/*.js', '!' + path.jsLibs.src + 'modernizr.min.js', '!' + path.jsLibs.src + 'libs.js'])
-		.pipe(concat('libs.js'))
-		//.pipe(isProduction ? uglify() : gutil.noop() )	// to unminify libs in dev, uncomment this and comment out the next line instead
+function jsVendor() {
+	return gulp.src([path.jsVendor.src + 'jquery.js', path.jsVendor.src + 'angular.js', path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'modernizr.min.js', '!' + path.jsVendor.src + 'vendor.js'])
+		.pipe(concat('vendor.js'))
+		//.pipe(isProduction ? uglify() : gutil.noop() )	// to unminify vendor in dev, uncomment this and comment out the next line instead
 		.pipe(uglify())
-		.pipe(gulp.dest(path.jsLibs.dest));
+		.pipe(gulp.dest(path.jsVendor.dest));
 }
 
 /**
@@ -144,7 +144,7 @@ function jsAngular() {
 
 gulp.task('styles', styles);
 gulp.task('js', js);
-gulp.task('jsLibs', jsLibs);
+gulp.task('jsVendor', jsVendor);
 gulp.task('jsAngular', jsAngular);
 
 /**
@@ -155,11 +155,11 @@ gulp.task('jsAngular', jsAngular);
  * Use "gulp --prod" to trigger production/build mode from commandline
  */
 
-gulp.task('default', ['styles', 'jsLibs', 'js', 'jsAngular'], function() {
+gulp.task('default', ['styles', 'jsVendor', 'js', 'jsAngular'], function() {
 	if (!isProduction) {
 		gulp.watch(path.css.src + '**/*.scss', ['styles']);
-		gulp.watch([path.jsLibs.src + '**/*.js', '!' + path.jsLibs.src + 'libs.js'], ['jsLibs']);
-		gulp.watch([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'libs/*'], ['js']);
+		gulp.watch([path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'vendor.js'], ['jsVendor']);
+		gulp.watch([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'], ['js']);
 		gulp.watch([path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'ng-app.js'], ['jsAngular']);
 	}
 });

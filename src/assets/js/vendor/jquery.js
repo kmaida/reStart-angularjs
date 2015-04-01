@@ -38,7 +38,7 @@
 }(typeof window !== "undefined" ? window : this, function( window, noGlobal ) {
 
 // Support: Firefox 18+
-// Can't be in strict mode, several libs including ASP.NET trace
+// Can't be in strict mode, several vendor including ASP.NET trace
 // the stack via arguments.caller.callee and Firefox dies if
 // you try to trace through "use strict" call chains. (#13335)
 //
