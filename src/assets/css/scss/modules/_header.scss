@@ -64,7 +64,7 @@
 		font-weight: bold;
 	}
 
-	@include mq-large {
+	@include mq($mq-large) {
 		background: $color-nav-bg;
 		box-shadow: none;
 		padding: $padding-screen-large;

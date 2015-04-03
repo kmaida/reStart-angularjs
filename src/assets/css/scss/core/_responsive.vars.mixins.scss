@@ -9,8 +9,8 @@ $mq-large: 'screen and (min-width: 768px)';
 
 /*-- Mixins --*/
 
-@mixin mq-large() {
-	@media #{$mq-large} {
+@mixin mq($mqString) {
+	@media #{$mqString} {
 		@content;
 	}
 }
