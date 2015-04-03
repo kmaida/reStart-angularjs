@@ -8,9 +8,9 @@
 
 /*-- Core --*/
 
-@import 'core/colors.vars';
-@import 'core/layout.vars';
-@import 'core/responsive.vars.mixins';
+@import 'core/colors.partial';
+@import 'core/layout.partial';
+@import 'core/responsive.partial';
 
 @import 'core/normalize';
 @import 'core/fonts';
