@@ -26,3 +26,4 @@ To Do
 - [x] Update CSS to be more functionality-focused
   - [x] Change layout classes
   - [x] Change "global" classes for better modularity
+- [x] Rename and move ngStartup to app.module

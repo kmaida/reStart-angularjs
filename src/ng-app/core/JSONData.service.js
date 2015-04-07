@@ -11,9 +11,13 @@
 	function jsonData($http) {
 		this.getDataAsync = function(callback) {
 			$http({
-				method: 'GET',
-				url: '/ng-app/data/data.json'
-			}).success(callback);
+					method: 'GET',
+					url: '/ng-app/data/data.json'
+				})
+				.success(callback)
+				.error(function(error) {
+					alert(error.message);
+				});
 		}
 	}
 })();
