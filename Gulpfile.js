@@ -130,7 +130,7 @@ function jsVendor() {
  */
 
 function jsAngular() {
-	return gulp.src([path.jsAngular.src + 'app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'ng-app.js'])
+	return gulp.src([path.jsAngular.src + 'core/app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'ng-app.js'])
 		.pipe(sourcemaps.init())
 		.pipe(concat('ng-app.js'))
 		.pipe(sourcemaps.write())

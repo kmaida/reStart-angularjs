@@ -10,23 +10,20 @@
 
 	function viewSwitch(mediaCheck, MQ, $timeout) {
 
-		viewSwitchCtrl.$inject = ['$scope'];
+		viewSwitchLink.$inject = ['$scope'];
 		
-		function viewSwitchCtrl($scope) {
-			// controllerAs ViewModel
-			var vs = this;
-
+		function viewSwitchLink($scope) {
 			mediaCheck.init({
 				scope: $scope,
 				mq: MQ.SMALL,
 				enter: function () {
 					$timeout(function () {
-						vs.viewformat = 'small';
+						$scope.viewformat = 'small';
 					});
 				},
 				exit: function () {
 					$timeout(function () {
-						vs.viewformat = 'large';
+						$scope.viewformat = 'large';
 					});
 				}
 			});
@@ -34,9 +31,7 @@
 
 		return {
 			restrict: 'EA',
-			controller: viewSwitchCtrl,
-			controllerAs: 'vs',
-			// bindToController: true <-- use if isolate scope
+			link: viewSwitchLink
 		};
 	}
 })();
