@@ -24,21 +24,6 @@
 		header.navIsActive = function (path) {
 			return $location.path().substr(0, path.length) === path;
 		};
-
-		// apply body class based on url (TODO: consider moving to a factory)
-		$scope.$on('$locationChangeSuccess', function(event, newUrl, oldUrl) {
-			var getBodyClass = function (url) {
-					var bodyClass = url.substr(url.lastIndexOf('/') + 1);
-
-					return !!bodyClass ? 'page-' + bodyClass : 'page-home';
-				},
-				oldBodyClass = getBodyClass(oldUrl),
-				newBodyClass = getBodyClass(newUrl);
-
-			angular.element('body')
-				.removeClass(oldBodyClass)
-				.addClass(newBodyClass);
-		});
 	}
 
 })();
