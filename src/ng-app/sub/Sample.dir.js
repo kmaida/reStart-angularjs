@@ -15,16 +15,22 @@
 		directiveNameLink.$inject = ['$scope', '$element', '$attrs'];
 
 		function directiveNameLink($scope, $element, $attrs) {
-			// watch for async data to become available and update
-			$scope.$watch('json', function (json) {
-				if (json) {	// safeguard against watched data being undefined
+			// data object
+			$scope.dir = {};
 
+			// watch for async data to become available and update
+			$scope.$watch('jsonData', function(newVal, oldVal) {
+				if (newVal) {
+					$scope.dir.jsonData = $scope.jsonData;
 				}
 			}, true);
 		}
 
 		return {
 			restrict: 'EA',
+			scope: {
+				jsonData: '='
+			},
 			templateUrl: 'ng-app/sub/sample.tpl.html',
 			transclude: true,
 			link: directiveNameLink
