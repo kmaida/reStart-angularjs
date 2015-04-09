@@ -13,17 +13,20 @@
 		viewSwitchLink.$inject = ['$scope'];
 		
 		function viewSwitchLink($scope) {
+			// data object
+			$scope.vs = {};
+
 			mediaCheck.init({
 				scope: $scope,
 				mq: MQ.SMALL,
 				enter: function () {
 					$timeout(function () {
-						$scope.viewformat = 'small';
+						$scope.vs.viewformat = 'small';
 					});
 				},
 				exit: function () {
 					$timeout(function () {
-						$scope.viewformat = 'large';
+						$scope.vs.viewformat = 'large';
 					});
 				}
 			});
