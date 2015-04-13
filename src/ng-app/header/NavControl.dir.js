@@ -36,32 +36,39 @@
 				_navOpen = false;
 			}
 
+			// function to run on enter media query (private)
+			function _navEnterFn() {
+				_closeNav();
+
+				$timeout(function () {
+					// toggle mobile navigation open/closed
+					$scope.nav.toggleNav = function () {
+						if (!_navOpen) {
+							_openNav();
+						} else {
+							_closeNav();
+						}
+					};
+				});
+
+				$scope.$on('$locationChangeSuccess', _closeNav);
+			}
+
+			// function to run on exit media query (private)
+			function _navExitFn() {
+				$timeout(function () {
+					$scope.nav.toggleNav = null;
+				});
+
+				_body.removeClass('nav-closed nav-open');
+			}
+
+			// initialize mediaCheck
 			mediaCheck.init({
 				scope: $scope,
 				mq: MQ.SMALL,
-				enter: function () {
-					_closeNav();
-
-					$timeout(function () {
-						// toggle mobile navigation open/closed
-						$scope.nav.toggleNav = function () {
-							if (!_navOpen) {
-								_openNav();
-							} else {
-								_closeNav();
-							}
-						};
-					});
-
-					$scope.$on('$locationChangeSuccess', _closeNav);
-				},
-				exit: function () {
-					$timeout(function () {
-						$scope.nav.toggleNav = null;
-					});
-
-					_body.removeClass('nav-closed nav-open');
-				}
+				enter: _navEnterFn,
+				exit: _navExitFn
 			});
 		}
 

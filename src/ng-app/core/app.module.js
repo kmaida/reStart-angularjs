@@ -1,1 +1,2 @@
-angular.module('myApp', ['ngRoute', 'ngResource', 'ngSanitize', 'mediaCheck']);
+angular
+	.module('myApp', ['ngRoute', 'ngResource', 'ngSanitize', 'mediaCheck']);

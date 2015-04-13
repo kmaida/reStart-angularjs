@@ -16,19 +16,26 @@
 			// data object
 			$scope.vs = {};
 
+			// function to run on enter media query
+			function _enterFn(mq) {
+				$timeout(function () {
+					$scope.vs.viewformat = 'small';
+				});
+			}
+
+			// function to run on exit media query
+			function _exitFn(mq) {
+				$timeout(function () {
+					$scope.vs.viewformat = 'large';
+				});
+			}
+
+			// initialize mediaCheck
 			mediaCheck.init({
 				scope: $scope,
 				mq: MQ.SMALL,
-				enter: function () {
-					$timeout(function () {
-						$scope.vs.viewformat = 'small';
-					});
-				},
-				exit: function () {
-					$timeout(function () {
-						$scope.vs.viewformat = 'large';
-					});
-				}
+				enter: _enterFn,
+				exit: _exitFn
 			});
 		}
 

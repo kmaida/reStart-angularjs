@@ -1,14 +1,14 @@
-// routes
+// config
 (function() {
 	'use strict';
 
 	angular
 		.module('myApp')
-		.config(appRoutes);
+		.config(appConfig);
 
-	appRoutes.$inject = ['$routeProvider', '$locationProvider'];
+	appConfig.$inject = ['$routeProvider', '$locationProvider'];
 
-	function appRoutes($routeProvider, $locationProvider) {
+	function appConfig($routeProvider, $locationProvider) {
 		$routeProvider
 			.when('/', {
 				templateUrl: 'ng-app/home/Home.view.html'
@@ -19,6 +19,7 @@
 			.otherwise({
 				redirectTo: '/'
 			});
+
 		$locationProvider
 			.html5Mode({
 				enabled: true

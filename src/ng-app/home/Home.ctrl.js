@@ -17,6 +17,7 @@
 		// simple data binding example
 		home.name = 'Visitor';
 
+		// simple SCE ng-bind-html example
 		home.stringOfHTML = '<strong>Some bold text</strong> bound as HTML with a <a href="#">link</a>!';
 
 		// get the data from JSON
