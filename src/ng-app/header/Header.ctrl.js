@@ -12,9 +12,11 @@
 		var header = this;
 
 		// get the data from JSON
-		JSONData.getDataAsync(function(data) {
-			header.json = data;
-		});
+		JSONData.getDataAsync().then(
+			function(response) {
+				header.json = response.data;
+			}
+		);
 
 		// apply class to currently active nav item
 		header.indexIsActive = function(path) {

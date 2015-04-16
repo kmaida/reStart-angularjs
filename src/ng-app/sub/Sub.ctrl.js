@@ -15,9 +15,11 @@
 		sub.global = GlobalObj;
 
 		// get the data from JSON
-		JSONData.getDataAsync(function(data) {
-			sub.json = data;
-		});
+		JSONData.getDataAsync().then(
+			function(response) {
+				sub.json = response.data;
+			}
+		);
 	}
 
 })();

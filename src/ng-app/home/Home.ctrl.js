@@ -21,8 +21,10 @@
 		home.stringOfHTML = '<strong>Some bold text</strong> bound as HTML with a <a href="#">link</a>!';
 
 		// get the data from JSON
-		JSONData.getDataAsync(function (data) {
-			home.json = data;
-		});
+		JSONData.getDataAsync().then(
+			function(response) {
+				home.json = response.data;
+			}
+		);
 	}
 })();

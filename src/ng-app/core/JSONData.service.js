@@ -9,12 +9,17 @@
 	jsonData.$inject = ['$http'];
 
 	function jsonData($http) {
-		this.getDataAsync = function(callback) {
-			return $http.get('/ng-app/data/data.json')
-				.success(callback)
-				.error(function(error) {
-					alert(error.message);
-				});
+		this.getDataAsync = function() {
+			return $http
+				.get('/ng-app/data/data.json')
+				.then(
+					function(data) {
+						return data;
+					},
+					function(error) {
+						console.log('Error', error);
+					}
+				);
 		}
 	}
 })();
