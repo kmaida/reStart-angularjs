@@ -13,11 +13,12 @@
 			return $http
 				.get('/ng-app/data/data.json')
 				.then(
-					function(data) {
-						return data;
-					},
-					function(error) {
-						console.log('Error', error);
+					function(response) {
+						if (typeof response.data === 'object') {
+							return response.data;
+						} else {
+							throw new Error('retrieved data is not typeof object.');
+						}
 					}
 				);
 		}

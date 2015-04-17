@@ -22,8 +22,8 @@
 
 		// get the data from JSON
 		JSONData.getDataAsync().then(
-			function(response) {
-				home.json = response.data;
+			function(data) {
+				home.json = data;
 			}
 		);
 	}

@@ -25,4 +25,4 @@ To Do
 - [x] Update CSS to be more functionality-focused
   - [x] Change layout classes
   - [x] Change "global" classes for better modularity
-- [x] Switch `$http` to use `.then()` instead of `success` and `error` [opinionated]
+- [x] Use promises instead of callbacks with `$http` (opinionated)

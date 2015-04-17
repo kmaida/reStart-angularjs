@@ -13,8 +13,8 @@
 
 		// get the data from JSON
 		JSONData.getDataAsync().then(
-			function(response) {
-				header.json = response.data;
+			function(data) {
+				header.json = data;
 			}
 		);
 
