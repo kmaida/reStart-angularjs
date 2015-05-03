@@ -3,7 +3,8 @@ reStart-angular
 
 A mobile-first responsive framework in AngularJS.
 
-Supports modern browsers and IE9+
+Currently supports modern browsers and IE9+. This framework will attempt to stay in sync with latest Angular stable 
+releases, so the browser support may change over time.
 
 ## Dependencies
  
@@ -23,9 +24,10 @@ Supports modern browsers and IE9+
 
 ## Demo
 
-Demo available at [http://restart-angular.kim-maida.com](http://restart-angular.kim-maida.com)
+Demo available at [http://restart-angular.kmaida.io](http://restart-angular.kmaida.io)
 
 ## Changelog
 
-* **v0.2.0** 5/02/15 - Refine Sass, update menu styles, get rid of anonymous functions, add jsDoc comments, add data,
- deploy demo
+* **release v0.2.0-beta** - 5/02/15: Refine Sass, update menu styles, get rid of anonymous functions, add jsDoc 
+comments, add 
+data, deploy demo
