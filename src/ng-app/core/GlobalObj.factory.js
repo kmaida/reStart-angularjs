@@ -7,8 +7,10 @@
 		.factory('GlobalObj', GlobalObj);
 
 	function GlobalObj() {
+		var greeting = 'Hello';
+
 		return {
-			greeting: 'Hello'
+			greeting: greeting
 		};
 	}
 })();
