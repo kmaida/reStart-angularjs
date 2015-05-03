@@ -1,24 +1,31 @@
 reStart-angular
 ==========
 
-A mobile-first responsive framework in AngularJS; moving toward adherence to the [https://github.com/johnpapa/angular-styleguide](Angular Styleguide).
+A mobile-first responsive framework in AngularJS.
 
 Supports modern browsers and IE9+
 
-* Node >= 0.10  
+## Dependencies
+ 
 * AngularJS v1.3.15  
 * jQuery v2.1.3 
+* Node >= 0.10 
 * Gulp 
+* Sass
+
+## Features
+
+* closures  
+* single responsibility 
+* mostly flat file structure
+* modular 
+* for more, see [https://github.com/johnpapa/angular-styleguide](Angular Styleguide)
+
+## Demo
 
 Demo available at [http://restart-angular.kim-maida.com](http://restart-angular.kim-maida.com)
 
-* v0.2.0
-* closures with IIFEs
-* single responsibility
-* modular
-* Sass
 
-To Do
+## Changelog
 
-- [ ] Update demo
-- [ ] Add changelog
+* **v0.2.0** 5/02/15 - Refine Sass, update menu styles, get rid of anonymous functions, added jsDoc comments

@@ -54,7 +54,6 @@ if (gutil.env.prod) {
  *
  * @param err
  */
-
 function errorHandler(err){
 	gutil.beep();
 	gutil.log(gutil.colors.red('Error: '), err.message);
@@ -70,7 +69,6 @@ function errorHandler(err){
  * Minify (if production)
  * Save
  */
-
 function styles() {
 	return gulp.src(path.css.src + 'styles.scss')
 		.pipe(sourcemaps.init())
@@ -93,7 +91,6 @@ function styles() {
  * Uglify / minify (if production)
  * Save
  */
-
 function js() {
 	return gulp.src([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'])
 		.pipe(sourcemaps.init())
@@ -110,12 +107,10 @@ function js() {
  * Uglify / minify
  * Save
  */
-
 function jsVendor() {
 	return gulp.src([path.jsVendor.src + 'jquery.js', path.jsVendor.src + 'angular.js', path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'modernizr.min.js', '!' + path.jsVendor.src + 'vendor.js'])
 		.pipe(concat('vendor.js'))
-		//.pipe(isProduction ? uglify() : gutil.noop() )	// to unminify vendor in dev, uncomment this and comment out the next line instead
-		.pipe(uglify())
+		.pipe(isProduction ? uglify() : gutil.noop() )	// to unminify vendor in dev, remove "isProduction" ternary
 		.pipe(gulp.dest(path.jsVendor.dest));
 }
 
@@ -128,7 +123,6 @@ function jsVendor() {
  * Uglify / minify (if production)
  * Save
  */
-
 function jsAngular() {
 	return gulp.src([path.jsAngular.src + 'core/app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'ng-app.js'])
 		.pipe(sourcemaps.init())
