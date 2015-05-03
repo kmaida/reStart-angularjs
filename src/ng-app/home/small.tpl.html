@@ -1,4 +1,3 @@
 <ul>
-	<li>SMALL view list item</li>
-	<li>Another list item</li>
+	<li ng-repeat="animal in home.json.animals">{{::animal.name}} ({{::animal.class}})</li>
 </ul>

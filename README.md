@@ -25,7 +25,7 @@ Supports modern browsers and IE9+
 
 Demo available at [http://restart-angular.kim-maida.com](http://restart-angular.kim-maida.com)
 
-
 ## Changelog
 
-* **v0.2.0** 5/02/15 - Refine Sass, update menu styles, get rid of anonymous functions, added jsDoc comments
+* **v0.2.0** 5/02/15 - Refine Sass, update menu styles, get rid of anonymous functions, add jsDoc comments, add data,
+ deploy demo

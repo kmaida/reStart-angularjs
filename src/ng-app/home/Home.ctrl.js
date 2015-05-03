@@ -18,7 +18,7 @@
 		home.name = 'Visitor';
 
 		// simple SCE ng-bind-html example
-		home.stringOfHTML = '<strong>Some bold text</strong> bound as HTML with a <a href="#">link</a>!';
+		home.stringOfHTML = '<strong style="color: green;">Some green text</strong> bound as HTML with a <a href="#">link</a>, trusted with SCE!';
 
 		/**
 		 * Successful promise data

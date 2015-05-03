@@ -50,6 +50,11 @@ textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded
 small, sup, sub { font-size: 85%; }
 sup { vertical-align: super; }
 sub { vertical-align: sub; }
+table { margin: 10px 0; padding: 3px; }
+thead { border-bottom: 2px solid $color-border; }
+th { font-weight: bold; }
+th, tr, td { padding: 4px 12px; }
+tr { border-bottom: 1px solid $color-border}
 
 /*-- Clearfix --*/
 

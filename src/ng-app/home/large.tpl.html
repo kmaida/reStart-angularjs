@@ -1,14 +1,14 @@
 <table>
 	<thead>
 		<tr>
-			<th>Table Heading</th>
-			<th>Another Table Heading</th>
+			<th>Animal</th>
+			<th>Class</th>
 		</tr>
 	</thead>
 	<tbody>
-		<tr>
-			<td>LARGE view table cell</td>
-			<td>Table cell</td>
+		<tr ng-repeat="animal in home.json.animals">
+			<td>{{::animal.name}}</td>
+			<td>{{::animal.class}}</td>
 		</tr>
 	</tbody>
 </table>

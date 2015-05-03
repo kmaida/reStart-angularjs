@@ -6,11 +6,19 @@
 			<label>Name:</label>
 			<input type="text" ng-model="home.name" />
 		</p>
+
 		<h2>{{::home.global.greeting}}, {{home.name}}!</h2>
 		
 		<p>{{::home.json.summary}}</p>
 
 		<p ng-bind-html="home.stringOfHTML | trustAsHTML"></p>
+
+		<h3>View Switching</h3>
+
+		<p>The following view is manipulated by the current media query. Resize your browser window to see the
+			display change.</p>
+
+		<p><strong>Display:</strong> {{vs.viewformat === 'large' ? 'Table (large view)' : 'List (small view)'}}</p>
 
 		<div id="markupView-wrapper" class="markupView-wrapper" ng-switch on="vs.viewformat">
 			<div ng-switch-when="large">

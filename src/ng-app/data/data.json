@@ -1,4 +1,22 @@
 {
 	"title": "reStart Angular",
-	"summary": "reStart responsive framework in AngularJS"
+	"summary": "reStart responsive framework in AngularJS",
+    "animals": [
+      {
+        "name": "housecat",
+        "class": "mammal"
+      },
+      {
+        "name": "goldfish",
+        "class": "fish"
+      },
+      {
+        "name": "hawk",
+        "class": "bird"
+      },
+      {
+        "name": "frog",
+        "class": "amphibian"
+      }
+    ]
 }
