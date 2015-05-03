@@ -8,11 +8,11 @@
 
 /*-- Core --*/
 
-@import 'core/colors.partial';
-@import 'core/layout.partial';
-@import 'core/responsive.partial';
+@import 'core/partials/colors.vars';
+@import 'core/partials/layout.vars';
+@import 'core/partials/responsive.partial';
 
-@import 'core/normalize';
+@import 'core/base';
 @import 'core/fonts';
 @import 'core/presentation';
 @import 'core/layout';
@@ -21,4 +21,5 @@
 /*-- Modules --*/
 
 @import 'modules/header';
+@import 'modules/nav';
 @import 'modules/footer';

@@ -1,0 +1,30 @@
+/*--------------------
+	COLOR VARIABLES
+--------------------*/
+
+/*-- Color definitions --*/
+
+/* Hex code names from http://name-of-color.com/ */
+
+$color-black: #000;
+$color-white: #fff;
+$color-mineShaft: #333;
+$color-davysGray: #555;
+$color-celeste: #ccc;
+$color-gallery: #eee;
+
+/* Color partially defined by opacity */
+
+$color-gray-rgba: rgba(255,255,255,.5);
+$color-red-rgba: rgba(169,68,66,.6);
+
+/*-- Color by function --*/
+
+$color-bg-light: $color-gallery;
+$color-bg: $color-white;
+$color-module-bg: $color-celeste;
+$color-nav-bg: $color-davysGray;
+$color-text: $color-mineShaft;
+$color-link-contrast: $color-white;
+$color-disabled-rgba: $color-gray-rgba;
+$color-invalid-rgba: $color-red-rgba;

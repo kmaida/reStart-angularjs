@@ -35,7 +35,7 @@ body {
 
 /*-- Header --*/
 
-.toggle-offcanvas {
+.header-mobile-page {
 	@include mq($mq-large) {
 		display: none;
 	}
@@ -43,7 +43,7 @@ body {
 
 /*-- Navigation --*/
 
-.nav {
+.header .nav {
 	backface-visibility: hidden;
 	display: none;	/* deal with FOUC */
 	height: 100%;

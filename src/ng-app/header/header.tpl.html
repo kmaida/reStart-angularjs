@@ -1,10 +1,19 @@
 <div ng-controller="HeaderCtrl as header" nav-control>
-	<a class="toggle-offcanvas" ng-click="nav.toggleNav()"><span></span></a>
+	<div class="header-mobile-page">
+		<a class="toggle-offcanvas" ng-click="nav.toggleNav()"><span></span></a>
+		<h1 class="header-mobile-page-siteTitle">{{::header.json.title}}</h1>
+	</div>
 
 	<nav id="nav" class="nav" role="navigation">
 		<ul class="nav-list">
-			<li><a ng-class="{active: header.indexIsActive('/')}" ng-href="/">Home</a></li>
-			<li><a ng-class="{active: header.navIsActive('/subpage')}" ng-href="/subpage">Subpage</a></li>
+			<li>
+				<a ng-class="{active: header.indexIsActive('/')}"
+				   ng-href="/"><span class="nav-list-item-text">Home</span></a>
+			</li>
+			<li>
+				<a ng-class="{active: header.navIsActive('/subpage')}" ng-href="/subpage"><span
+						class="nav-list-item-text">Subpage</span></a>
+			</li>
 		</ul>
 	</nav>
 </div>

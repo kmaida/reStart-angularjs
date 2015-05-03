@@ -2,75 +2,21 @@
 	    HEADER
 --------------------*/
 
-.header {
-
-}
-
-/*-- Menu toggle --*/
-
-.toggle-offcanvas {
+.header-mobile-page {
 	background: $color-nav-bg;
+	color: $color-white;
 	height: 50px;
-	padding: 23.5px 13px;
-	position: absolute;
-	text-align: center;
-	width: 50px;
+	margin-bottom: 10px;
+	position: relative;
 
-	span,
-	span:before,
-	span:after {
-		background: $color-white;
-		border-radius: 1px;
-		content: '';
-		display: block;
-		height: 3px;
+	&-siteTitle {
+		font-size: 30px;
+		line-height: 50px;
+		margin: 0;
+		padding: 0 0 0 50px;
 		position: absolute;
-		transition: all 250ms ease-in-out;
-		width: 24px;
-	}
-	span {
-		&:before {
-			top: -9px;
-		}
-		&:after {
-			bottom: -9px;
-		}
-	}
-	.nav-open & {
-		span {
-			background: transparent;
-
-			&:before,
-			&:after {
-				top: 0;
-			}
-			&:before {
-				transform: rotate(45deg);
-			}
-			&:after {
-				transform: rotate(-45deg);
-			}
-		}
-	}
-}
-
-/*------------------------------------------------------------------------- Navigation --*/
-
-.nav {
-	box-shadow: inset -8px 0 8px -6px rgba(0,0,0,0.2);
-	padding: $padding-screen-small;
-
-	.active {
-		font-weight: bold;
-	}
-
-	@include mq($mq-large) {
-		background: $color-nav-bg;
-		box-shadow: none;
-		padding: $padding-screen-large;
-
-		a {
-			color: $color-link-contrast;
-		}
+		top: 0;
+		text-align: center;
+		width: 100%;
 	}
 }

@@ -23,9 +23,9 @@ body {
 .content-heading {
 	font-size: 36px;
 	margin: -1.5% 0 20px;
-	text-align: center;
 
 	@include mq($mq-large) {
 		margin-top: 0;
+		text-align: center;
 	}
 }

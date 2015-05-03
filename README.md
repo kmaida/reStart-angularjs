@@ -20,9 +20,5 @@ Demo available at [http://restart-angular.kim-maida.com](http://restart-angular.
 
 To Do
 
-- [x] Modify Gulpfile to use named functions for tasks
-- [x] Change "libs" to "vendor" and rename associated tasks
-- [x] Update CSS to be more functionality-focused
-  - [x] Change layout classes
-  - [x] Change "global" classes for better modularity
-- [x] Use promises instead of callbacks with `$http` (opinionated)
+- [ ] Update demo
+- [ ] Add changelog

@@ -47,6 +47,9 @@ pre,code { background: #eee; border: 1px solid #ccc; font-family: Consolas, 'Luc
 input, select, textarea { border: 1px solid #ccc; font-family: inherit; font-size: inherit; padding: 3px 6px; }
 input, select { vertical-align: middle; }
 textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded in IE */
+small, sup, sub { font-size: 85%; }
+sup { vertical-align: super; }
+sub { vertical-align: sub; }
 
 /*-- Clearfix --*/
 
@@ -82,4 +85,18 @@ textarea { overflow: auto; } /* prevents scrollbar from showing up when unneeded
 .touch p a {
 	margin: 0 -.5em;
 	padding: 0 .5em;
+}
+
+/*-- Forms --*/
+
+input[type="text"],
+input[type="number"],
+input[type="password"],
+textarea {
+	font-size: 16px;	/* for iOS phones */
+}
+
+input.ng-dirty.ng-invalid {
+	border-color: $color-invalid-rgba;
+	box-shadow: 0 0 6px $color-invalid-rgba;
 }
