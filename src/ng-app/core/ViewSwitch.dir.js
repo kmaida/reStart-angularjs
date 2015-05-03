@@ -16,14 +16,22 @@
 			// data object
 			$scope.vs = {};
 
-			// function to run on enter media query
+			/**
+			 * Function to run on enter media query
+			 *
+			 * @param {object} mq media query
+ 			 */
 			function _enterFn(mq) {
 				$timeout(function () {
 					$scope.vs.viewformat = 'small';
 				});
 			}
 
-			// function to run on exit media query
+			/**
+			 * Function to run on exit media query
+			 *
+			 * @param {object} mq media query
+			 */
 			function _exitFn(mq) {
 				$timeout(function () {
 					$scope.vs.viewformat = 'large';

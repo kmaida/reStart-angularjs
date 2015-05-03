@@ -14,12 +14,18 @@
 		// put global variables in the scope
 		sub.global = GlobalObj;
 
+		/**
+		 * Successful promise data
+		 *
+		 * @param data {json}
+		 * @private
+		 */
+		function _getJsonSuccess(data) {
+			sub.json = data;
+		}
+
 		// get the data from JSON
-		JSONData.getDataAsync().then(
-			function(data) {
-				sub.json = data;
-			}
-		);
+		JSONData.getLocalData().then(_getJsonSuccess);
 	}
 
 })();

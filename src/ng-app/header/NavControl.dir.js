@@ -18,7 +18,11 @@
 			var _body = angular.element('body'),
 				_navOpen;
 
-			// open mobile navigation (private)
+			/**
+			 * Open mobile navigation
+			 *
+			 * @private
+			 */
 			function _openNav() {
 				_body
 					.removeClass('nav-closed')
@@ -27,7 +31,11 @@
 				_navOpen = true;
 			}
 
-			// close mobile navigation (private)
+			/**
+			 * Close mobile navigation
+			 *
+			 * @private
+			 */
 			function _closeNav() {
 				_body
 					.removeClass('nav-open')
@@ -36,8 +44,13 @@
 				_navOpen = false;
 			}
 
-			// function to run on enter media query (private)
-			function _navEnterFn() {
+			/**
+			 * Function to execute when entering mobile media query
+			 * Close nav and set up menu toggling functionality
+			 *
+			 * @private
+			 */
+			function _enterMobile() {
 				_closeNav();
 
 				$timeout(function () {
@@ -51,11 +64,16 @@
 					};
 				});
 
-				$scope.$on('$locationChangeSuccess', _closeNav);
+				$scope.$on('$locationChangeStart', _closeNav);
 			}
 
-			// function to run on exit media query (private)
-			function _navExitFn() {
+			/**
+			 * Function to execute when exiting mobile media query
+			 * Disable menu toggling and remove body classes
+			 *
+			 * @private
+			 */
+			function _exitMobile() {
 				$timeout(function () {
 					$scope.nav.toggleNav = null;
 				});
@@ -63,12 +81,12 @@
 				_body.removeClass('nav-closed nav-open');
 			}
 
-			// initialize mediaCheck
+			// Set up functionality to run on enter/exit of media query
 			mediaCheck.init({
 				scope: $scope,
 				mq: MQ.SMALL,
-				enter: _navEnterFn,
-				exit: _navExitFn
+				enter: _enterMobile,
+				exit: _exitMobile
 			});
 		}
 
