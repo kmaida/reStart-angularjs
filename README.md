@@ -8,7 +8,7 @@ releases, so the browser support may change over time.
 
 ## Dependencies
  
-* AngularJS v1.3.15  
+* AngularJS v1.4.0  
 * jQuery v2.1.3 
 * Node >= 0.10 
 * Gulp 
@@ -29,5 +29,6 @@ Demo available at [http://restart-angular.kmaida.io](http://restart-angular.kmai
 
 ## Changelog
 
+* 5/29/15: Upgrade to Angular 1.4.0
 * **release v0.2.0-beta** - 5/02/15: Refine Sass, update menu styles, get rid of anonymous functions, add jsDoc 
 comments, add data, deploy demo
