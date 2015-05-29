@@ -57,6 +57,7 @@ if (gutil.env.prod) {
 function errorHandler(err){
 	gutil.beep();
 	gutil.log(gutil.colors.red('Error: '), err.message);
+	this.emit('end');
 }
 
 /**
