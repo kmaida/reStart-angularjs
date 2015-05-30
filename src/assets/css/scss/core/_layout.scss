@@ -66,11 +66,4 @@ body {
 	.no-csstransforms3d .nav-closed & {
 		left: -100%;
 	}
-	.no-csstransforms3d .nav-open & {
-		left: -270px;
-
-		@include mq($mq-large) {
-			left: 0;
-		}
-	}
 }
