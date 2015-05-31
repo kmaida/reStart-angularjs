@@ -1,5 +1,5 @@
 /*--------------------
-		LAYOUT
+ LAYOUT FUNCTIONALITY
 --------------------*/
 
 body {
@@ -57,7 +57,6 @@ body {
 	@include mq($mq-large) {
 		display: block;
 		position: relative;
-		transform: none;
 		width: 100%;
 	}
 	.nav-closed &,
@@ -66,6 +65,10 @@ body {
 	}
 	.csstransforms3d & {
 		transform: translate3d(-100%,0,0);
+
+		@include mq($mq-large) {
+			transform: none;
+		}
 	}
 	.no-csstransforms3d .nav-closed & {
 		left: -100%;
