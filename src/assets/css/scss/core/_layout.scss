@@ -1,5 +1,5 @@
 /*--------------------
-   LAYOUT FUNCTION
+		LAYOUT
 --------------------*/
 
 body {
@@ -17,13 +17,15 @@ body {
 	backface-visibility: hidden;
 	position: relative;
 	left: 0;
-	transition: transform 250ms ease;
-	transform: translate3d(0,0,0);
 	width: 100%;
 
 	@include mq($mq-large) {
 		transition: none;
 		transform: none;
+	}
+	.csstransforms3d & {
+		transition: transform 250ms ease;
+		transform: translate3d(0,0,0);
 	}
 	.csstransforms3d .nav-open & {
 		transform: translate3d(270px,0,0);
@@ -50,7 +52,6 @@ body {
 	overflow-y: auto;
 	position: absolute;
 	top: 0;
-	transform: translate3d(-100%,0,0);
 	width: 270px;
 
 	@include mq($mq-large) {
@@ -63,7 +64,17 @@ body {
 	.nav-open & {
 		display: block;	/* deal with FOUC */
 	}
+	.csstransforms3d & {
+		transform: translate3d(-100%,0,0);
+	}
 	.no-csstransforms3d .nav-closed & {
 		left: -100%;
+	}
+	.no-csstransforms3d .nav-open & {
+		left: -270px;
+
+		@include mq($mq-large) {
+			left: 0;
+		}
 	}
 }
