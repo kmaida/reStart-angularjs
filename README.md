@@ -29,7 +29,7 @@ Demo available at [http://restart-angular.kmaida.io](http://restart-angular.kmai
 
 ## Changelog
 
-* 8/19/15: Upgrade to Angular 1.4.4, upgrade to jQuery 2.1.4, fix `controllerAs` to reference named functions
+* 8/19/15: Upgrade to Angular 1.4.4, upgrade to jQuery 2.1.4, fix `controllerAs` to reference named functions instead of using anonymous functions
 * 5/29/15: Upgrade to Angular 1.4.0
 * **release v0.2.0-beta** - 5/02/15: Refine Sass, update menu styles, get rid of anonymous functions, add jsDoc 
 comments, add data, deploy demo
