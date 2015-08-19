@@ -1,5 +1,5 @@
 /*!
- * jQuery JavaScript Library v2.1.3
+ * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
  *
  * Includes Sizzle.js
@@ -9,7 +9,7 @@
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2014-12-18T15:11Z
+ * Date: 2015-04-28T16:01Z
  */
 
 (function( global, factory ) {
@@ -38,7 +38,7 @@
 }(typeof window !== "undefined" ? window : this, function( window, noGlobal ) {
 
 // Support: Firefox 18+
-// Can't be in strict mode, several vendor including ASP.NET trace
+// Can't be in strict mode, several libs including ASP.NET trace
 // the stack via arguments.caller.callee and Firefox dies if
 // you try to trace through "use strict" call chains. (#13335)
 //
@@ -67,7 +67,7 @@
 	// Use the correct document accordingly with window argument (sandbox)
 		document = window.document,
 
-		version = "2.1.3",
+		version = "2.1.4",
 
 	// Define a local copy of jQuery
 		jQuery = function( selector, context ) {
@@ -531,7 +531,12 @@
 	});
 
 	function isArraylike( obj ) {
-		var length = obj.length,
+
+		// Support: iOS 8.2 (not reproducible in simulator)
+		// `in` check used to prevent JIT error (gh-2145)
+		// hasOwn isn't used here due to false negatives
+		// regarding Nodelist length in IE
+		var length = "length" in obj && obj.length,
 			type = jQuery.type( obj );
 
 		if ( type === "function" || jQuery.isWindow( obj ) ) {
@@ -669,13 +674,13 @@
 					"ATTR": new RegExp( "^" + attributes ),
 					"PSEUDO": new RegExp( "^" + pseudos ),
 					"CHILD": new RegExp( "^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\(" + whitespace +
-					"*(even|odd|(([+-]|)(\\d*)n|)" + whitespace + "*(?:([+-]|)" + whitespace +
-					"*(\\d+)|))" + whitespace + "*\\)|)", "i" ),
+						"*(even|odd|(([+-]|)(\\d*)n|)" + whitespace + "*(?:([+-]|)" + whitespace +
+						"*(\\d+)|))" + whitespace + "*\\)|)", "i" ),
 					"bool": new RegExp( "^(?:" + booleans + ")$", "i" ),
 					// For use in libraries implementing .is()
 					// We use this for POS matching in `select`
 					"needsContext": new RegExp( "^" + whitespace + "*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\(" +
-					whitespace + "*((?:-\\d)?\\d*)" + whitespace + "*\\)|)(?=[^-]|$)", "i" )
+						whitespace + "*((?:-\\d)?\\d*)" + whitespace + "*\\)|)(?=[^-]|$)", "i" )
 				},
 
 				rinputs = /^(?:input|select|textarea|button)$/i,
@@ -1143,10 +1148,10 @@
 
 				// Class
 				Expr.find["CLASS"] = support.getElementsByClassName && function( className, context ) {
-					if ( documentIsHTML ) {
-						return context.getElementsByClassName( className );
-					}
-				};
+						if ( documentIsHTML ) {
+							return context.getElementsByClassName( className );
+						}
+					};
 
 				/* QSA/matchesSelector
 				 ---------------------------------------------------------------------- */
@@ -1173,8 +1178,8 @@
 						// since its presence should be enough
 						// http://bugs.jquery.com/ticket/12359
 						docElem.appendChild( div ).innerHTML = "<a id='" + expando + "'></a>" +
-						"<select id='" + expando + "-\f]' msallowcapture=''>" +
-						"<option selected=''></option></select>";
+							"<select id='" + expando + "-\f]' msallowcapture=''>" +
+							"<option selected=''></option></select>";
 
 						// Support: IE8, Opera 11-12.16
 						// Nothing should be selected when empty strings follow ^= or $= or *=
@@ -1236,10 +1241,10 @@
 				}
 
 				if ( (support.matchesSelector = rnative.test( (matches = docElem.matches ||
-					docElem.webkitMatchesSelector ||
-					docElem.mozMatchesSelector ||
-					docElem.oMatchesSelector ||
-					docElem.msMatchesSelector) )) ) {
+						docElem.webkitMatchesSelector ||
+						docElem.mozMatchesSelector ||
+						docElem.oMatchesSelector ||
+						docElem.msMatchesSelector) )) ) {
 
 					assert(function( div ) {
 						// Check to see if it's possible to do matchesSelector
@@ -1710,8 +1715,8 @@
 
 										while ( (node = ++nodeIndex && node && node[ dir ] ||
 
-											// Fallback to seeking `elem` from the start
-										(diff = nodeIndex = 0) || start.pop()) ) {
+												// Fallback to seeking `elem` from the start
+											(diff = nodeIndex = 0) || start.pop()) ) {
 
 											// When found, cache indexes on `parent` and break
 											if ( node.nodeType === 1 && ++diff && node === elem ) {
@@ -1728,7 +1733,7 @@
 									} else {
 										// Use the same loop as above to seek `elem` from the start
 										while ( (node = ++nodeIndex && node && node[ dir ] ||
-										(diff = nodeIndex = 0) || start.pop()) ) {
+											(diff = nodeIndex = 0) || start.pop()) ) {
 
 											if ( ( ofType ? node.nodeName.toLowerCase() === name : node.nodeType === 1 ) && ++diff ) {
 												// Cache the index of each encountered element
@@ -5628,7 +5633,7 @@
 		support.clearCloneStyle = div.style.backgroundClip === "content-box";
 
 		container.style.cssText = "border:0;width:0;height:0;top:0;left:-9999px;margin-top:1px;" +
-		"position:absolute";
+			"position:absolute";
 		container.appendChild( div );
 
 		// Executing both pixelPosition & boxSizingReliable tests require only one layout
@@ -5833,7 +5838,7 @@
 			// Check for style in case a browser which returns unreliable values
 			// for getComputedStyle silently falls back to the reliable elem.style
 			valueIsBorderBox = isBorderBox &&
-			( support.boxSizingReliable() || val === elem.style[ name ] );
+				( support.boxSizingReliable() || val === elem.style[ name ] );
 
 			// Normalize "", auto, and prepare for extra
 			val = parseFloat( val ) || 0;
@@ -5841,13 +5846,13 @@
 
 		// Use the active box-sizing model to add/subtract irrelevant styles
 		return ( val +
-			augmentWidthOrHeight(
-				elem,
-				name,
-				extra || ( isBorderBox ? "border" : "content" ),
-				valueIsBorderBox,
-				styles
-			)
+				augmentWidthOrHeight(
+					elem,
+					name,
+					extra || ( isBorderBox ? "border" : "content" ),
+					valueIsBorderBox,
+					styles
+				)
 			) + "px";
 	}
 
@@ -6970,7 +6975,7 @@
 			if ( nType !== 1 || !jQuery.isXMLDoc( elem ) ) {
 				name = name.toLowerCase();
 				hooks = jQuery.attrHooks[ name ] ||
-				( jQuery.expr.match.bool.test( name ) ? boolHook : nodeHook );
+					( jQuery.expr.match.bool.test( name ) ? boolHook : nodeHook );
 			}
 
 			if ( value !== undefined ) {
@@ -7181,9 +7186,9 @@
 				for ( ; i < len; i++ ) {
 					elem = this[ i ];
 					cur = elem.nodeType === 1 && ( elem.className ?
-						( " " + elem.className + " " ).replace( rclass, " " ) :
-						" "
-					);
+								( " " + elem.className + " " ).replace( rclass, " " ) :
+								" "
+						);
 
 					if ( cur ) {
 						j = 0;
@@ -7223,9 +7228,9 @@
 					elem = this[ i ];
 					// This expression is here for better compressibility (see addClass)
 					cur = elem.nodeType === 1 && ( elem.className ?
-						( " " + elem.className + " " ).replace( rclass, " " ) :
-						""
-					);
+								( " " + elem.className + " " ).replace( rclass, " " ) :
+								""
+						);
 
 					if ( cur ) {
 						j = 0;
@@ -7766,7 +7771,7 @@
 
 								// If prev can be converted to accepted input
 								conv = converters[ prev + " " + tmp[ 0 ] ] ||
-								converters[ "* " + tmp[ 0 ] ];
+									converters[ "* " + tmp[ 0 ] ];
 								if ( conv ) {
 									// Condense equivalence converters
 									if ( conv === true ) {
@@ -8034,9 +8039,9 @@
 			if ( s.crossDomain == null ) {
 				parts = rurl.exec( s.url.toLowerCase() );
 				s.crossDomain = !!( parts &&
-				( parts[ 1 ] !== ajaxLocParts[ 1 ] || parts[ 2 ] !== ajaxLocParts[ 2 ] ||
-				( parts[ 3 ] || ( parts[ 1 ] === "http:" ? "80" : "443" ) ) !==
-				( ajaxLocParts[ 3 ] || ( ajaxLocParts[ 1 ] === "http:" ? "80" : "443" ) ) )
+					( parts[ 1 ] !== ajaxLocParts[ 1 ] || parts[ 2 ] !== ajaxLocParts[ 2 ] ||
+					( parts[ 3 ] || ( parts[ 1 ] === "http:" ? "80" : "443" ) ) !==
+					( ajaxLocParts[ 3 ] || ( ajaxLocParts[ 1 ] === "http:" ? "80" : "443" ) ) )
 				);
 			}
 
@@ -8722,8 +8727,8 @@
 
 		var callbackName, overwritten, responseContainer,
 			jsonProp = s.jsonp !== false && ( rjsonp.test( s.url ) ?
-					"url" :
-				typeof s.data === "string" && !( s.contentType || "" ).indexOf("application/x-www-form-urlencoded") && rjsonp.test( s.data ) && "data"
+						"url" :
+					typeof s.data === "string" && !( s.contentType || "" ).indexOf("application/x-www-form-urlencoded") && rjsonp.test( s.data ) && "data"
 				);
 
 		// Handle iff the expected data type is "jsonp" or we have a parameter to set
@@ -8875,8 +8880,8 @@
 					responseText );
 
 			}).complete( callback && function( jqXHR, status ) {
-				self.each( callback, response || [ jqXHR.responseText, status, jqXHR ] );
-			});
+					self.each( callback, response || [ jqXHR.responseText, status, jqXHR ] );
+				});
 		}
 
 		return this;
@@ -8929,7 +8934,7 @@
 			curCSSTop = jQuery.css( elem, "top" );
 			curCSSLeft = jQuery.css( elem, "left" );
 			calculatePosition = ( position === "absolute" || position === "fixed" ) &&
-			( curCSSTop + curCSSLeft ).indexOf("auto") > -1;
+				( curCSSTop + curCSSLeft ).indexOf("auto") > -1;
 
 			// Need to be able to calculate position if either
 			// top or left is auto and position is either absolute or fixed
