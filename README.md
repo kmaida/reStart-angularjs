@@ -8,8 +8,8 @@ releases, so the browser support may change over time.
 
 ## Dependencies
  
-* AngularJS v1.4.4
-* jQuery v2.1.4
+* AngularJS v1.4.0  
+* jQuery v2.1.3 
 * Node >= 0.10 
 * Gulp 
 * Sass
