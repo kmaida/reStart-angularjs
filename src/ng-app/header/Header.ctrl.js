@@ -11,6 +11,9 @@
 		// controllerAs ViewModel
 		var header = this;
 
+		header.indexIsActive = indexIsActive;
+		header.navIsActive = navIsActive;
+
 		/**
 		 * Successful promise data
 		 *
@@ -29,19 +32,19 @@
 		 *
 		 * @param {string} path
  		 */
-		header.indexIsActive = function(path) {
+		function indexIsActive(path) {
 			// path should be '/'
 			return $location.path() === path;
-		};
+		}
 
 		/**
 		 * Apply class to currently active nav item
 		 *
 		 * @param {string} path
 		 */
-		header.navIsActive = function(path) {
+		 function navIsActive(path) {
 			return $location.path().substr(0, path.length) === path;
-		};
+		}
 	}
 
 })();
