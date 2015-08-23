@@ -3,6 +3,7 @@
  */
 
 var gulp = require('gulp'),
+	connect = require('gulp-connect'),
 	gutil = require('gulp-util'),
 	uglify = require('gulp-uglify'),
 	sass = require('gulp-sass'),
@@ -134,6 +135,22 @@ function jsAngular() {
 }
 
 /**
+ * function serve()
+ *
+ * Start webserver
+ * localhost:8000
+ */
+function serve() {
+	if (!isProduction) {
+		connect.server({
+			root: 'src',
+			port: 8000,
+			fallback: 'index.html'
+		});
+	}
+}
+
+/**
  * Gulp tasks
  */
 
@@ -141,6 +158,7 @@ gulp.task('styles', styles);
 gulp.task('js', js);
 gulp.task('jsVendor', jsVendor);
 gulp.task('jsAngular', jsAngular);
+gulp.task('serve', serve);
 
 /**
  * Default build task
@@ -150,7 +168,7 @@ gulp.task('jsAngular', jsAngular);
  * Use "gulp --prod" to trigger production/build mode from commandline
  */
 
-gulp.task('default', ['styles', 'jsVendor', 'js', 'jsAngular'], function() {
+gulp.task('default', ['serve', 'styles', 'jsVendor', 'js', 'jsAngular'], function() {
 	if (!isProduction) {
 		gulp.watch(path.css.src + '**/*.scss', ['styles']);
 		gulp.watch([path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'vendor.js'], ['jsVendor']);
