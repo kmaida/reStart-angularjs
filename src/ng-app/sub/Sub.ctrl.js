@@ -5,11 +5,13 @@
 		.module('myApp')
 		.controller('SubCtrl', subCtrl);
 
-	subCtrl.$inject = ['GlobalObj', 'JSONData'];
+	subCtrl.$inject = ['GlobalObj', 'JSONData', 'Page'];
 
-	function subCtrl(GlobalObj, JSONData) {
+	function subCtrl(GlobalObj, JSONData, Page) {
 		// controllerAs ViewModel
 		var sub = this;
+
+		Page.setTitle('Subpage');
 
 		// put global variables in the scope
 		sub.global = GlobalObj;

@@ -5,11 +5,13 @@
 		.module('myApp')
 		.controller('HomeCtrl', HomeCtrl);
 
-	HomeCtrl.$inject = ['GlobalObj', 'JSONData'];
+	HomeCtrl.$inject = ['GlobalObj', 'JSONData', 'Page'];
 
-	function HomeCtrl(GlobalObj, JSONData) {
+	function HomeCtrl(GlobalObj, JSONData, Page) {
 		// controllerAs ViewModel
 		var home = this;
+
+		Page.setTitle('Home');
 
 		// put global variables in scope
 		home.global = GlobalObj;

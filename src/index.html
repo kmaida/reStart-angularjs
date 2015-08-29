@@ -1,10 +1,10 @@
 <!DOCTYPE HTML>
 <!--[if lte IE 8]><html lang="en" class="no-js oldIE ie no-angular"><![endif]-->
-<!--[if IE 9]><html lang="en" class="no-js ie9 ie" ng-app="myApp"><![endif]-->
-<!--[if gt IE 9|!IE]><!--><html class="no-js" ng-app="myApp"><!-- <![endif]-->
+<!--[if IE 9]><html lang="en" class="no-js ie9 ie" ng-app="myApp" ng-controller="PageCtrl as page"><![endif]-->
+<!--[if gt IE 9|!IE]><!--><html class="no-js" ng-app="myApp" ng-controller="PageCtrl as page"><!-- <![endif]-->
 	<head>
 		<meta charset="utf-8">
-		<title>reStart Boilerplate in AngularJS</title>
+		<title>reStart Angular | {{page.pageTitle.title()}}</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="description" content="">
 		<meta name="author" content="">

@@ -145,7 +145,7 @@ function serve() {
 		connect.server({
 			root: 'src',
 			port: 8000,
-			fallback: 'index.html'
+			fallback: 'src/index.html'
 		});
 	}
 }
