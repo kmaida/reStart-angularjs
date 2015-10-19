@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.4.4
+ * @license AngularJS v1.4.7
  * (c) 2010-2015 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -57,7 +57,7 @@
 				return match;
 			});
 
-			message += '\nhttp://errors.angularjs.org/1.4.4/' +
+			message += '\nhttp://errors.angularjs.org/1.4.7/' +
 				(module ? module + '/' : '') + code;
 
 			for (i = SKIP_INDEXES, paramPrefix = '?'; i < templateArgs.length; i++, paramPrefix = '&') {
@@ -894,6 +894,8 @@
 				} else if (isRegExp(source)) {
 					destination = new RegExp(source.source, source.toString().match(/[^\/]*$/)[0]);
 					destination.lastIndex = source.lastIndex;
+				} else if (isFunction(source.cloneNode)) {
+					destination = source.cloneNode(true);
 				} else {
 					var emptyObject = Object.create(getPrototypeOf(source));
 					return copy(source, emptyObject, stackSource, stackDest);
@@ -1044,7 +1046,7 @@
 					for (key in o2) {
 						if (!(key in keySet) &&
 							key.charAt(0) !== '$' &&
-							o2[key] !== undefined &&
+							isDefined(o2[key]) &&
 							!isFunction(o2[key])) return false;
 					}
 					return true;
@@ -1740,10 +1742,9 @@
 
 		// bind to jQuery if present;
 		var jqName = jq();
-		jQuery = window.jQuery; // use default jQuery.
-		if (isDefined(jqName)) { // `ngJq` present
-			jQuery = jqName === null ? undefined : window[jqName]; // if empty; use jqLite. if not empty, use jQuery specified by `ngJq`.
-		}
+		jQuery = isUndefined(jqName) ? window.jQuery :   // use jQuery (if present)
+			!jqName             ? undefined     :   // use jqLite
+				window[jqName];   // use jQuery specified by `ngJq`
 
 		// Use jQuery if it exists with proper functionality, otherwise default to us.
 		// Angular 1.2+ requires jQuery 1.7+ for on()/off() support.
@@ -1848,22 +1849,24 @@
 	/**
 	 * Return the DOM siblings between the first and last node in the given array.
 	 * @param {Array} array like object
-	 * @returns {jqLite} jqLite collection containing the nodes
+	 * @returns {Array} the inputted object or a jqLite collection containing the nodes
 	 */
 	function getBlockNodes(nodes) {
-		// TODO(perf): just check if all items in `nodes` are siblings and if they are return the original
-		//             collection, otherwise update the original collection.
+		// TODO(perf): update `nodes` instead of creating a new object?
 		var node = nodes[0];
 		var endNode = nodes[nodes.length - 1];
-		var blockNodes = [node];
+		var blockNodes;
 
-		do {
-			node = node.nextSibling;
-			if (!node) break;
-			blockNodes.push(node);
-		} while (node !== endNode);
+		for (var i = 1; node !== endNode && (node = node.nextSibling); i++) {
+			if (blockNodes || nodes[i] !== node) {
+				if (!blockNodes) {
+					blockNodes = jqLite(slice.call(nodes, 0, i));
+				}
+				blockNodes.push(node);
+			}
+		}
 
-		return jqLite(blockNodes);
+		return blockNodes || nodes;
 	}
 
 
@@ -2247,7 +2250,7 @@
 			val = toJsonReplacer(key, val);
 			if (isObject(val)) {
 
-				if (seen.indexOf(val) >= 0) return '<<already seen>>';
+				if (seen.indexOf(val) >= 0) return '...';
 
 				seen.push(val);
 			}
@@ -2258,7 +2261,7 @@
 	function toDebugString(obj) {
 		if (typeof obj === 'function') {
 			return obj.toString().replace(/ \{[\s\S]*$/, '');
-		} else if (typeof obj === 'undefined') {
+		} else if (isUndefined(obj)) {
 			return 'undefined';
 		} else if (typeof obj !== 'string') {
 			return serializeObject(obj);
@@ -2338,6 +2341,7 @@
 	 $HttpParamSerializerProvider,
 	 $HttpParamSerializerJQLikeProvider,
 	 $HttpBackendProvider,
+	 $xhrFactoryProvider,
 	 $LocationProvider,
 	 $LogProvider,
 	 $ParseProvider,
@@ -2364,21 +2368,22 @@
 	 * @name angular.version
 	 * @module ng
 	 * @description
-	 * An object that contains information about the current AngularJS version. This object has the
-	 * following properties:
+	 * An object that contains information about the current AngularJS version.
 	 *
-	 * - `full` – `{string}` – Full version string, such as "0.9.18".
-	 * - `major` – `{number}` – Major version number, such as "0".
-	 * - `minor` – `{number}` – Minor version number, such as "9".
-	 * - `dot` – `{number}` – Dot version number, such as "18".
-	 * - `codeName` – `{string}` – Code name of the release, such as "jiggling-armfat".
+	 * This object has the following properties:
+	 *
+	 * - `full` â€“ `{string}` â€“ Full version string, such as "0.9.18".
+	 * - `major` â€“ `{number}` â€“ Major version number, such as "0".
+	 * - `minor` â€“ `{number}` â€“ Minor version number, such as "9".
+	 * - `dot` â€“ `{number}` â€“ Dot version number, such as "18".
+	 * - `codeName` â€“ `{string}` â€“ Code name of the release, such as "jiggling-armfat".
 	 */
 	var version = {
-		full: '1.4.4',    // all of these placeholder strings will be replaced by grunt's
+		full: '1.4.7',    // all of these placeholder strings will be replaced by grunt's
 		major: 1,    // package task
 		minor: 4,
-		dot: 4,
-		codeName: 'pylon-requirement'
+		dot: 7,
+		codeName: 'dark-luminescence'
 	};
 
 
@@ -2495,6 +2500,7 @@
 					$httpParamSerializer: $HttpParamSerializerProvider,
 					$httpParamSerializerJQLike: $HttpParamSerializerJQLikeProvider,
 					$httpBackend: $HttpBackendProvider,
+					$xhrFactory: $xhrFactoryProvider,
 					$location: $LocationProvider,
 					$log: $LogProvider,
 					$parse: $ParseProvider,
@@ -2583,7 +2589,7 @@
 	 * - [`html()`](http://api.jquery.com/html/)
 	 * - [`next()`](http://api.jquery.com/next/) - Does not support selectors
 	 * - [`on()`](http://api.jquery.com/on/) - Does not support namespaces, selectors or eventData
-	 * - [`off()`](http://api.jquery.com/off/) - Does not support namespaces or selectors
+	 * - [`off()`](http://api.jquery.com/off/) - Does not support namespaces, selectors or event object as parameter
 	 * - [`one()`](http://api.jquery.com/one/) - Does not support namespaces or selectors
 	 * - [`parent()`](http://api.jquery.com/parent/) - Does not support selectors
 	 * - [`prepend()`](http://api.jquery.com/prepend/)
@@ -2597,7 +2603,7 @@
 	 * - [`text()`](http://api.jquery.com/text/)
 	 * - [`toggleClass()`](http://api.jquery.com/toggleClass/)
 	 * - [`triggerHandler()`](http://api.jquery.com/triggerHandler/) - Passes a dummy event object to handlers.
-	 * - [`unbind()`](http://api.jquery.com/unbind/) - Does not support namespaces
+	 * - [`unbind()`](http://api.jquery.com/unbind/) - Does not support namespaces or event object as parameter
 	 * - [`val()`](http://api.jquery.com/val/)
 	 * - [`wrap()`](http://api.jquery.com/wrap/)
 	 *
@@ -2669,10 +2675,10 @@
 			replace(MOZ_HACK_REGEXP, 'Moz$1');
 	}
 
-	var SINGLE_TAG_REGEXP = /^<(\w+)\s*\/?>(?:<\/\1>|)$/;
+	var SINGLE_TAG_REGEXP = /^<([\w-]+)\s*\/?>(?:<\/\1>|)$/;
 	var HTML_REGEXP = /<|&#?\w+;/;
-	var TAG_NAME_REGEXP = /<([\w:]+)/;
-	var XHTML_TAG_REGEXP = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/gi;
+	var TAG_NAME_REGEXP = /<([\w:-]+)/;
+	var XHTML_TAG_REGEXP = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:-]+)[^>]*)\/>/gi;
 
 	var wrapMap = {
 		'option': [1, '<select multiple="multiple">', '</select>'],
@@ -2968,7 +2974,7 @@
 
 		while (element) {
 			for (var i = 0, ii = names.length; i < ii; i++) {
-				if ((value = jqLite.data(element, names[i])) !== undefined) return value;
+				if (isDefined(value = jqLite.data(element, names[i]))) return value;
 			}
 
 			// If dealing with a document fragment node with a host element, and no parent, use the host
@@ -3074,9 +3080,8 @@
 		return booleanAttr && BOOLEAN_ELEMENTS[nodeName_(element)] && booleanAttr;
 	}
 
-	function getAliasedAttrName(element, name) {
-		var nodeName = element.nodeName;
-		return (nodeName === 'INPUT' || nodeName === 'TEXTAREA') && ALIASED_ATTR[name];
+	function getAliasedAttrName(name) {
+		return ALIASED_ATTR[name];
 	}
 
 	forEach({
@@ -3213,7 +3218,7 @@
 			// in a way that survives minification.
 			// jqLiteEmpty takes no arguments but is a setter.
 			if (fn !== jqLiteEmpty &&
-				(((fn.length == 2 && (fn !== jqLiteHasClass && fn !== jqLiteController)) ? arg1 : arg2) === undefined)) {
+				(isUndefined((fn.length == 2 && (fn !== jqLiteHasClass && fn !== jqLiteController)) ? arg1 : arg2))) {
 				if (isObject(arg1)) {
 
 					// we are a write, but the object properties are the key/values
@@ -3234,7 +3239,7 @@
 					// TODO: do we still need this?
 					var value = fn.$dv;
 					// Only if we have $dv do we iterate over all, otherwise it is just the first element.
-					var jj = (value === undefined) ? Math.min(nodeCount, 1) : nodeCount;
+					var jj = (isUndefined(value)) ? Math.min(nodeCount, 1) : nodeCount;
 					for (var j = 0; j < jj; j++) {
 						var nodeValue = fn(this[j], arg1, arg2);
 						value = value ? value + nodeValue : nodeValue;
@@ -4873,61 +4878,66 @@
 					}
 				};
 
-				function addRemoveClassesPostDigest(element, add, remove) {
-					var classVal, data = postDigestQueue.get(element);
 
-					if (!data) {
-						postDigestQueue.put(element, data = {});
-						postDigestElements.push(element);
-					}
-
-					var updateData = function(classes, value) {
-						var changed = false;
-						if (classes) {
-							classes = isString(classes) ? classes.split(' ') :
-								isArray(classes) ? classes : [];
-							forEach(classes, function(className) {
-								if (className) {
-									changed = true;
-									data[className] = value;
-								}
-							});
-						}
-						return changed;
-					};
-
-					var classesAdded = updateData(add, true);
-					var classesRemoved = updateData(remove, false);
-					if ((!classesAdded && !classesRemoved) || postDigestElements.length > 1) return;
-
-					$rootScope.$$postDigest(function() {
-						forEach(postDigestElements, function(element) {
-							var data = postDigestQueue.get(element);
-							if (data) {
-								var existing = splitClasses(element.attr('class'));
-								var toAdd = '';
-								var toRemove = '';
-								forEach(data, function(status, className) {
-									var hasClass = !!existing[className];
-									if (status !== hasClass) {
-										if (status) {
-											toAdd += (toAdd.length ? ' ' : '') + className;
-										} else {
-											toRemove += (toRemove.length ? ' ' : '') + className;
-										}
-									}
-								});
-
-								forEach(element, function(elm) {
-									toAdd    && jqLiteAddClass(elm, toAdd);
-									toRemove && jqLiteRemoveClass(elm, toRemove);
-								});
-								postDigestQueue.remove(element);
+				function updateData(data, classes, value) {
+					var changed = false;
+					if (classes) {
+						classes = isString(classes) ? classes.split(' ') :
+							isArray(classes) ? classes : [];
+						forEach(classes, function(className) {
+							if (className) {
+								changed = true;
+								data[className] = value;
 							}
 						});
+					}
+					return changed;
+				}
 
-						postDigestElements.length = 0;
+				function handleCSSClassChanges() {
+					forEach(postDigestElements, function(element) {
+						var data = postDigestQueue.get(element);
+						if (data) {
+							var existing = splitClasses(element.attr('class'));
+							var toAdd = '';
+							var toRemove = '';
+							forEach(data, function(status, className) {
+								var hasClass = !!existing[className];
+								if (status !== hasClass) {
+									if (status) {
+										toAdd += (toAdd.length ? ' ' : '') + className;
+									} else {
+										toRemove += (toRemove.length ? ' ' : '') + className;
+									}
+								}
+							});
+
+							forEach(element, function(elm) {
+								toAdd    && jqLiteAddClass(elm, toAdd);
+								toRemove && jqLiteRemoveClass(elm, toRemove);
+							});
+							postDigestQueue.remove(element);
+						}
 					});
+					postDigestElements.length = 0;
+				}
+
+
+				function addRemoveClassesPostDigest(element, add, remove) {
+					var data = postDigestQueue.get(element) || {};
+
+					var classesAdded = updateData(data, add, true);
+					var classesRemoved = updateData(data, remove, false);
+
+					if (classesAdded || classesRemoved) {
+
+						postDigestQueue.put(element, data);
+						postDigestElements.push(element);
+
+						if (postDigestElements.length === 1) {
+							$rootScope.$$postDigest(handleCSSClassChanges);
+						}
+					}
 				}
 			}];
 	};
@@ -5392,14 +5402,21 @@
 					return this.getPromise().then(f1,f2);
 				},
 				'catch': function(f1) {
-					return this.getPromise().catch(f1);
+					return this.getPromise()['catch'](f1);
 				},
 				'finally': function(f1) {
-					return this.getPromise().finally(f1);
+					return this.getPromise()['finally'](f1);
 				}
 			};
 
 			return function(element, options) {
+				// there is no point in applying the styles since
+				// there is no animation that goes on at all in
+				// this version of $animateCss.
+				if (options.cleanupStyles) {
+					options.from = options.to = null;
+				}
+
 				if (options.from) {
 					element.css(options.from);
 					options.from = null;
@@ -5528,7 +5545,7 @@
 		var cachedState, lastHistoryState,
 			lastBrowserUrl = location.href,
 			baseElement = document.find('base'),
-			reloadLocation = null;
+			pendingLocation = null;
 
 		cacheState();
 		lastHistoryState = cachedState;
@@ -5588,8 +5605,8 @@
 					// Do the assignment again so that those two variables are referentially identical.
 					lastHistoryState = cachedState;
 				} else {
-					if (!sameBase || reloadLocation) {
-						reloadLocation = url;
+					if (!sameBase || pendingLocation) {
+						pendingLocation = url;
 					}
 					if (replace) {
 						location.replace(url);
@@ -5598,14 +5615,18 @@
 					} else {
 						location.hash = getHash(url);
 					}
+					if (location.href !== url) {
+						pendingLocation = url;
+					}
 				}
 				return self;
 				// getter
 			} else {
-				// - reloadLocation is needed as browsers don't allow to read out
-				//   the new location.href if a reload happened.
+				// - pendingLocation is needed as browsers don't allow to read out
+				//   the new location.href if a reload happened or if there is a bug like in iOS 9 (see
+				//   https://openradar.appspot.com/22186109).
 				// - the replacement is a workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=407172
-				return reloadLocation || location.href.replace(/%27/g,"'");
+				return pendingLocation || location.href.replace(/%27/g,"'");
 			}
 		};
 
@@ -5627,6 +5648,7 @@
 			urlChangeInit = false;
 
 		function cacheStateAndFireUrlChange() {
+			pendingLocation = null;
 			cacheState();
 			fireUrlChange();
 		}
@@ -5821,17 +5843,17 @@
 	 * @param {string} cacheId Name or id of the newly created cache.
 	 * @param {object=} options Options object that specifies the cache behavior. Properties:
 	 *
-	 *   - `{number=}` `capacity` — turns the cache into LRU cache.
+	 *   - `{number=}` `capacity` â€” turns the cache into LRU cache.
 	 *
 	 * @returns {object} Newly created cache object with the following set of methods:
 	 *
-	 * - `{object}` `info()` — Returns id, size, and options of cache.
-	 * - `{{*}}` `put({string} key, {*} value)` — Puts a new key-value pair into the cache and returns
+	 * - `{object}` `info()` â€” Returns id, size, and options of cache.
+	 * - `{{*}}` `put({string} key, {*} value)` â€” Puts a new key-value pair into the cache and returns
 	 *   it.
-	 * - `{{*}}` `get({string} key)` — Returns cached value for `key` or undefined for cache miss.
-	 * - `{void}` `remove({string} key)` — Removes a key-value pair from the cache.
-	 * - `{void}` `removeAll()` — Removes all cached values.
-	 * - `{void}` `destroy()` — Removes references to this cache from $cacheFactory.
+	 * - `{{*}}` `get({string} key)` â€” Returns cached value for `key` or undefined for cache miss.
+	 * - `{void}` `remove({string} key)` â€” Removes a key-value pair from the cache.
+	 * - `{void}` `removeAll()` â€” Removes all cached values.
+	 * - `{void}` `destroy()` â€” Removes references to this cache from $cacheFactory.
 	 *
 	 * @example
 	 <example module="cacheExampleApp">
@@ -5862,10 +5884,10 @@
            $scope.keys = [];
            $scope.cache = $cacheFactory('cacheId');
            $scope.put = function(key, value) {
-             if ($scope.cache.get(key) === undefined) {
+             if (angular.isUndefined($scope.cache.get(key))) {
                $scope.keys.push(key);
              }
-             $scope.cache.put(key, value === undefined ? null : value);
+             $scope.cache.put(key, angular.isUndefined(value) ? null : value);
            };
          }]);
 	 </file>
@@ -6341,18 +6363,24 @@
 	 * and other directives used in the directive's template will also be excluded from execution.
 	 *
 	 * #### `scope`
-	 * **If set to `true`,** then a new scope will be created for this directive. If multiple directives on the
-	 * same element request a new scope, only one new scope is created. The new scope rule does not
-	 * apply for the root of the template since the root of the template always gets a new scope.
+	 * The scope property can be `true`, an object or a falsy value:
 	 *
-	 * **If set to `{}` (object hash),** then a new "isolate" scope is created. The 'isolate' scope differs from
-	 * normal scope in that it does not prototypically inherit from the parent scope. This is useful
-	 * when creating reusable components, which should not accidentally read or modify data in the
-	 * parent scope.
+	 * * **falsy:** No scope will be created for the directive. The directive will use its parent's scope.
 	 *
-	 * The 'isolate' scope takes an object hash which defines a set of local scope properties
-	 * derived from the parent scope. These local properties are useful for aliasing values for
-	 * templates. Locals definition is a hash of local scope property to its source:
+	 * * **`true`:** A new child scope that prototypically inherits from its parent will be created for
+	 * the directive's element. If multiple directives on the same element request a new scope,
+	 * only one new scope is created. The new scope rule does not apply for the root of the template
+	 * since the root of the template always gets a new scope.
+	 *
+	 * * **`{...}` (an object hash):** A new "isolate" scope is created for the directive's element. The
+	 * 'isolate' scope differs from normal scope in that it does not prototypically inherit from its parent
+	 * scope. This is useful when creating reusable components, which should not accidentally read or modify
+	 * data in the parent scope.
+	 *
+	 * The 'isolate' scope object hash defines a set of local scope properties derived from attributes on the
+	 * directive's element. These local properties are useful for aliasing values for templates. The keys in
+	 * the object hash map to the name of the property on the isolate scope; the values define how the property
+	 * is bound to the parent scope, via matching attributes on the directive's element:
 	 *
 	 * * `@` or `@attr` - bind a local scope property to the value of DOM attribute. The result is
 	 *   always a string since DOM attributes are strings. If no `attr` name is specified  then the
@@ -6385,6 +6413,20 @@
 	 *   For example, if the expression is `increment(amount)` then we can specify the amount value
 	 *   by calling the `localFn` as `localFn({amount: 22})`.
 	 *
+	 * In general it's possible to apply more than one directive to one element, but there might be limitations
+	 * depending on the type of scope required by the directives. The following points will help explain these limitations.
+	 * For simplicity only two directives are taken into account, but it is also applicable for several directives:
+	 *
+	 * * **no scope** + **no scope** => Two directives which don't require their own scope will use their parent's scope
+	 * * **child scope** + **no scope** =>  Both directives will share one single child scope
+	 * * **child scope** + **child scope** =>  Both directives will share one single child scope
+	 * * **isolated scope** + **no scope** =>  The isolated directive will use it's own created isolated scope. The other directive will use
+	 * its parent's scope
+	 * * **isolated scope** + **child scope** =>  **Won't work!** Only one scope can be related to one element. Therefore these directives cannot
+	 * be applied to the same element.
+	 * * **isolated scope** + **isolated scope**  =>  **Won't work!** Only one scope can be related to one element. Therefore these directives
+	 * cannot be applied to the same element.
+	 *
 	 *
 	 * #### `bindToController`
 	 * When an isolate scope is used for a component (see above), and `controllerAs` is used, `bindToController: true` will
@@ -6393,7 +6435,7 @@
 	 *
 	 * #### `controller`
 	 * Controller constructor function. The controller is instantiated before the
-	 * pre-linking phase and it is shared with other directives (see
+	 * pre-linking phase and can be accessed by other directives (see
 	 * `require` attribute). This allows the directives to communicate with each other and augment
 	 * each other's behavior. The controller is injectable (and supports bracket notation) with the following locals:
 	 *
@@ -6433,9 +6475,10 @@
 	 *
 	 * #### `controllerAs`
 	 * Identifier name for a reference to the controller in the directive's scope.
-	 * This allows the controller to be referenced from the directive template. The directive
-	 * needs to define a scope for this configuration to be used. Useful in the case when
-	 * directive is used as component.
+	 * This allows the controller to be referenced from the directive template. This is especially
+	 * useful when a directive is used as component, i.e. with an `isolate` scope. It's also possible
+	 * to use it in a directive without an `isolate` / `new` scope, but you need to be aware that the
+	 * `controllerAs` reference might overwrite a property that already exists on the parent scope.
 	 *
 	 *
 	 * #### `restrict`
@@ -7161,7 +7204,7 @@
 			'$injector', '$interpolate', '$exceptionHandler', '$templateRequest', '$parse',
 			'$controller', '$rootScope', '$document', '$sce', '$animate', '$$sanitizeUri',
 			function($injector,   $interpolate,   $exceptionHandler,   $templateRequest,   $parse,
-					 $controller,   $rootScope,   $document,   $sce,   $animate,   $$sanitizeUri) {
+			         $controller,   $rootScope,   $document,   $sce,   $animate,   $$sanitizeUri) {
 
 				var Attributes = function(element, attributesToCopy) {
 					if (attributesToCopy) {
@@ -7272,7 +7315,7 @@
 
 						var node = this.$$element[0],
 							booleanKey = getBooleanAttrName(node, key),
-							aliasedKey = getAliasedAttrName(node, key),
+							aliasedKey = getAliasedAttrName(key),
 							observer = key,
 							nodeName;
 
@@ -7339,7 +7382,7 @@
 						}
 
 						if (writeAttr !== false) {
-							if (value === null || value === undefined) {
+							if (value === null || isUndefined(value)) {
 								this.$$element.removeAttr(attrName);
 							} else {
 								this.$$element.attr(attrName, value);
@@ -7445,7 +7488,7 @@
 				//================================
 
 				function compile($compileNodes, transcludeFn, maxPriority, ignoreDirective,
-								 previousCompileContext) {
+				                 previousCompileContext) {
 					if (!($compileNodes instanceof jqLite)) {
 						// jquery always rewraps, whereas we need to preserve the original selector so that we can
 						// modify it.
@@ -7540,7 +7583,7 @@
 				 * @returns {Function} A composite linking function of all of the matched directives or null.
 				 */
 				function compileNodes(nodeList, transcludeFn, $rootElement, maxPriority, ignoreDirective,
-									  previousCompileContext) {
+				                      previousCompileContext) {
 					var linkFns = [],
 						attrs, directives, nodeLinkFn, childNodes, childLinkFn, linkFnFound, nodeLinkFnFound;
 
@@ -7687,7 +7730,7 @@
 
 							// iterate over the attributes
 							for (var attr, name, nName, ngAttrName, value, isNgAttr, nAttrs = node.attributes,
-									 j = 0, jj = nAttrs && nAttrs.length; j < jj; j++) {
+								     j = 0, jj = nAttrs && nAttrs.length; j < jj; j++) {
 								var attrStartName = false;
 								var attrEndName = false;
 
@@ -7844,8 +7887,8 @@
 				 * @returns {Function} linkFn
 				 */
 				function applyDirectivesToNode(directives, compileNode, templateAttrs, transcludeFn,
-											   jqCollection, originalReplaceDirective, preLinkFns, postLinkFns,
-											   previousCompileContext) {
+				                               jqCollection, originalReplaceDirective, preLinkFns, postLinkFns,
+				                               previousCompileContext) {
 					previousCompileContext = previousCompileContext || {};
 
 					var terminalPriority = -Number.MAX_VALUE,
@@ -8146,7 +8189,7 @@
 					}
 
 					function nodeLinkFn(childLinkFn, scope, linkNode, $rootElement, boundTranscludeFn,
-										thisLinkFn) {
+					                    thisLinkFn) {
 						var i, ii, linkFn, controller, isolateScope, elementControllers, transcludeFn, $element,
 							attrs;
 
@@ -8297,15 +8340,15 @@
 				 * @returns {boolean} true if directive was added.
 				 */
 				function addDirective(tDirectives, name, location, maxPriority, ignoreDirective, startAttrName,
-									  endAttrName) {
+				                      endAttrName) {
 					if (name === ignoreDirective) return null;
 					var match = null;
 					if (hasDirectives.hasOwnProperty(name)) {
 						for (var directive, directives = $injector.get(name + Suffix),
-								 i = 0, ii = directives.length; i < ii; i++) {
+							     i = 0, ii = directives.length; i < ii; i++) {
 							try {
 								directive = directives[i];
-								if ((maxPriority === undefined || maxPriority > directive.priority) &&
+								if ((isUndefined(maxPriority) || maxPriority > directive.priority) &&
 									directive.restrict.indexOf(location) != -1) {
 									if (startAttrName) {
 										directive = inherit(directive, {$$start: startAttrName, $$end: endAttrName});
@@ -8331,7 +8374,7 @@
 				function directiveIsMultiElement(name) {
 					if (hasDirectives.hasOwnProperty(name)) {
 						for (var directive, directives = $injector.get(name + Suffix),
-								 i = 0, ii = directives.length; i < ii; i++) {
+							     i = 0, ii = directives.length; i < ii; i++) {
 							directive = directives[i];
 							if (directive.multiElement) {
 								return true;
@@ -8384,7 +8427,7 @@
 
 
 				function compileTemplateUrl(directives, $compileNode, tAttrs,
-											$rootElement, childTranscludeFn, preLinkFns, postLinkFns, previousCompileContext) {
+				                            $rootElement, childTranscludeFn, preLinkFns, postLinkFns, previousCompileContext) {
 					var linkQueue = [],
 						afterTemplateNodeLinkFn,
 						afterTemplateChildLinkFn,
@@ -8601,7 +8644,7 @@
 						compile: function() {
 							return {
 								pre: function attrInterpolatePreLinkFn(scope, element, attr) {
-									var $$observers = (attr.$$observers || (attr.$$observers = {}));
+									var $$observers = (attr.$$observers || (attr.$$observers = createMap()));
 
 									if (EVENT_HANDLER_ATTR_REGEXP.test(name)) {
 										throw $compileMinErr('nodomevents',
@@ -8671,8 +8714,8 @@
 							if ($rootElement[i] == firstElementToRemove) {
 								$rootElement[i++] = newNode;
 								for (var j = i, j2 = j + removeCount - 1,
-										 jj = $rootElement.length;
-									 j < jj; j++, j2++) {
+									     jj = $rootElement.length;
+								     j < jj; j++, j2++) {
 									if (j2 < jj) {
 										$rootElement[j] = $rootElement[j2];
 									} else {
@@ -8753,7 +8796,7 @@
 				// Set up $watches for isolate scope and controller bindings. This process
 				// only occurs for isolate scopes and new scopes with controllerAs.
 				function initializeDirectiveBindings(scope, attrs, destination, bindings,
-													 directive, newScope) {
+				                                     directive, newScope) {
 					var onNewScopeDestroyed;
 					forEach(bindings, function(definition, scopeName) {
 						var attrName = definition.attrName,
@@ -9653,28 +9696,18 @@
 				 *
 				 *
 				 * ## General usage
-				 * The `$http` service is a function which takes a single argument — a configuration object —
+				 * The `$http` service is a function which takes a single argument â€” a {@link $http#usage configuration object} â€”
 				 * that is used to generate an HTTP request and returns  a {@link ng.$q promise}.
 				 *
 				 * ```js
-				 *   // Simple GET request example :
-				 *   $http.get('/someUrl').
-				 *     then(function(response) {
+				 *   // Simple GET request example:
+				 *   $http({
+     *     method: 'GET',
+     *     url: '/someUrl'
+     *   }).then(function successCallback(response) {
      *       // this callback will be called asynchronously
      *       // when the response is available
-     *     }, function(response) {
-     *       // called asynchronously if an error occurs
-     *       // or server returns response with an error status.
-     *     });
-				 * ```
-				 *
-				 * ```js
-				 *   // Simple POST request example (passing data) :
-				 *   $http.post('/someUrl', {msg:'hello word!'}).
-				 *     then(function(response) {
-     *       // this callback will be called asynchronously
-     *       // when the response is available
-     *     }, function(response) {
+     *     }, function errorCallback(response) {
      *       // called asynchronously if an error occurs
      *       // or server returns response with an error status.
      *     });
@@ -9682,37 +9715,28 @@
 				 *
 				 * The response object has these properties:
 				 *
-				 *   - **data** – `{string|Object}` – The response body transformed with the transform
+				 *   - **data** â€“ `{string|Object}` â€“ The response body transformed with the transform
 				 *     functions.
-				 *   - **status** – `{number}` – HTTP status code of the response.
-				 *   - **headers** – `{function([headerName])}` – Header getter function.
-				 *   - **config** – `{Object}` – The configuration object that was used to generate the request.
-				 *   - **statusText** – `{string}` – HTTP status text of the response.
+				 *   - **status** â€“ `{number}` â€“ HTTP status code of the response.
+				 *   - **headers** â€“ `{function([headerName])}` â€“ Header getter function.
+				 *   - **config** â€“ `{Object}` â€“ The configuration object that was used to generate the request.
+				 *   - **statusText** â€“ `{string}` â€“ HTTP status text of the response.
 				 *
 				 * A response status code between 200 and 299 is considered a success status and
 				 * will result in the success callback being called. Note that if the response is a redirect,
 				 * XMLHttpRequest will transparently follow it, meaning that the error callback will not be
 				 * called for such responses.
 				 *
-				 * ## Writing Unit Tests that use $http
-				 * When unit testing (using {@link ngMock ngMock}), it is necessary to call
-				 * {@link ngMock.$httpBackend#flush $httpBackend.flush()} to flush each pending
-				 * request using trained responses.
-				 *
-				 * ```
-				 * $httpBackend.expectGET(...);
-				 * $http.get(...);
-				 * $httpBackend.flush();
-				 * ```
 				 *
 				 * ## Shortcut methods
 				 *
 				 * Shortcut methods are also available. All shortcut methods require passing in the URL, and
-				 * request data must be passed in for POST/PUT requests.
+				 * request data must be passed in for POST/PUT requests. An optional config can be passed as the
+				 * last argument.
 				 *
 				 * ```js
-				 *   $http.get('/someUrl').then(successCallback);
-				 *   $http.post('/someUrl', data).then(successCallback);
+				 *   $http.get('/someUrl', config).then(successCallback, errorCallback);
+				 *   $http.post('/someUrl', data, config).then(successCallback, errorCallback);
 				 * ```
 				 *
 				 * Complete list of shortcut methods:
@@ -9725,6 +9749,17 @@
 				 * - {@link ng.$http#jsonp $http.jsonp}
 				 * - {@link ng.$http#patch $http.patch}
 				 *
+				 *
+				 * ## Writing Unit Tests that use $http
+				 * When unit testing (using {@link ngMock ngMock}), it is necessary to call
+				 * {@link ngMock.$httpBackend#flush $httpBackend.flush()} to flush each pending
+				 * request using trained responses.
+				 *
+				 * ```
+				 * $httpBackend.expectGET(...);
+				 * $http.get(...);
+				 * $httpBackend.flush();
+				 * ```
 				 *
 				 * ## Deprecation Notice
 				 * <div class="alert alert-danger">
@@ -9883,7 +9918,7 @@
 				 *
 				 * There are two kinds of interceptors (and two kinds of rejection interceptors):
 				 *
-				 *   * `request`: interceptors get called with a http `config` object. The function is free to
+				 *   * `request`: interceptors get called with a http {@link $http#usage config} object. The function is free to
 				 *     modify the `config` object or create a new one. The function needs to return the `config`
 				 *     object directly, or a promise containing the `config` or a new `config` object.
 				 *   * `requestError`: interceptor gets called when a previous interceptor threw an error or
@@ -10012,24 +10047,24 @@
 				 * @param {object} config Object describing the request to be made and how it should be
 				 *    processed. The object has following properties:
 				 *
-				 *    - **method** – `{string}` – HTTP method (e.g. 'GET', 'POST', etc)
-				 *    - **url** – `{string}` – Absolute or relative URL of the resource that is being requested.
-				 *    - **params** – `{Object.<string|Object>}` – Map of strings or objects which will be serialized
+				 *    - **method** â€“ `{string}` â€“ HTTP method (e.g. 'GET', 'POST', etc)
+				 *    - **url** â€“ `{string}` â€“ Absolute or relative URL of the resource that is being requested.
+				 *    - **params** â€“ `{Object.<string|Object>}` â€“ Map of strings or objects which will be serialized
 				 *      with the `paramSerializer` and appended as GET parameters.
-				 *    - **data** – `{string|Object}` – Data to be sent as the request message data.
-				 *    - **headers** – `{Object}` – Map of strings or functions which return strings representing
+				 *    - **data** â€“ `{string|Object}` â€“ Data to be sent as the request message data.
+				 *    - **headers** â€“ `{Object}` â€“ Map of strings or functions which return strings representing
 				 *      HTTP headers to send to the server. If the return value of a function is null, the
 				 *      header will not be sent. Functions accept a config object as an argument.
-				 *    - **xsrfHeaderName** – `{string}` – Name of HTTP header to populate with the XSRF token.
-				 *    - **xsrfCookieName** – `{string}` – Name of cookie containing the XSRF token.
-				 *    - **transformRequest** –
-				 *      `{function(data, headersGetter)|Array.<function(data, headersGetter)>}` –
+				 *    - **xsrfHeaderName** â€“ `{string}` â€“ Name of HTTP header to populate with the XSRF token.
+				 *    - **xsrfCookieName** â€“ `{string}` â€“ Name of cookie containing the XSRF token.
+				 *    - **transformRequest** â€“
+				 *      `{function(data, headersGetter)|Array.<function(data, headersGetter)>}` â€“
 				 *      transform function or an array of such functions. The transform function takes the http
 				 *      request body and headers and returns its transformed (typically serialized) version.
 				 *      See {@link ng.$http#overriding-the-default-transformations-per-request
      *      Overriding the Default Transformations}
-				 *    - **transformResponse** –
-				 *      `{function(data, headersGetter, status)|Array.<function(data, headersGetter, status)>}` –
+				 *    - **transformResponse** â€“
+				 *      `{function(data, headersGetter, status)|Array.<function(data, headersGetter, status)>}` â€“
 				 *      transform function or an array of such functions. The transform function takes the http
 				 *      response body, headers and status and returns its transformed (typically deserialized) version.
 				 *      See {@link ng.$http#overriding-the-default-transformations-per-request
@@ -10041,11 +10076,11 @@
 				 *      by registering it as a {@link auto.$provide#service service}.
 				 *      The default serializer is the {@link $httpParamSerializer $httpParamSerializer};
 				 *      alternatively, you can use the {@link $httpParamSerializerJQLike $httpParamSerializerJQLike}
-				 *    - **cache** – `{boolean|Cache}` – If true, a default $http cache will be used to cache the
+				 *    - **cache** â€“ `{boolean|Cache}` â€“ If true, a default $http cache will be used to cache the
 				 *      GET request, otherwise if a cache instance built with
 				 *      {@link ng.$cacheFactory $cacheFactory}, this cache will be used for
 				 *      caching.
-				 *    - **timeout** – `{number|Promise}` – timeout in milliseconds, or {@link ng.$q promise}
+				 *    - **timeout** â€“ `{number|Promise}` â€“ timeout in milliseconds, or {@link ng.$q promise}
 				 *      that should abort the request when resolved.
 				 *    - **withCredentials** - `{boolean}` - whether to set the `withCredentials` flag on the
 				 *      XHR object. See [requests with credentials](https://developer.mozilla.org/docs/Web/HTTP/Access_control_CORS#Requests_with_credentials)
@@ -10517,8 +10552,8 @@
 					 * Resolves the raw $http promise.
 					 */
 					function resolvePromise(response, status, headers, statusText) {
-						// normalize internal statuses to 0
-						status = Math.max(status, 0);
+						//status: HTTP response status code, 0, -1 (aborted by timeout / promise)
+						status = status >= -1 ? status : 0;
 
 						(isSuccess(status) ? deferred.resolve : deferred.reject)({
 							data: response,
@@ -10549,8 +10584,33 @@
 			}];
 	}
 
-	function createXhr() {
-		return new window.XMLHttpRequest();
+	/**
+	 * @ngdoc service
+	 * @name $xhrFactory
+	 *
+	 * @description
+	 * Factory function used to create XMLHttpRequest objects.
+	 *
+	 * Replace or decorate this service to create your own custom XMLHttpRequest objects.
+	 *
+	 * ```
+	 * angular.module('myApp', [])
+	 * .factory('$xhrFactory', function() {
+ *   return function createXhr(method, url) {
+ *     return new window.XMLHttpRequest({mozSystem: true});
+ *   };
+ * });
+	 * ```
+	 *
+	 * @param {string} method HTTP method of the request (GET, POST, PUT, ..)
+	 * @param {string} url URL of the request.
+	 */
+	function $xhrFactoryProvider() {
+		this.$get = function() {
+			return function createXhr() {
+				return new window.XMLHttpRequest();
+			};
+		};
 	}
 
 	/**
@@ -10558,6 +10618,7 @@
 	 * @name $httpBackend
 	 * @requires $window
 	 * @requires $document
+	 * @requires $xhrFactory
 	 *
 	 * @description
 	 * HTTP backend used by the {@link ng.$http service} that delegates to
@@ -10570,8 +10631,8 @@
  * $httpBackend} which can be trained with responses.
 	 */
 	function $HttpBackendProvider() {
-		this.$get = ['$browser', '$window', '$document', function($browser, $window, $document) {
-			return createHttpBackend($browser, createXhr, $browser.defer, $window.angular.callbacks, $document[0]);
+		this.$get = ['$browser', '$window', '$document', '$xhrFactory', function($browser, $window, $document, $xhrFactory) {
+			return createHttpBackend($browser, $xhrFactory, $browser.defer, $window.angular.callbacks, $document[0]);
 		}];
 	}
 
@@ -10595,7 +10656,7 @@
 					});
 			} else {
 
-				var xhr = createXhr();
+				var xhr = createXhr(method, url);
 
 				xhr.open(method, url, true);
 				forEach(headers, function(value, key) {
@@ -10658,7 +10719,7 @@
 					}
 				}
 
-				xhr.send(post);
+				xhr.send(isUndefined(post) ? null : post);
 			}
 
 			if (timeout > 0) {
@@ -10675,7 +10736,7 @@
 
 			function completeRequest(callback, status, response, headersString, statusText) {
 				// cancel timeout and subsequent timeout promise resolution
-				if (timeoutId !== undefined) {
+				if (isDefined(timeoutId)) {
 					$browserDefer.cancel(timeoutId);
 				}
 				jsonpDone = xhr = null;
@@ -10861,7 +10922,7 @@
 			 * ```js
 			 *   var $interpolate = ...; // injected
 			 *   var exp = $interpolate('Hello {{name | uppercase}}!');
-			 *   expect(exp({name:'Angular'}).toEqual('Hello ANGULAR!');
+			 *   expect(exp({name:'Angular'})).toEqual('Hello ANGULAR!');
 			 * ```
 			 *
 			 * `$interpolate` takes an optional fourth argument, `allOrNothing`. If `allOrNothing` is
@@ -11270,7 +11331,7 @@
 	 * $locale service provides localization rules for various Angular components. As of right now the
 	 * only public api is:
 	 *
-	 * * `id` – `{string}` – locale id formatted as `languageId-countryId` (e.g. `en-us`)
+	 * * `id` â€“ `{string}` â€“ locale id formatted as `languageId-countryId` (e.g. `en-us`)
 	 */
 
 	var PATH_MATCH = /^([^\?#]*)(\?([^#]*))?(#(.*))?$/,
@@ -11414,14 +11475,14 @@
 			var appUrl, prevAppUrl;
 			var rewrittenUrl;
 
-			if ((appUrl = beginsWith(appBase, url)) !== undefined) {
+			if (isDefined(appUrl = beginsWith(appBase, url))) {
 				prevAppUrl = appUrl;
-				if ((appUrl = beginsWith(basePrefix, appUrl)) !== undefined) {
+				if (isDefined(appUrl = beginsWith(basePrefix, appUrl))) {
 					rewrittenUrl = appBaseNoFile + (beginsWith('/', appUrl) || appUrl);
 				} else {
 					rewrittenUrl = appBase + prevAppUrl;
 				}
-			} else if ((appUrl = beginsWith(appBaseNoFile, url)) !== undefined) {
+			} else if (isDefined(appUrl = beginsWith(appBaseNoFile, url))) {
 				rewrittenUrl = appBaseNoFile + appUrl;
 			} else if (appBaseNoFile == url + '/') {
 				rewrittenUrl = appBaseNoFile;
@@ -12004,7 +12065,7 @@
 		 * @param {(boolean|Object)=} mode If boolean, sets `html5Mode.enabled` to value.
 		 *   If object, sets `enabled`, `requireBase` and `rewriteLinks` to respective values. Supported
 		 *   properties:
-		 *   - **enabled** – `{boolean}` – (default: false) If true, will rely on `history.pushState` to
+		 *   - **enabled** â€“ `{boolean}` â€“ (default: false) If true, will rely on `history.pushState` to
 		 *     change urls where supported. Will fall back to hash-prefixed paths in browsers that do not
 		 *     support `pushState`.
 		 *   - **requireBase** - `{boolean}` - (default: `true`) When html5Mode is enabled, specifies
@@ -12474,6 +12535,25 @@
 		return name;
 	}
 
+	function getStringValue(name, fullExpression) {
+		// From the JavaScript docs:
+		// Property names must be strings. This means that non-string objects cannot be used
+		// as keys in an object. Any non-string object, including a number, is typecasted
+		// into a string via the toString method.
+		//
+		// So, to ensure that we are checking the same `name` that JavaScript would use,
+		// we cast it to a string, if possible.
+		// Doing `name + ''` can cause a repl error if the result to `toString` is not a string,
+		// this is, this will handle objects that misbehave.
+		name = name + '';
+		if (!isString(name)) {
+			throw $parseMinErr('iseccst',
+				'Cannot convert object to primitive value! '
+				+ 'Expression: {0}', fullExpression);
+		}
+		return name;
+	}
+
 	function ensureSafeObject(obj, fullExpression) {
 		// nifty check if obj is Function that is fast and works across iframes and other contexts
 		if (obj) {
@@ -12515,6 +12595,16 @@
 				throw $parseMinErr('isecff',
 					'Referencing call, apply or bind in Angular expressions is disallowed! Expression: {0}',
 					fullExpression);
+			}
+		}
+	}
+
+	function ensureSafeAssignContext(obj, fullExpression) {
+		if (obj) {
+			if (obj === (0).constructor || obj === (false).constructor || obj === ''.constructor ||
+				obj === {}.constructor || obj === [].constructor || obj === Function.constructor) {
+				throw $parseMinErr('isecaf',
+					'Assigning to a constructor is disallowed! Expression: {0}', fullExpression);
 			}
 		}
 	}
@@ -13200,6 +13290,7 @@
 				this.state.computing = 'assign';
 				var result = this.nextId();
 				this.recurse(assignable, result);
+				this.return_(result);
 				extra = 'fn.assign=' + this.generateFunction('assign', 's,v,l');
 			}
 			var toWatch = getInputs(ast.body);
@@ -13232,6 +13323,8 @@
 				'ensureSafeMemberName',
 				'ensureSafeObject',
 				'ensureSafeFunction',
+				'getStringValue',
+				'ensureSafeAssignContext',
 				'ifDefined',
 				'plus',
 				'text',
@@ -13240,6 +13333,8 @@
 				ensureSafeMemberName,
 				ensureSafeObject,
 				ensureSafeFunction,
+				getStringValue,
+				ensureSafeAssignContext,
 				ifDefined,
 				plusFn,
 				expression);
@@ -13383,6 +13478,7 @@
 							if (ast.computed) {
 								right = self.nextId();
 								self.recurse(ast.property, right);
+								self.getStringValue(right);
 								self.addEnsureSafeMemberName(right);
 								if (create && create !== 1) {
 									self.if_(self.not(self.computedMember(left, right)), self.lazyAssign(self.computedMember(left, right), '{}'));
@@ -13466,6 +13562,7 @@
 						self.if_(self.notNull(left.context), function() {
 							self.recurse(ast.right, right);
 							self.addEnsureSafeObject(self.member(left.context, left.name, left.computed));
+							self.addEnsureSafeAssignContext(left.context);
 							expression = self.member(left.context, left.name, left.computed) + ast.operator + right;
 							self.assign(intoId, expression);
 							recursionFn(intoId || expression);
@@ -13591,6 +13688,10 @@
 			this.current().body.push(this.ensureSafeFunction(item), ';');
 		},
 
+		addEnsureSafeAssignContext: function(item) {
+			this.current().body.push(this.ensureSafeAssignContext(item), ';');
+		},
+
 		ensureSafeObject: function(item) {
 			return 'ensureSafeObject(' + item + ',text)';
 		},
@@ -13601,6 +13702,14 @@
 
 		ensureSafeFunction: function(item) {
 			return 'ensureSafeFunction(' + item + ',text)';
+		},
+
+		getStringValue: function(item) {
+			this.assign(item, 'getStringValue(' + item + ',text)');
+		},
+
+		ensureSafeAssignContext: function(item) {
+			return 'ensureSafeAssignContext(' + item + ',text)';
 		},
 
 		lazyRecurse: function(ast, intoId, nameId, recursionFn, create, skipWatchIdCheck) {
@@ -13780,6 +13889,7 @@
 						var lhs = left(scope, locals, assign, inputs);
 						var rhs = right(scope, locals, assign, inputs);
 						ensureSafeObject(lhs.value, self.expression);
+						ensureSafeAssignContext(lhs.context);
 						lhs.context[lhs.name] = rhs;
 						return context ? {value: rhs} : rhs;
 					};
@@ -13977,6 +14087,7 @@
 				var value;
 				if (lhs != null) {
 					rhs = right(scope, locals, assign, inputs);
+					rhs = getStringValue(rhs);
 					ensureSafeMemberName(rhs, expression);
 					if (create && create !== 1 && lhs && !(lhs[rhs])) {
 						lhs[rhs] = {};
@@ -14076,17 +14187,17 @@
 	 * @param {string} expression String expression to compile.
 	 * @returns {function(context, locals)} a function which represents the compiled expression:
 	 *
-	 *    * `context` – `{object}` – an object against which any expressions embedded in the strings
+	 *    * `context` â€“ `{object}` â€“ an object against which any expressions embedded in the strings
 	 *      are evaluated against (typically a scope object).
-	 *    * `locals` – `{object=}` – local variables context object, useful for overriding values in
+	 *    * `locals` â€“ `{object=}` â€“ local variables context object, useful for overriding values in
 	 *      `context`.
 	 *
 	 *    The returned function also has the following properties:
-	 *      * `literal` – `{boolean}` – whether the expression's top-level node is a JavaScript
+	 *      * `literal` â€“ `{boolean}` â€“ whether the expression's top-level node is a JavaScript
 	 *        literal.
-	 *      * `constant` – `{boolean}` – whether the expression is made entirely of JavaScript
+	 *      * `constant` â€“ `{boolean}` â€“ whether the expression is made entirely of JavaScript
 	 *        constant literals.
-	 *      * `assign` – `{?function(context, value)}` – if the expression is assignable, this will be
+	 *      * `assign` â€“ `{?function(context, value)}` â€“ if the expression is assignable, this will be
 	 *        set to a function to change its value on the given context.
 	 *
 	 */
@@ -14425,16 +14536,16 @@
 	 *
 	 * **Methods**
 	 *
-	 * - `resolve(value)` – resolves the derived promise with the `value`. If the value is a rejection
+	 * - `resolve(value)` â€“ resolves the derived promise with the `value`. If the value is a rejection
 	 *   constructed via `$q.reject`, the promise will be rejected instead.
-	 * - `reject(reason)` – rejects the derived promise with the `reason`. This is equivalent to
+	 * - `reject(reason)` â€“ rejects the derived promise with the `reason`. This is equivalent to
 	 *   resolving it with a rejection constructed via `$q.reject`.
 	 * - `notify(value)` - provides updates on the status of the promise's execution. This may be called
 	 *   multiple times before the promise is either resolved or rejected.
 	 *
 	 * **Properties**
 	 *
-	 * - promise – `{Promise}` – promise object associated with this deferred.
+	 * - promise â€“ `{Promise}` â€“ promise object associated with this deferred.
 	 *
 	 *
 	 * # The Promise API
@@ -14447,7 +14558,7 @@
 	 *
 	 * **Methods**
 	 *
-	 * - `then(successCallback, errorCallback, notifyCallback)` – regardless of when the promise was or
+	 * - `then(successCallback, errorCallback, notifyCallback)` â€“ regardless of when the promise was or
 	 *   will be resolved or rejected, `then` calls one of the success or error callbacks asynchronously
 	 *   as soon as the result is available. The callbacks are called with a single argument: the result
 	 *   or rejection reason. Additionally, the notify callback may be called zero or more times to
@@ -14460,9 +14571,9 @@
 	 *   It also notifies via the return value of the `notifyCallback` method. The promise cannot be
 	 *   resolved or rejected from the notifyCallback method.
 	 *
-	 * - `catch(errorCallback)` – shorthand for `promise.then(null, errorCallback)`
+	 * - `catch(errorCallback)` â€“ shorthand for `promise.then(null, errorCallback)`
 	 *
-	 * - `finally(callback, notifyCallback)` – allows you to observe either the fulfillment or rejection of a promise,
+	 * - `finally(callback, notifyCallback)` â€“ allows you to observe either the fulfillment or rejection of a promise,
 	 *   but to do so without modifying the final value. This is useful to release resources or do some
 	 *   clean-up that needs to be done whether the promise was rejected or resolved. See the [full
 	 *   specification](https://github.com/kriskowal/q/wiki/API-Reference#promisefinallycallback) for
@@ -14917,7 +15028,7 @@
 				$window.webkitCancelRequestAnimationFrame;
 
 			var rafSupported = !!requestAnimationFrame;
-			var rafFn = rafSupported
+			var raf = rafSupported
 				? function(fn) {
 				var id = requestAnimationFrame(fn);
 				return function() {
@@ -14931,47 +15042,9 @@
 				};
 			};
 
-			queueFn.supported = rafSupported;
+			raf.supported = rafSupported;
 
-			var cancelLastRAF;
-			var taskCount = 0;
-			var taskQueue = [];
-			return queueFn;
-
-			function flush() {
-				for (var i = 0; i < taskQueue.length; i++) {
-					var task = taskQueue[i];
-					if (task) {
-						taskQueue[i] = null;
-						task();
-					}
-				}
-				taskCount = taskQueue.length = 0;
-			}
-
-			function queueFn(asyncFn) {
-				var index = taskQueue.length;
-
-				taskCount++;
-				taskQueue.push(asyncFn);
-
-				if (index === 0) {
-					cancelLastRAF = rafFn(flush);
-				}
-
-				return function cancelQueueFn() {
-					if (index >= 0) {
-						taskQueue[index] = null;
-						index = null;
-
-						if (--taskCount === 0 && cancelLastRAF) {
-							cancelLastRAF();
-							cancelLastRAF = null;
-							taskQueue.length = 0;
-						}
-					}
-				};
-			}
+			return raf;
 		}];
 	}
 
@@ -15228,10 +15301,10 @@
 					 * Registers a `listener` callback to be executed whenever the `watchExpression` changes.
 					 *
 					 * - The `watchExpression` is called on every call to {@link ng.$rootScope.Scope#$digest
-       *   $digest()} and should return the value that will be watched. (Since
-					 *   {@link ng.$rootScope.Scope#$digest $digest()} reruns when it detects changes the
-					 *   `watchExpression` can execute multiple times per
-					 *   {@link ng.$rootScope.Scope#$digest $digest()} and should be idempotent.)
+       *   $digest()} and should return the value that will be watched. (`watchExpression` should not change
+					 *   its value when executed multiple times with the same input because it may be executed multiple
+					 *   times by {@link ng.$rootScope.Scope#$digest $digest()}. That is, `watchExpression` should be
+					 *   [idempotent](http://en.wikipedia.org/wiki/Idempotence).
 					 * - The `listener` is called only when the value from the current `watchExpression` and the
 					 *   previous call to `watchExpression` are not equal (with the exception of the initial run,
 					 *   see below). Inequality is determined according to reference inequality,
@@ -15580,7 +15653,7 @@
 								// copy the items to oldValue and look for changes.
 								newLength = 0;
 								for (key in newValue) {
-									if (newValue.hasOwnProperty(key)) {
+									if (hasOwnProperty.call(newValue, key)) {
 										newLength++;
 										newItem = newValue[key];
 										oldItem = oldValue[key];
@@ -15602,7 +15675,7 @@
 									// we used to have more keys, need to find them and destroy them.
 									changeDetected++;
 									for (key in oldValue) {
-										if (!newValue.hasOwnProperty(key)) {
+										if (!hasOwnProperty.call(newValue, key)) {
 											oldLength--;
 											delete oldValue[key];
 										}
@@ -16502,7 +16575,7 @@
 	 *
 	 * - your app is hosted at url `http://myapp.example.com/`
 	 * - but some of your templates are hosted on other domains you control such as
-	 *   `http://srv01.assets.example.com/`,  `http://srv02.assets.example.com/`, etc.
+	 *   `http://srv01.assets.example.com/`,Â  `http://srv02.assets.example.com/`, etc.
 	 * - and you have an open redirect at `http://myapp.example.com/clickThru?...`.
 	 *
 	 * Here is what a secure configuration for this scenario might look like:
@@ -16687,7 +16760,7 @@
 						'Attempted to trust a value in invalid context. Context: {0}; Value: {1}',
 						type, trustedValue);
 				}
-				if (trustedValue === null || trustedValue === undefined || trustedValue === '') {
+				if (trustedValue === null || isUndefined(trustedValue) || trustedValue === '') {
 					return trustedValue;
 				}
 				// All the current contexts in SCE_CONTEXTS happen to be strings.  In order to avoid trusting
@@ -16742,7 +16815,7 @@
      *     `$sceDelegate.trustAs`} if valid in this context.  Otherwise, throws an exception.
 			 */
 			function getTrusted(type, maybeTrusted) {
-				if (maybeTrusted === null || maybeTrusted === undefined || maybeTrusted === '') {
+				if (maybeTrusted === null || isUndefined(maybeTrusted) || maybeTrusted === '') {
 					return maybeTrusted;
 				}
 				var constructor = (byType.hasOwnProperty(type) ? byType[type] : null);
@@ -17172,9 +17245,9 @@
 			 * @param {string} expression String expression to compile.
 			 * @returns {function(context, locals)} a function which represents the compiled expression:
 			 *
-			 *    * `context` – `{object}` – an object against which any expressions embedded in the strings
+			 *    * `context` â€“ `{object}` â€“ an object against which any expressions embedded in the strings
 			 *      are evaluated against (typically a scope object).
-			 *    * `locals` – `{object=}` – local variables context object, useful for overriding values in
+			 *    * `locals` â€“ `{object=}` â€“ local variables context object, useful for overriding values in
 			 *      `context`.
 			 */
 			sce.parseAs = function sceParseAs(type, expr) {
@@ -17212,7 +17285,7 @@
 			 * @name $sce#trustAsHtml
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.trustAsHtml(value)` →
+			 * Shorthand method.  `$sce.trustAsHtml(value)` â†’
 			 *     {@link ng.$sceDelegate#trustAs `$sceDelegate.trustAs($sce.HTML, value)`}
 			 *
 			 * @param {*} value The value to trustAs.
@@ -17227,7 +17300,7 @@
 			 * @name $sce#trustAsUrl
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.trustAsUrl(value)` →
+			 * Shorthand method.  `$sce.trustAsUrl(value)` â†’
 			 *     {@link ng.$sceDelegate#trustAs `$sceDelegate.trustAs($sce.URL, value)`}
 			 *
 			 * @param {*} value The value to trustAs.
@@ -17242,7 +17315,7 @@
 			 * @name $sce#trustAsResourceUrl
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.trustAsResourceUrl(value)` →
+			 * Shorthand method.  `$sce.trustAsResourceUrl(value)` â†’
 			 *     {@link ng.$sceDelegate#trustAs `$sceDelegate.trustAs($sce.RESOURCE_URL, value)`}
 			 *
 			 * @param {*} value The value to trustAs.
@@ -17257,7 +17330,7 @@
 			 * @name $sce#trustAsJs
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.trustAsJs(value)` →
+			 * Shorthand method.  `$sce.trustAsJs(value)` â†’
 			 *     {@link ng.$sceDelegate#trustAs `$sceDelegate.trustAs($sce.JS, value)`}
 			 *
 			 * @param {*} value The value to trustAs.
@@ -17290,7 +17363,7 @@
 			 * @name $sce#getTrustedHtml
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.getTrustedHtml(value)` →
+			 * Shorthand method.  `$sce.getTrustedHtml(value)` â†’
 			 *     {@link ng.$sceDelegate#getTrusted `$sceDelegate.getTrusted($sce.HTML, value)`}
 			 *
 			 * @param {*} value The value to pass to `$sce.getTrusted`.
@@ -17302,7 +17375,7 @@
 			 * @name $sce#getTrustedCss
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.getTrustedCss(value)` →
+			 * Shorthand method.  `$sce.getTrustedCss(value)` â†’
 			 *     {@link ng.$sceDelegate#getTrusted `$sceDelegate.getTrusted($sce.CSS, value)`}
 			 *
 			 * @param {*} value The value to pass to `$sce.getTrusted`.
@@ -17314,7 +17387,7 @@
 			 * @name $sce#getTrustedUrl
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.getTrustedUrl(value)` →
+			 * Shorthand method.  `$sce.getTrustedUrl(value)` â†’
 			 *     {@link ng.$sceDelegate#getTrusted `$sceDelegate.getTrusted($sce.URL, value)`}
 			 *
 			 * @param {*} value The value to pass to `$sce.getTrusted`.
@@ -17326,7 +17399,7 @@
 			 * @name $sce#getTrustedResourceUrl
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.getTrustedResourceUrl(value)` →
+			 * Shorthand method.  `$sce.getTrustedResourceUrl(value)` â†’
 			 *     {@link ng.$sceDelegate#getTrusted `$sceDelegate.getTrusted($sce.RESOURCE_URL, value)`}
 			 *
 			 * @param {*} value The value to pass to `$sceDelegate.getTrusted`.
@@ -17338,7 +17411,7 @@
 			 * @name $sce#getTrustedJs
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.getTrustedJs(value)` →
+			 * Shorthand method.  `$sce.getTrustedJs(value)` â†’
 			 *     {@link ng.$sceDelegate#getTrusted `$sceDelegate.getTrusted($sce.JS, value)`}
 			 *
 			 * @param {*} value The value to pass to `$sce.getTrusted`.
@@ -17350,15 +17423,15 @@
 			 * @name $sce#parseAsHtml
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.parseAsHtml(expression string)` →
+			 * Shorthand method.  `$sce.parseAsHtml(expression string)` â†’
 			 *     {@link ng.$sce#parseAs `$sce.parseAs($sce.HTML, value)`}
 			 *
 			 * @param {string} expression String expression to compile.
 			 * @returns {function(context, locals)} a function which represents the compiled expression:
 			 *
-			 *    * `context` – `{object}` – an object against which any expressions embedded in the strings
+			 *    * `context` â€“ `{object}` â€“ an object against which any expressions embedded in the strings
 			 *      are evaluated against (typically a scope object).
-			 *    * `locals` – `{object=}` – local variables context object, useful for overriding values in
+			 *    * `locals` â€“ `{object=}` â€“ local variables context object, useful for overriding values in
 			 *      `context`.
 			 */
 
@@ -17367,15 +17440,15 @@
 			 * @name $sce#parseAsCss
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.parseAsCss(value)` →
+			 * Shorthand method.  `$sce.parseAsCss(value)` â†’
 			 *     {@link ng.$sce#parseAs `$sce.parseAs($sce.CSS, value)`}
 			 *
 			 * @param {string} expression String expression to compile.
 			 * @returns {function(context, locals)} a function which represents the compiled expression:
 			 *
-			 *    * `context` – `{object}` – an object against which any expressions embedded in the strings
+			 *    * `context` â€“ `{object}` â€“ an object against which any expressions embedded in the strings
 			 *      are evaluated against (typically a scope object).
-			 *    * `locals` – `{object=}` – local variables context object, useful for overriding values in
+			 *    * `locals` â€“ `{object=}` â€“ local variables context object, useful for overriding values in
 			 *      `context`.
 			 */
 
@@ -17384,15 +17457,15 @@
 			 * @name $sce#parseAsUrl
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.parseAsUrl(value)` →
+			 * Shorthand method.  `$sce.parseAsUrl(value)` â†’
 			 *     {@link ng.$sce#parseAs `$sce.parseAs($sce.URL, value)`}
 			 *
 			 * @param {string} expression String expression to compile.
 			 * @returns {function(context, locals)} a function which represents the compiled expression:
 			 *
-			 *    * `context` – `{object}` – an object against which any expressions embedded in the strings
+			 *    * `context` â€“ `{object}` â€“ an object against which any expressions embedded in the strings
 			 *      are evaluated against (typically a scope object).
-			 *    * `locals` – `{object=}` – local variables context object, useful for overriding values in
+			 *    * `locals` â€“ `{object=}` â€“ local variables context object, useful for overriding values in
 			 *      `context`.
 			 */
 
@@ -17401,15 +17474,15 @@
 			 * @name $sce#parseAsResourceUrl
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.parseAsResourceUrl(value)` →
+			 * Shorthand method.  `$sce.parseAsResourceUrl(value)` â†’
 			 *     {@link ng.$sce#parseAs `$sce.parseAs($sce.RESOURCE_URL, value)`}
 			 *
 			 * @param {string} expression String expression to compile.
 			 * @returns {function(context, locals)} a function which represents the compiled expression:
 			 *
-			 *    * `context` – `{object}` – an object against which any expressions embedded in the strings
+			 *    * `context` â€“ `{object}` â€“ an object against which any expressions embedded in the strings
 			 *      are evaluated against (typically a scope object).
-			 *    * `locals` – `{object=}` – local variables context object, useful for overriding values in
+			 *    * `locals` â€“ `{object=}` â€“ local variables context object, useful for overriding values in
 			 *      `context`.
 			 */
 
@@ -17418,15 +17491,15 @@
 			 * @name $sce#parseAsJs
 			 *
 			 * @description
-			 * Shorthand method.  `$sce.parseAsJs(value)` →
+			 * Shorthand method.  `$sce.parseAsJs(value)` â†’
 			 *     {@link ng.$sce#parseAs `$sce.parseAs($sce.JS, value)`}
 			 *
 			 * @param {string} expression String expression to compile.
 			 * @returns {function(context, locals)} a function which represents the compiled expression:
 			 *
-			 *    * `context` – `{object}` – an object against which any expressions embedded in the strings
+			 *    * `context` â€“ `{object}` â€“ an object against which any expressions embedded in the strings
 			 *      are evaluated against (typically a scope object).
-			 *    * `locals` – `{object=}` – local variables context object, useful for overriding values in
+			 *    * `locals` â€“ `{object=}` â€“ local variables context object, useful for overriding values in
 			 *      `context`.
 			 */
 
@@ -18003,7 +18076,7 @@
 						// the first value that is seen for a cookie is the most
 						// specific one.  values for the same cookie name that
 						// follow are for less specific paths.
-						if (lastCookies[name] === undefined) {
+						if (isUndefined(lastCookies[name])) {
 							lastCookies[name] = safeDecodeURIComponent(cookie.substring(index + 1));
 						}
 					}
@@ -18518,7 +18591,7 @@
 	 * Formats a number as text.
 	 *
 	 * If the input is null or undefined, it will just be returned.
-	 * If the input is infinite (Infinity/-Infinity) the Infinity symbol '∞' is returned.
+	 * If the input is infinite (Infinity/-Infinity) the Infinity symbol 'âˆž' is returned.
 	 * If the input is not a number an empty string is returned.
 	 *
 	 *
@@ -18526,7 +18599,7 @@
 	 * @param {(number|string)=} fractionSize Number of decimal places to round the number to.
 	 * If this is not provided then the fraction size is computed from the current locale's number
 	 * formatting pattern. In the case of the default locale, it will be 3.
-	 * @returns {string} Number rounded to decimalPlaces and places a “,” after each third digit.
+	 * @returns {string} Number rounded to decimalPlaces and places a â€œ,â€ after each third digit.
 	 *
 	 * @example
 	 <example module="numberFilterExample">
@@ -18651,6 +18724,7 @@
 			if (fractionSize > 0 && number < 1) {
 				formatedText = number.toFixed(fractionSize);
 				number = parseFloat(formatedText);
+				formatedText = formatedText.replace(DECIMAL_SEP, decimalSep);
 			}
 		}
 
@@ -19949,6 +20023,7 @@
 	 * @property {boolean} $dirty True if user has already interacted with the form.
 	 * @property {boolean} $valid True if all of the containing forms and controls are valid.
 	 * @property {boolean} $invalid True if at least one containing control or form is invalid.
+	 * @property {boolean} $pending True if at least one containing control or form is pending.
 	 * @property {boolean} $submitted True if user has submitted the form even if its invalid.
 	 *
 	 * @property {Object} $error Is an object hash, containing references to controls or
@@ -19988,8 +20063,6 @@
 		var form = this,
 			controls = [];
 
-		var parentForm = form.$$parentForm = element.parent().controller('form') || nullFormCtrl;
-
 		// init state
 		form.$error = {};
 		form.$$success = {};
@@ -20000,8 +20073,7 @@
 		form.$valid = true;
 		form.$invalid = false;
 		form.$submitted = false;
-
-		parentForm.$addControl(form);
+		form.$$parentForm = nullFormCtrl;
 
 		/**
 		 * @ngdoc method
@@ -20040,11 +20112,23 @@
 		/**
 		 * @ngdoc method
 		 * @name form.FormController#$addControl
+		 * @param {object} control control object, either a {@link form.FormController} or an
+		 * {@link ngModel.NgModelController}
 		 *
 		 * @description
-		 * Register a control with the form.
+		 * Register a control with the form. Input elements using ngModelController do this automatically
+		 * when they are linked.
 		 *
-		 * Input elements using ngModelController do this automatically when they are linked.
+		 * Note that the current state of the control will not be reflected on the new parent form. This
+		 * is not an issue with normal use, as freshly compiled and linked controls are in a `$pristine`
+		 * state.
+		 *
+		 * However, if the method is used programmatically, for example by adding dynamically created controls,
+		 * or controls that have been previously removed without destroying their corresponding DOM element,
+		 * it's the developers responsiblity to make sure the current state propagates to the parent form.
+		 *
+		 * For example, if an input control is added that is already `$dirty` and has `$error` properties,
+		 * calling `$setDirty()` and `$validate()` afterwards will propagate the state to the parent form.
 		 */
 		form.$addControl = function(control) {
 			// Breaking change - before, inputs whose name was "hasOwnProperty" were quietly ignored
@@ -20055,6 +20139,8 @@
 			if (control.$name) {
 				form[control.$name] = control;
 			}
+
+			control.$$parentForm = form;
 		};
 
 		// Private API: rename a form control
@@ -20071,11 +20157,18 @@
 		/**
 		 * @ngdoc method
 		 * @name form.FormController#$removeControl
+		 * @param {object} control control object, either a {@link form.FormController} or an
+		 * {@link ngModel.NgModelController}
 		 *
 		 * @description
 		 * Deregister a control from the form.
 		 *
 		 * Input elements using ngModelController do this automatically when they are destroyed.
+		 *
+		 * Note that only the removed control's validation state (`$errors`etc.) will be removed from the
+		 * form. `$dirty`, `$submitted` states will not be changed, because the expected behavior can be
+		 * different from case to case. For example, removing the only `$dirty` control from a form may or
+		 * may not mean that the form is still `$dirty`.
 		 */
 		form.$removeControl = function(control) {
 			if (control.$name && form[control.$name] === control) {
@@ -20092,6 +20185,7 @@
 			});
 
 			arrayRemove(controls, control);
+			control.$$parentForm = nullFormCtrl;
 		};
 
 
@@ -20128,7 +20222,6 @@
 					delete object[property];
 				}
 			},
-			parentForm: parentForm,
 			$animate: $animate
 		});
 
@@ -20147,7 +20240,7 @@
 			$animate.addClass(element, DIRTY_CLASS);
 			form.$dirty = true;
 			form.$pristine = false;
-			parentForm.$setDirty();
+			form.$$parentForm.$setDirty();
 		};
 
 		/**
@@ -20203,7 +20296,7 @@
 		form.$setSubmitted = function() {
 			$animate.addClass(element, SUBMITTED_CLASS);
 			form.$submitted = true;
-			parentForm.$setSubmitted();
+			form.$$parentForm.$setSubmitted();
 		};
 	}
 
@@ -20253,6 +20346,7 @@
 	 * # CSS classes
 	 *  - `ng-valid` is set if the form is valid.
 	 *  - `ng-invalid` is set if the form is invalid.
+	 *  - `ng-pending` is set if the form is pending.
 	 *  - `ng-pristine` is set if the form is pristine.
 	 *  - `ng-dirty` is set if the form is dirty.
 	 *  - `ng-submitted` is set if the form was submitted.
@@ -20328,7 +20422,6 @@
 	 </script>
 	 <style>
 	 .my-form {
-          -webkit-transition:all linear 0.5s;
           transition:all linear 0.5s;
           background: transparent;
         }
@@ -20377,6 +20470,7 @@
 			var formDirective = {
 				name: 'form',
 				restrict: isNgForm ? 'EAC' : 'E',
+				require: ['form', '^^?form'], //first is the form's own ctrl, second is an optional parent form
 				controller: FormController,
 				compile: function ngFormCompile(formElement, attr) {
 					// Setup initial state of the control
@@ -20385,7 +20479,9 @@
 					var nameAttr = attr.name ? 'name' : (isNgForm && attr.ngForm ? 'ngForm' : false);
 
 					return {
-						pre: function ngFormPreLink(scope, formElement, attr, controller) {
+						pre: function ngFormPreLink(scope, formElement, attr, ctrls) {
+							var controller = ctrls[0];
+
 							// if `action` attr is not present on the form, prevent the default action (submission)
 							if (!('action' in attr)) {
 								// we can't use jq events because if a form is destroyed during submission the default
@@ -20414,7 +20510,9 @@
 								});
 							}
 
-							var parentFormCtrl = controller.$$parentForm;
+							var parentFormCtrl = ctrls[1] || controller.$$parentForm;
+							parentFormCtrl.$addControl(controller);
+
 							var setter = nameAttr ? getSetter(controller.$name) : noop;
 
 							if (nameAttr) {
@@ -20422,13 +20520,13 @@
 								attr.$observe(nameAttr, function(newValue) {
 									if (controller.$name === newValue) return;
 									setter(scope, undefined);
-									parentFormCtrl.$$renameControl(controller, newValue);
+									controller.$$parentForm.$$renameControl(controller, newValue);
 									setter = getSetter(controller.$name);
 									setter(scope, controller);
 								});
 							}
 							formElement.on('$destroy', function() {
-								parentFormCtrl.$removeControl(controller);
+								controller.$$parentForm.$removeControl(controller);
 								setter(scope, undefined);
 								extend(controller, nullFormCtrl); //stop propagating child destruction handlers upwards
 							});
@@ -20590,9 +20688,17 @@
 		 * @param {string} ngModel Assignable angular expression to data-bind to.
 		 * @param {string=} name Property name of the form under which the control is published.
 		 * @param {string=} min Sets the `min` validation error key if the value entered is less than `min`. This must be a
-		 * valid ISO date string (yyyy-MM-dd).
+		 *   valid ISO date string (yyyy-MM-dd). You can also use interpolation inside this attribute
+		 *   (e.g. `min="{{minDate | date:'yyyy-MM-dd'}}"`). Note that `min` will also add native HTML5
+		 *   constraint validation.
 		 * @param {string=} max Sets the `max` validation error key if the value entered is greater than `max`. This must be
-		 * a valid ISO date string (yyyy-MM-dd).
+		 *   a valid ISO date string (yyyy-MM-dd). You can also use interpolation inside this attribute
+		 *   (e.g. `max="{{maxDate | date:'yyyy-MM-dd'}}"`). Note that `max` will also add native HTML5
+		 *   constraint validation.
+		 * @param {(date|string)=} ngMin Sets the `min` validation constraint to the Date / ISO date string
+		 *   the `ngMin` expression evaluates to. Note that it does not set the `min` attribute.
+		 * @param {(date|string)=} ngMax Sets the `max` validation constraint to the Date / ISO date string
+		 *   the `ngMax` expression evaluates to. Note that it does not set the `max` attribute.
 		 * @param {string=} required Sets `required` validation error key if the value is not entered.
 		 * @param {string=} ngRequired Adds `required` attribute and `required` validation constraint to
 		 *    the element when the ngRequired expression evaluates to true. Use `ngRequired` instead of
@@ -20684,10 +20790,18 @@
 		 *
 		 * @param {string} ngModel Assignable angular expression to data-bind to.
 		 * @param {string=} name Property name of the form under which the control is published.
-		 * @param {string=} min Sets the `min` validation error key if the value entered is less than `min`. This must be a
-		 * valid ISO datetime format (yyyy-MM-ddTHH:mm:ss).
-		 * @param {string=} max Sets the `max` validation error key if the value entered is greater than `max`. This must be
-		 * a valid ISO datetime format (yyyy-MM-ddTHH:mm:ss).
+		 * @param {string=} min Sets the `min` validation error key if the value entered is less than `min`.
+		 *   This must be a valid ISO datetime format (yyyy-MM-ddTHH:mm:ss). You can also use interpolation
+		 *   inside this attribute (e.g. `min="{{minDatetimeLocal | date:'yyyy-MM-ddTHH:mm:ss'}}"`).
+		 *   Note that `min` will also add native HTML5 constraint validation.
+		 * @param {string=} max Sets the `max` validation error key if the value entered is greater than `max`.
+		 *   This must be a valid ISO datetime format (yyyy-MM-ddTHH:mm:ss). You can also use interpolation
+		 *   inside this attribute (e.g. `max="{{maxDatetimeLocal | date:'yyyy-MM-ddTHH:mm:ss'}}"`).
+		 *   Note that `max` will also add native HTML5 constraint validation.
+		 * @param {(date|string)=} ngMin Sets the `min` validation error key to the Date / ISO datetime string
+		 *   the `ngMin` expression evaluates to. Note that it does not set the `min` attribute.
+		 * @param {(date|string)=} ngMax Sets the `max` validation error key to the Date / ISO datetime string
+		 *   the `ngMax` expression evaluates to. Note that it does not set the `max` attribute.
 		 * @param {string=} required Sets `required` validation error key if the value is not entered.
 		 * @param {string=} ngRequired Adds `required` attribute and `required` validation constraint to
 		 *    the element when the ngRequired expression evaluates to true. Use `ngRequired` instead of
@@ -20780,10 +20894,18 @@
 		 *
 		 * @param {string} ngModel Assignable angular expression to data-bind to.
 		 * @param {string=} name Property name of the form under which the control is published.
-		 * @param {string=} min Sets the `min` validation error key if the value entered is less than `min`. This must be a
-		 * valid ISO time format (HH:mm:ss).
-		 * @param {string=} max Sets the `max` validation error key if the value entered is greater than `max`. This must be a
-		 * valid ISO time format (HH:mm:ss).
+		 * @param {string=} min Sets the `min` validation error key if the value entered is less than `min`.
+		 *   This must be a valid ISO time format (HH:mm:ss). You can also use interpolation inside this
+		 *   attribute (e.g. `min="{{minTime | date:'HH:mm:ss'}}"`). Note that `min` will also add
+		 *   native HTML5 constraint validation.
+		 * @param {string=} max Sets the `max` validation error key if the value entered is greater than `max`.
+		 *   This must be a valid ISO time format (HH:mm:ss). You can also use interpolation inside this
+		 *   attribute (e.g. `max="{{maxTime | date:'HH:mm:ss'}}"`). Note that `max` will also add
+		 *   native HTML5 constraint validation.
+		 * @param {(date|string)=} ngMin Sets the `min` validation constraint to the Date / ISO time string the
+		 *   `ngMin` expression evaluates to. Note that it does not set the `min` attribute.
+		 * @param {(date|string)=} ngMax Sets the `max` validation constraint to the Date / ISO time string the
+		 *   `ngMax` expression evaluates to. Note that it does not set the `max` attribute.
 		 * @param {string=} required Sets `required` validation error key if the value is not entered.
 		 * @param {string=} ngRequired Adds `required` attribute and `required` validation constraint to
 		 *    the element when the ngRequired expression evaluates to true. Use `ngRequired` instead of
@@ -20875,10 +20997,18 @@
 		 *
 		 * @param {string} ngModel Assignable angular expression to data-bind to.
 		 * @param {string=} name Property name of the form under which the control is published.
-		 * @param {string=} min Sets the `min` validation error key if the value entered is less than `min`. This must be a
-		 * valid ISO week format (yyyy-W##).
-		 * @param {string=} max Sets the `max` validation error key if the value entered is greater than `max`. This must be
-		 * a valid ISO week format (yyyy-W##).
+		 * @param {string=} min Sets the `min` validation error key if the value entered is less than `min`.
+		 *   This must be a valid ISO week format (yyyy-W##). You can also use interpolation inside this
+		 *   attribute (e.g. `min="{{minWeek | date:'yyyy-Www'}}"`). Note that `min` will also add
+		 *   native HTML5 constraint validation.
+		 * @param {string=} max Sets the `max` validation error key if the value entered is greater than `max`.
+		 *   This must be a valid ISO week format (yyyy-W##). You can also use interpolation inside this
+		 *   attribute (e.g. `max="{{maxWeek | date:'yyyy-Www'}}"`). Note that `max` will also add
+		 *   native HTML5 constraint validation.
+		 * @param {(date|string)=} ngMin Sets the `min` validation constraint to the Date / ISO week string
+		 *   the `ngMin` expression evaluates to. Note that it does not set the `min` attribute.
+		 * @param {(date|string)=} ngMax Sets the `max` validation constraint to the Date / ISO week string
+		 *   the `ngMax` expression evaluates to. Note that it does not set the `max` attribute.
 		 * @param {string=} required Sets `required` validation error key if the value is not entered.
 		 * @param {string=} ngRequired Adds `required` attribute and `required` validation constraint to
 		 *    the element when the ngRequired expression evaluates to true. Use `ngRequired` instead of
@@ -20972,10 +21102,19 @@
 		 *
 		 * @param {string} ngModel Assignable angular expression to data-bind to.
 		 * @param {string=} name Property name of the form under which the control is published.
-		 * @param {string=} min Sets the `min` validation error key if the value entered is less than `min`. This must be
-		 * a valid ISO month format (yyyy-MM).
-		 * @param {string=} max Sets the `max` validation error key if the value entered is greater than `max`. This must
-		 * be a valid ISO month format (yyyy-MM).
+		 * @param {string=} min Sets the `min` validation error key if the value entered is less than `min`.
+		 *   This must be a valid ISO month format (yyyy-MM). You can also use interpolation inside this
+		 *   attribute (e.g. `min="{{minMonth | date:'yyyy-MM'}}"`). Note that `min` will also add
+		 *   native HTML5 constraint validation.
+		 * @param {string=} max Sets the `max` validation error key if the value entered is greater than `max`.
+		 *   This must be a valid ISO month format (yyyy-MM). You can also use interpolation inside this
+		 *   attribute (e.g. `max="{{maxMonth | date:'yyyy-MM'}}"`). Note that `max` will also add
+		 *   native HTML5 constraint validation.
+		 * @param {(date|string)=} ngMin Sets the `min` validation constraint to the Date / ISO week string
+		 *   the `ngMin` expression evaluates to. Note that it does not set the `min` attribute.
+		 * @param {(date|string)=} ngMax Sets the `max` validation constraint to the Date / ISO week string
+		 *   the `ngMax` expression evaluates to. Note that it does not set the `max` attribute.
+
 		 * @param {string=} required Sets `required` validation error key if the value is not entered.
 		 * @param {string=} ngRequired Adds `required` attribute and `required` validation constraint to
 		 *    the element when the ngRequired expression evaluates to true. Use `ngRequired` instead of
@@ -21737,7 +21876,7 @@
 			}
 
 			function parseObservedDateValue(val) {
-				return isDefined(val) ? (isDate(val) ? val : parseDate(val)) : undefined;
+				return isDefined(val) && !isDate(val) ? parseDate(val) || undefined : val;
 			}
 		};
 	}
@@ -22232,7 +22371,7 @@
 					$compile.$$addBindingInfo(element, attr.ngBind);
 					element = element[0];
 					scope.$watch(attr.ngBind, function ngBindWatchAction(value) {
-						element.textContent = value === undefined ? '' : value;
+						element.textContent = isUndefined(value) ? '' : value;
 					});
 				};
 			}
@@ -22300,7 +22439,7 @@
 					$compile.$$addBindingInfo(element, interpolateFn.expressions);
 					element = element[0];
 					attr.$observe('ngBindTemplate', function(value) {
-						element.textContent = value === undefined ? '' : value;
+						element.textContent = isUndefined(value) ? '' : value;
 					});
 				};
 			}
@@ -22717,7 +22856,6 @@
 	 </file>
 	 <file name="style.css">
 	 .base-class {
-         -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
          transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
        }
 
@@ -22919,10 +23057,10 @@
 	 *
 	 * MVC components in angular:
 	 *
-	 * * Model — Models are the properties of a scope; scopes are attached to the DOM where scope properties
+	 * * Model â€” Models are the properties of a scope; scopes are attached to the DOM where scope properties
 	 *   are accessed through bindings.
-	 * * View — The template (HTML with data bindings) that is rendered into the View.
-	 * * Controller — The `ngController` directive specifies a Controller class; the class contains business
+	 * * View â€” The template (HTML with data bindings) that is rendered into the View.
+	 * * Controller â€” The `ngController` directive specifies a Controller class; the class contains business
 	 *   logic behind the application to decorate the scope with functions and values
 	 *
 	 * Note that you can also attach controllers to the DOM by declaring it in a route definition
@@ -23892,7 +24030,6 @@
       }
 
 	 .animate-if.ng-enter, .animate-if.ng-leave {
-        -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
         transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
       }
 
@@ -24041,7 +24178,6 @@
       }
 
 	 .slide-animate.ng-enter, .slide-animate.ng-leave {
-        -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
         transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
 
         position:absolute;
@@ -24260,16 +24396,18 @@
 	 * current scope.
 	 *
 	 * <div class="alert alert-danger">
-	 * The only appropriate use of `ngInit` is for aliasing special properties of
-	 * {@link ng.directive:ngRepeat `ngRepeat`}, as seen in the demo below. Besides this case, you
-	 * should use {@link guide/controller controllers} rather than `ngInit`
-	 * to initialize values on a scope.
+	 * This directive can be abused to add unnecessary amounts of logic into your templates.
+	 * There are only a few appropriate uses of `ngInit`, such as for aliasing special properties of
+	 * {@link ng.directive:ngRepeat `ngRepeat`}, as seen in the demo below; and for injecting data via
+	 * server side scripting. Besides these few cases, you should use {@link guide/controller controllers}
+	 * rather than `ngInit` to initialize values on a scope.
 	 * </div>
+	 *
 	 * <div class="alert alert-warning">
-	 * **Note**: If you have assignment in `ngInit` along with {@link ng.$filter `$filter`}, make
-	 * sure you have parenthesis for correct precedence:
+	 * **Note**: If you have assignment in `ngInit` along with a {@link ng.$filter `filter`}, make
+	 * sure you have parentheses to ensure correct operator precedence:
 	 * <pre class="prettyprint">
-	 * `<div ng-init="test1 = (data | orderBy:'name')"></div>`
+	 * `<div ng-init="test1 = ($index | toString)"></div>`
 	 * </pre>
 	 * </div>
 	 *
@@ -24382,7 +24520,7 @@
 	 *   </file>
 	 * </example>
 	 *
-	 * ### Example - splitting on whitespace
+	 * ### Example - splitting on newline
 	 * <example name="ngList-directive-newlines">
 	 *   <file name="index.html">
 	 *    <textarea ng-model="list" ng-list="&#10;" ng-trim="false"></textarea>
@@ -24467,7 +24605,9 @@
 	 * @ngdoc type
 	 * @name ngModel.NgModelController
 	 *
-	 * @property {string} $viewValue Actual string value in the view.
+	 * @property {*} $viewValue The actual value from the control's view. For `input` elements, this is a
+	 * String. See {@link ngModel.NgModelController#$setViewValue} for information about when the $viewValue
+	 * is set.
 	 * @property {*} $modelValue The value in the model that the control is bound to.
 	 * @property {Array.<Function>} $parsers Array of functions to execute, as a pipeline, whenever
 	 the control reads value from the DOM. The functions are called in array order, each passing
@@ -24681,7 +24821,7 @@
 			this.$$success = {}; // keep valid keys here
 			this.$pending = undefined; // keep pending keys here
 			this.$name = $interpolate($attr.name || '', false)($scope);
-
+			this.$$parentForm = nullFormCtrl;
 
 			var parsedNgModel = $parse($attr.ngModel),
 				parsedNgModelAssign = parsedNgModel.assign,
@@ -24761,8 +24901,7 @@
 				return isUndefined(value) || value === '' || value === null || value !== value;
 			};
 
-			var parentForm = $element.inheritedData('$formController') || nullFormCtrl,
-				currentValidationRunId = 0;
+			var currentValidationRunId = 0;
 
 			/**
 			 * @ngdoc method
@@ -24795,7 +24934,6 @@
 				unset: function(object, property) {
 					delete object[property];
 				},
-				parentForm: parentForm,
 				$animate: $animate
 			});
 
@@ -24833,7 +24971,7 @@
 				ctrl.$pristine = false;
 				$animate.removeClass($element, PRISTINE_CLASS);
 				$animate.addClass($element, DIRTY_CLASS);
-				parentForm.$setDirty();
+				ctrl.$$parentForm.$setDirty();
 			};
 
 			/**
@@ -25003,7 +25141,7 @@
 
 				function processParseErrors() {
 					var errorKey = ctrl.$$parserName || 'parse';
-					if (parserValid === undefined) {
+					if (isUndefined(parserValid)) {
 						setValidity(errorKey, null);
 					} else {
 						if (!parserValid) {
@@ -25173,37 +25311,47 @@
 			 * @description
 			 * Update the view value.
 			 *
-			 * This method should be called when an input directive want to change the view value; typically,
-			 * this is done from within a DOM event handler.
+			 * This method should be called when a control wants to change the view value; typically,
+			 * this is done from within a DOM event handler. For example, the {@link ng.directive:input input}
+			 * directive calls it when the value of the input changes and {@link ng.directive:select select}
+			 * calls it when an option is selected.
 			 *
-			 * For example {@link ng.directive:input input} calls it when the value of the input changes and
-			 * {@link ng.directive:select select} calls it when an option is selected.
-			 *
-			 * If the new `value` is an object (rather than a string or a number), we should make a copy of the
-			 * object before passing it to `$setViewValue`.  This is because `ngModel` does not perform a deep
-			 * watch of objects, it only looks for a change of identity. If you only change the property of
-			 * the object then ngModel will not realise that the object has changed and will not invoke the
-			 * `$parsers` and `$validators` pipelines.
-			 *
-			 * For this reason, you should not change properties of the copy once it has been passed to
-			 * `$setViewValue`. Otherwise you may cause the model value on the scope to change incorrectly.
-			 *
-			 * When this method is called, the new `value` will be staged for committing through the `$parsers`
+			 * When `$setViewValue` is called, the new `value` will be staged for committing through the `$parsers`
 			 * and `$validators` pipelines. If there are no special {@link ngModelOptions} specified then the staged
 			 * value sent directly for processing, finally to be applied to `$modelValue` and then the
-			 * **expression** specified in the `ng-model` attribute.
-			 *
-			 * Lastly, all the registered change listeners, in the `$viewChangeListeners` list, are called.
+			 * **expression** specified in the `ng-model` attribute. Lastly, all the registered change listeners,
+			 * in the `$viewChangeListeners` list, are called.
 			 *
 			 * In case the {@link ng.directive:ngModelOptions ngModelOptions} directive is used with `updateOn`
 			 * and the `default` trigger is not listed, all those actions will remain pending until one of the
 			 * `updateOn` events is triggered on the DOM element.
 			 * All these actions will be debounced if the {@link ng.directive:ngModelOptions ngModelOptions}
 			 * directive is used with a custom debounce for this particular event.
+			 * Note that a `$digest` is only triggered once the `updateOn` events are fired, or if `debounce`
+			 * is specified, once the timer runs out.
 			 *
-			 * Note that calling this function does not trigger a `$digest`.
+			 * When used with standard inputs, the view value will always be a string (which is in some cases
+			 * parsed into another type, such as a `Date` object for `input[date]`.)
+			 * However, custom controls might also pass objects to this method. In this case, we should make
+			 * a copy of the object before passing it to `$setViewValue`. This is because `ngModel` does not
+			 * perform a deep watch of objects, it only looks for a change of identity. If you only change
+			 * the property of the object then ngModel will not realise that the object has changed and
+			 * will not invoke the `$parsers` and `$validators` pipelines. For this reason, you should
+			 * not change properties of the copy once it has been passed to `$setViewValue`.
+			 * Otherwise you may cause the model value on the scope to change incorrectly.
 			 *
-			 * @param {string} value Value from the view.
+			 * <div class="alert alert-info">
+			 * In any case, the value passed to the method should always reflect the current value
+			 * of the control. For example, if you are calling `$setViewValue` for an input element,
+			 * you should pass the input DOM value. Otherwise, the control and the scope model become
+			 * out of sync. It's also important to note that `$setViewValue` does not call `$render` or change
+			 * the control's DOM value in any way. If we want to change the control's DOM value
+			 * programmatically, we should update the `ngModel` scope expression. Its new value will be
+			 * picked up by the model controller, which will run it through the `$formatters`, `$render` it
+			 * to update the DOM, and finally call `$validate` on it.
+			 * </div>
+			 *
+			 * @param {*} value value from the view.
 			 * @param {string} trigger Event that triggered the update.
 			 */
 			this.$setViewValue = function(value, trigger) {
@@ -25380,7 +25528,6 @@
 	 </script>
 	 <style>
 	 .my-input {
-           -webkit-transition:all linear 0.5s;
            transition:all linear 0.5s;
            background: transparent;
          }
@@ -25467,7 +25614,7 @@
 				return {
 					pre: function ngModelPreLink(scope, element, attr, ctrls) {
 						var modelCtrl = ctrls[0],
-							formCtrl = ctrls[1] || nullFormCtrl;
+							formCtrl = ctrls[1] || modelCtrl.$$parentForm;
 
 						modelCtrl.$$setOptions(ctrls[2] && ctrls[2].$options);
 
@@ -25476,12 +25623,12 @@
 
 						attr.$observe('name', function(newValue) {
 							if (modelCtrl.$name !== newValue) {
-								formCtrl.$$renameControl(modelCtrl, newValue);
+								modelCtrl.$$parentForm.$$renameControl(modelCtrl, newValue);
 							}
 						});
 
 						scope.$on('$destroy', function() {
-							formCtrl.$removeControl(modelCtrl);
+							modelCtrl.$$parentForm.$removeControl(modelCtrl);
 						});
 					},
 					post: function ngModelPostLink(scope, element, attr, ctrls) {
@@ -25676,7 +25823,7 @@
 				var that = this;
 				this.$options = copy($scope.$eval($attrs.ngModelOptions));
 				// Allow adding/overriding bound events
-				if (this.$options.updateOn !== undefined) {
+				if (isDefined(this.$options.updateOn)) {
 					this.$options.updateOnDefault = false;
 					// extract "default" pseudo-event from list of events that can trigger a model update
 					this.$options.updateOn = trim(this.$options.updateOn.replace(DEFAULT_REGEXP, function() {
@@ -25699,7 +25846,6 @@
 			classCache = {},
 			set = context.set,
 			unset = context.unset,
-			parentForm = context.parentForm,
 			$animate = context.$animate;
 
 		classCache[INVALID_CLASS] = !(classCache[VALID_CLASS] = $element.hasClass(VALID_CLASS));
@@ -25707,7 +25853,7 @@
 		ctrl.$setValidity = setValidity;
 
 		function setValidity(validationErrorKey, state, controller) {
-			if (state === undefined) {
+			if (isUndefined(state)) {
 				createAndSet('$pending', validationErrorKey, controller);
 			} else {
 				unsetAndCleanup('$pending', validationErrorKey, controller);
@@ -25751,7 +25897,7 @@
 			}
 
 			toggleValidationCss(validationErrorKey, combinedState);
-			parentForm.$setValidity(validationErrorKey, combinedState, ctrl);
+			ctrl.$$parentForm.$setValidity(validationErrorKey, combinedState, ctrl);
 		}
 
 		function createAndSet(name, value, controller) {
@@ -26412,11 +26558,16 @@
 				function updateOptionElement(option, element) {
 					option.element = element;
 					element.disabled = option.disabled;
-					if (option.value !== element.value) element.value = option.selectValue;
+					// NOTE: The label must be set before the value, otherwise IE10/11/EDGE create unresponsive
+					// selects in certain circumstances when multiple selects are next to each other and display
+					// the option list in listbox style, i.e. the select is [multiple], or specifies a [size].
+					// See https://github.com/angular/angular.js/issues/11314 for more info.
+					// This is unfortunately untestable with unit / e2e tests
 					if (option.label !== element.label) {
 						element.label = option.label;
 						element.textContent = option.label;
 					}
+					if (option.value !== element.value) element.value = option.selectValue;
 				}
 
 				function addOrReuseElement(parent, current, type, templateElement) {
@@ -26457,7 +26608,10 @@
 					if (emptyOption_ || unknownOption_) {
 						while (current &&
 						(current === emptyOption_ ||
-						current === unknownOption_)) {
+						current === unknownOption_ ||
+						emptyOption_ && emptyOption_.nodeType === NODE_TYPE_COMMENT)) {
+							// Empty options might have directives that transclude
+							// and insert comments (e.g. ngIf)
 							current = current.nextSibling;
 						}
 					}
@@ -26819,8 +26973,10 @@
 	 * | `$even`   | {@type boolean} | true if the iterator position `$index` is even (otherwise false).           |
 	 * | `$odd`    | {@type boolean} | true if the iterator position `$index` is odd (otherwise false).            |
 	 *
-	 * Creating aliases for these properties is possible with {@link ng.directive:ngInit `ngInit`}.
-	 * This may be useful when, for instance, nesting ngRepeats.
+	 * <div class="alert alert-info">
+	 *   Creating aliases for these properties is possible with {@link ng.directive:ngInit `ngInit`}.
+	 *   This may be useful when, for instance, nesting ngRepeats.
+	 * </div>
 	 *
 	 *
 	 * # Iterating over object properties
@@ -26962,17 +27118,17 @@
 	 * @param {repeat_expression} ngRepeat The expression indicating how to enumerate a collection. These
 	 *   formats are currently supported:
 	 *
-	 *   * `variable in expression` – where variable is the user defined loop variable and `expression`
+	 *   * `variable in expression` â€“ where variable is the user defined loop variable and `expression`
 	 *     is a scope expression giving the collection to enumerate.
 	 *
 	 *     For example: `album in artist.albums`.
 	 *
-	 *   * `(key, value) in expression` – where `key` and `value` can be any user defined identifiers,
+	 *   * `(key, value) in expression` â€“ where `key` and `value` can be any user defined identifiers,
 	 *     and `expression` is the scope expression giving the collection to enumerate.
 	 *
 	 *     For example: `(name, age) in {'adam':10, 'amalie':12}`.
 	 *
-	 *   * `variable in expression track by tracking_expression` – You can also provide an optional tracking expression
+	 *   * `variable in expression track by tracking_expression` â€“ You can also provide an optional tracking expression
 	 *     which can be used to associate the objects in the collection with the DOM elements. If no tracking expression
 	 *     is specified, ng-repeat associates elements by identity. It is an error to have
 	 *     more than one tracking expression value resolve to the same key. (This would mean that two distinct objects are
@@ -26995,7 +27151,7 @@
 	 *     For example: `item in items | filter:searchText track by item.id` is a pattern that might be used to apply a filter
 	 *     to items in conjunction with a tracking expression.
 	 *
-	 *   * `variable in expression as alias_expression` – You can also provide an optional alias expression which will then store the
+	 *   * `variable in expression as alias_expression` â€“ You can also provide an optional alias expression which will then store the
 	 *     intermediate results of the repeater after the filters have been applied. Typically this is used to render a special message
 	 *     when a filter is active on the repeater, but the filtered result set is empty.
 	 *
@@ -27054,7 +27210,6 @@
 	 .animate-repeat.ng-move,
 	 .animate-repeat.ng-enter,
 	 .animate-repeat.ng-leave {
-        -webkit-transition:all linear 0.5s;
         transition:all linear 0.5s;
       }
 
@@ -27200,7 +27355,7 @@
 					$scope.$watchCollection(rhs, function ngRepeatAction(collection) {
 						var index, length,
 							previousNode = $element[0],     // node that cloned nodes should be inserted after
-															// initialized to the comment node anchor
+						                                    // initialized to the comment node anchor
 							nextNode,
 						// Same as lastBlockMap but it has the current state. It will become the
 						// lastBlockMap on the next iteration.
@@ -27226,7 +27381,7 @@
 							// if object, extract keys, in enumeration order, unsorted
 							collectionKeys = [];
 							for (var itemKey in collection) {
-								if (collection.hasOwnProperty(itemKey) && itemKey.charAt(0) !== '$') {
+								if (hasOwnProperty.call(collection, itemKey) && itemKey.charAt(0) !== '$') {
 									collectionKeys.push(itemKey);
 								}
 							}
@@ -27451,9 +27606,7 @@
         background: white;
       }
 
-	 .animate-show.ng-hide-add.ng-hide-add-active,
-	 .animate-show.ng-hide-remove.ng-hide-remove-active {
-        -webkit-transition: all linear 0.5s;
+	 .animate-show.ng-hide-add, .animate-show.ng-hide-remove {
         transition: all linear 0.5s;
       }
 
@@ -27610,7 +27763,6 @@
 	 </file>
 	 <file name="animations.css">
 	 .animate-hide {
-        -webkit-transition: all linear 0.5s;
         transition: all linear 0.5s;
         line-height: 20px;
         opacity: 1;
@@ -27809,7 +27961,6 @@
       }
 
 	 .animate-switch.ng-animate {
-        -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
         transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
 
         position:absolute;
@@ -28150,31 +28301,162 @@
 	 * @description
 	 * HTML `SELECT` element with angular data-binding.
 	 *
-	 * In many cases, `ngRepeat` can be used on `<option>` elements instead of {@link ng.directive:ngOptions
- * ngOptions} to achieve a similar result. However, `ngOptions` provides some benefits such as reducing
-	 * memory and increasing speed by not creating a new scope for each repeated instance, as well as providing
-	 * more flexibility in how the `<select>`'s model is assigned via the `select` **`as`** part of the
-	 * comprehension expression.
+	 * The `select` directive is used together with {@link ngModel `ngModel`} to provide data-binding
+	 * between the scope and the `<select>` control (including setting default values).
+	 * ÃŒt also handles dynamic `<option>` elements, which can be added using the {@link ngRepeat `ngRepeat}` or
+	 * {@link ngOptions `ngOptions`} directives.
 	 *
-	 * When an item in the `<select>` menu is selected, the array element or object property
-	 * represented by the selected option will be bound to the model identified by the `ngModel`
-	 * directive.
+	 * When an item in the `<select>` menu is selected, the value of the selected option will be bound
+	 * to the model identified by the `ngModel` directive. With static or repeated options, this is
+	 * the content of the `value` attribute or the textContent of the `<option>`, if the value attribute is missing.
+	 * If you want dynamic value attributes, you can use interpolation inside the value attribute.
 	 *
-	 * If the viewValue contains a value that doesn't match any of the options then the control
-	 * will automatically add an "unknown" option, which it then removes when this is resolved.
+	 * <div class="alert alert-warning">
+	 * Note that the value of a `select` directive used without `ngOptions` is always a string.
+	 * When the model needs to be bound to a non-string value, you must either explictly convert it
+	 * using a directive (see example below) or use `ngOptions` to specify the set of options.
+	 * This is because an option element can only be bound to string values at present.
+	 * </div>
+	 *
+	 * If the viewValue of `ngModel` does not match any of the options, then the control
+	 * will automatically add an "unknown" option, which it then removes when the mismatch is resolved.
 	 *
 	 * Optionally, a single hard-coded `<option>` element, with the value set to an empty string, can
 	 * be nested into the `<select>` element. This element will then represent the `null` or "not selected"
 	 * option. See example below for demonstration.
 	 *
 	 * <div class="alert alert-info">
-	 * The value of a `select` directive used without `ngOptions` is always a string.
-	 * When the model needs to be bound to a non-string value, you must either explictly convert it
-	 * using a directive (see example below) or use `ngOptions` to specify the set of options.
-	 * This is because an option element can only be bound to string values at present.
+	 * In many cases, `ngRepeat` can be used on `<option>` elements instead of {@link ng.directive:ngOptions
+ * ngOptions} to achieve a similar result. However, `ngOptions` provides some benefits, such as
+	 * more flexibility in how the `<select>`'s model is assigned via the `select` **`as`** part of the
+	 * comprehension expression, and additionally in reducing memory and increasing speed by not creating
+	 * a new scope for each repeated instance.
 	 * </div>
 	 *
-	 * ### Example (binding `select` to a non-string value)
+	 *
+	 * @param {string} ngModel Assignable angular expression to data-bind to.
+	 * @param {string=} name Property name of the form under which the control is published.
+	 * @param {string=} required Sets `required` validation error key if the value is not entered.
+	 * @param {string=} ngRequired Adds required attribute and required validation constraint to
+	 * the element when the ngRequired expression evaluates to true. Use ngRequired instead of required
+	 * when you want to data-bind to the required attribute.
+	 * @param {string=} ngChange Angular expression to be executed when selected option(s) changes due to user
+	 *    interaction with the select element.
+	 * @param {string=} ngOptions sets the options that the select is populated with and defines what is
+	 * set on the model on selection. See {@link ngOptions `ngOptions`}.
+	 *
+	 * @example
+	 * ### Simple `select` elements with static options
+	 *
+	 * <example name="static-select" module="staticSelect">
+	 * <file name="index.html">
+	 * <div ng-controller="ExampleController">
+	 *   <form name="myForm">
+	 *     <label for="singleSelect"> Single select: </label><br>
+	 *     <select name="singleSelect" ng-model="data.singleSelect">
+	 *       <option value="option-1">Option 1</option>
+	 *       <option value="option-2">Option 2</option>
+	 *     </select><br>
+	 *
+	 *     <label for="singleSelect"> Single select with "not selected" option and dynamic option values: </label><br>
+	 *     <select name="singleSelect" id="singleSelect" ng-model="data.singleSelect">
+	 *       <option value="">---Please select---</option> <!-- not selected / blank option -->
+	 *       <option value="{{data.option1}}">Option 1</option> <!-- interpolation -->
+	 *       <option value="option-2">Option 2</option>
+	 *     </select><br>
+	 *     <button ng-click="forceUnknownOption()">Force unknown option</button><br>
+	 *     <tt>singleSelect = {{data.singleSelect}}</tt>
+	 *
+	 *     <hr>
+	 *     <label for="multipleSelect"> Multiple select: </label><br>
+	 *     <select name="multipleSelect" id="multipleSelect" ng-model="data.multipleSelect" multiple>
+	 *       <option value="option-1">Option 1</option>
+	 *       <option value="option-2">Option 2</option>
+	 *       <option value="option-3">Option 3</option>
+	 *     </select><br>
+	 *     <tt>multipleSelect = {{data.multipleSelect}}</tt><br/>
+	 *   </form>
+	 * </div>
+	 * </file>
+	 * <file name="app.js">
+	 *  angular.module('staticSelect', [])
+	 *    .controller('ExampleController', ['$scope', function($scope) {
+ *      $scope.data = {
+ *       singleSelect: null,
+ *       multipleSelect: [],
+ *       option1: 'option-1',
+ *      };
+ *
+ *      $scope.forceUnknownOption = function() {
+ *        $scope.data.singleSelect = 'nonsense';
+ *      };
+ *   }]);
+	 * </file>
+	 *</example>
+	 *
+	 * ### Using `ngRepeat` to generate `select` options
+	 * <example name="ngrepeat-select" module="ngrepeatSelect">
+	 * <file name="index.html">
+	 * <div ng-controller="ExampleController">
+	 *   <form name="myForm">
+	 *     <label for="repeatSelect"> Repeat select: </label>
+	 *     <select name="repeatSelect" id="repeatSelect" ng-model="data.repeatSelect">
+	 *       <option ng-repeat="option in data.availableOptions" value="{{option.id}}">{{option.name}}</option>
+	 *     </select>
+	 *   </form>
+	 *   <hr>
+	 *   <tt>repeatSelect = {{data.repeatSelect}}</tt><br/>
+	 * </div>
+	 * </file>
+	 * <file name="app.js">
+	 *  angular.module('ngrepeatSelect', [])
+	 *    .controller('ExampleController', ['$scope', function($scope) {
+ *      $scope.data = {
+ *       repeatSelect: null,
+ *       availableOptions: [
+ *         {id: '1', name: 'Option A'},
+ *         {id: '2', name: 'Option B'},
+ *         {id: '3', name: 'Option C'}
+ *       ],
+ *      };
+ *   }]);
+	 * </file>
+	 *</example>
+	 *
+	 *
+	 * ### Using `select` with `ngOptions` and setting a default value
+	 * See the {@link ngOptions ngOptions documentation} for more `ngOptions` usage examples.
+	 *
+	 * <example name="select-with-default-values" module="defaultValueSelect">
+	 * <file name="index.html">
+	 * <div ng-controller="ExampleController">
+	 *   <form name="myForm">
+	 *     <label for="mySelect">Make a choice:</label>
+	 *     <select name="mySelect" id="mySelect"
+	 *       ng-options="option.name for option in data.availableOptions track by option.id"
+	 *       ng-model="data.selectedOption"></select>
+	 *   </form>
+	 *   <hr>
+	 *   <tt>option = {{data.selectedOption}}</tt><br/>
+	 * </div>
+	 * </file>
+	 * <file name="app.js">
+	 *  angular.module('defaultValueSelect', [])
+	 *    .controller('ExampleController', ['$scope', function($scope) {
+ *      $scope.data = {
+ *       availableOptions: [
+ *         {id: '1', name: 'Option A'},
+ *         {id: '2', name: 'Option B'},
+ *         {id: '3', name: 'Option C'}
+ *       ],
+ *       selectedOption: {id: '3', name: 'Option C'} //This sets the default value of the select in the ui
+ *       };
+ *   }]);
+	 * </file>
+	 *</example>
+	 *
+	 *
+	 * ### Binding `select` to a non-string value via `ngModel` parsing / formatting
 	 *
 	 * <example name="select-with-non-string-options" module="nonStringSelect">
 	 *   <file name="index.html">
@@ -28312,9 +28594,12 @@
 			priority: 100,
 			compile: function(element, attr) {
 
-				// If the value attribute is not defined then we fall back to the
-				// text content of the option element, which may be interpolated
-				if (isUndefined(attr.value)) {
+				if (isDefined(attr.value)) {
+					// If the value attribute is defined, check if it contains an interpolation
+					var valueInterpolated = $interpolate(attr.value, true);
+				} else {
+					// If the value attribute is not defined then we fall back to the
+					// text content of the option element, which may be interpolated
 					var interpolateFn = $interpolate(element.text(), true);
 					if (!interpolateFn) {
 						attr.$set('value', element.text());
@@ -28330,24 +28615,38 @@
 						selectCtrl = parent.data(selectCtrlName) ||
 							parent.parent().data(selectCtrlName); // in case we are in optgroup
 
+					function addOption(optionValue) {
+						selectCtrl.addOption(optionValue, element);
+						selectCtrl.ngModelCtrl.$render();
+						chromeHack(element);
+					}
+
 					// Only update trigger option updates if this is an option within a `select`
 					// that also has `ngModel` attached
 					if (selectCtrl && selectCtrl.ngModelCtrl) {
 
-						if (interpolateFn) {
+						if (valueInterpolated) {
+							// The value attribute is interpolated
+							var oldVal;
+							attr.$observe('value', function valueAttributeObserveAction(newVal) {
+								if (isDefined(oldVal)) {
+									selectCtrl.removeOption(oldVal);
+								}
+								oldVal = newVal;
+								addOption(newVal);
+							});
+						} else if (interpolateFn) {
+							// The text content is interpolated
 							scope.$watch(interpolateFn, function interpolateWatchAction(newVal, oldVal) {
 								attr.$set('value', newVal);
 								if (oldVal !== newVal) {
 									selectCtrl.removeOption(oldVal);
 								}
-								selectCtrl.addOption(newVal, element);
-								selectCtrl.ngModelCtrl.$render();
-								chromeHack(element);
+								addOption(newVal);
 							});
 						} else {
-							selectCtrl.addOption(attr.value, element);
-							selectCtrl.ngModelCtrl.$render();
-							chromeHack(element);
+							// The value attribute is static
+							addOption(attr.value);
 						}
 
 						element.on('$destroy', function() {
@@ -28408,8 +28707,9 @@
 					ctrl.$validate();
 				});
 
-				ctrl.$validators.pattern = function(value) {
-					return ctrl.$isEmpty(value) || isUndefined(regexp) || regexp.test(value);
+				ctrl.$validators.pattern = function(modelValue, viewValue) {
+					// HTML5 pattern constraint validates the input value, so we validate the viewValue
+					return ctrl.$isEmpty(viewValue) || isUndefined(regexp) || regexp.test(viewValue);
 				};
 			}
 		};

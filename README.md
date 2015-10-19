@@ -8,7 +8,7 @@ releases, so the browser support may change over time.
 
 ## Dependencies
  
-* AngularJS v1.4.4
+* AngularJS v1.4.7
 * jQuery v2.1.4
 * Node >= 0.10 
 * Gulp 
@@ -36,6 +36,8 @@ Run `gulp --prod` to use the `production` flag, minifying files (no server, no `
 
 ## Changelog
 
+* 10/18/15: Upgrade to Angular 1.4.7, upgrade `gulp-sass` to use latest and lowercase package name (for Node v4), add
+ error response to `$http` promises
 * 8/23/15: Add gulp `connect` and server task
 * 8/19/15: Upgrade to Angular 1.4.4, upgrade to jQuery 2.1.4, fix `controllerAs` to reference named functions instead of using anonymous functions
 * 5/29/15: Upgrade to Angular 1.4.0
