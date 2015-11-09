@@ -4,14 +4,14 @@
 
 	angular
 		.module('myApp')
-		.service('JSONData', jsonData);
+		.service('JSONData', JSONData);
 
 	/**
 	 * Promise response function - success
 	 * Checks typeof data returned and succeeds if JS object, throws error if not
 	 *
 	 * @param response {*} data from $http
-	 * @returns {*} object, array
+	 * @returns {object|Array}
 	 * @private
 	 */
 	function _successRes(response) {
@@ -33,15 +33,18 @@
 		throw new Error('error retrieving data', error);
 	}
 
-	jsonData.$inject = ['$http'];
+	JSONData.$inject = ['$http'];
 
-	function jsonData($http) {
+	function JSONData($http) {
+		// callable members
+		this.getLocalData = getLocalData;
+
 		/**
 		 * Get local JSON data file and return results
 		 *
 		 * @returns {promise}
 		 */
-		this.getLocalData = function() {
+		function getLocalData() {
 			return $http
 				.get('/ng-app/data/data.json')
 				.then(_successRes, _errorRes);
