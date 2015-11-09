@@ -8,33 +8,61 @@
 
 	angular
 		.module('myApp')
-		.directive('directiveName', directiveName);
+		.directive('sampleDirective', sampleDirective);
 
-	function directiveName() {
-
-		directiveNameLink.$inject = ['$scope', '$element', '$attrs'];
-
-		function directiveNameLink($scope, $element, $attrs) {
-			// data object
-			$scope.dir = {};
-
-			// watch for async data to become available and update
-			$scope.$watch('jsonData', function(newVal, oldVal) {
-				if (newVal) {
-					$scope.dir.jsonData = $scope.jsonData;
-				}
-			}, true);
-		}
-
+	/**
+	 * sampleDirective directive
+	 * Sample directive with isolate scope,
+	 * controller, link, transclusion
+	 *
+	 * @returns {object} directive
+	 */
+	function sampleDirective() {
 		return {
 			restrict: 'EA',
+			replace: true,
 			scope: {
 				jsonData: '='
 			},
 			templateUrl: 'ng-app/sub/sample.tpl.html',
 			transclude: true,
-			link: directiveNameLink
+			controller: SampleDirectiveCtrl,
+			controllerAs: 'sd',
+			bindToController: true,
+			link: sampleDirectiveLink
 		};
+	}
+
+	SampleDirectiveCtrl.$inject = ['$scope'];
+	/**
+	 * sampleDirective CONTROLLER
+	 *
+	 * @param $scope
+	 */
+	function SampleDirectiveCtrl($scope) {
+		var sd = this;
+
+		console.log('Hello from directive controller');
+	}
+
+	sampleDirectiveLink.$inject = ['$scope', '$element', '$attrs'];
+	/**
+	 * sampleDirective LINK function
+	 *
+	 * @param $scope
+	 * @param $element
+	 * @param $attrs
+	 */
+	function sampleDirectiveLink($scope, $element, $attrs) {
+		// data object
+		$scope.sdl = {};
+
+		// watch for async data to become available and update
+		$scope.$watch('jsonData', function(newVal, oldVal) {
+			if (newVal) {
+				$scope.sdl.jsonData = $scope.jsonData;
+			}
+		}, true);
 	}
 
 })();
