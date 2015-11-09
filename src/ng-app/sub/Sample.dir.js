@@ -41,28 +41,24 @@
 	 */
 	function SampleDirectiveCtrl($scope) {
 		var sd = this;
-
-		console.log('Hello from directive controller');
 	}
 
-	sampleDirectiveLink.$inject = ['$scope', '$element', '$attrs'];
+	sampleDirectiveLink.$inject = ['$scope', '$element', '$attrs', 'sd'];
 	/**
 	 * sampleDirective LINK function
 	 *
 	 * @param $scope
 	 * @param $element
 	 * @param $attrs
+	 * @param sd {controller}
 	 */
-	function sampleDirectiveLink($scope, $element, $attrs) {
-		// data object
-		$scope.sdl = {};
-
+	function sampleDirectiveLink($scope, $element, $attrs, sd) {
 		// watch for async data to become available and update
-		$scope.$watch('jsonData', function(newVal, oldVal) {
+		$scope.$watch('sd.jsonData', function(newVal, oldVal) {
 			if (newVal) {
-				$scope.sdl.jsonData = $scope.jsonData;
+				sd.jsonData = newVal;
 			}
-		}, true);
+		});
 	}
 
 })();

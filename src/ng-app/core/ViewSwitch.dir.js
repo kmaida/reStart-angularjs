@@ -11,7 +11,7 @@
 	function viewSwitch(mediaCheck, MQ, $timeout) {
 
 		viewSwitchLink.$inject = ['$scope'];
-		
+
 		function viewSwitchLink($scope) {
 			// data object
 			$scope.vs = {};
