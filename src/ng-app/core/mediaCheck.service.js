@@ -120,7 +120,7 @@
 				};
 
 				var fakeMatchMediaResize = function () {
-					clearTimeout(debounceResize);
+					$timeout.cancel(debounceResize);
 					debounceResize = $timeout(mmListener, debounceSpeed);
 				};
 
