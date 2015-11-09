@@ -3,14 +3,15 @@
 
 	angular
 		.module('myApp')
-		.controller('HeaderCtrl', headerCtrl);
+		.controller('HeaderCtrl', HeaderCtrl);
 
-	headerCtrl.$inject = ['$scope', '$location', 'JSONData'];
+	HeaderCtrl.$inject = ['$scope', '$location', 'JSONData'];
 
-	function headerCtrl($scope, $location, JSONData) {
+	function HeaderCtrl($scope, $location, JSONData) {
 		// controllerAs ViewModel
 		var header = this;
 
+		// bindable members
 		header.indexIsActive = indexIsActive;
 		header.navIsActive = navIsActive;
 

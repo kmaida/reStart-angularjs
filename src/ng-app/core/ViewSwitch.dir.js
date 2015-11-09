@@ -22,7 +22,7 @@
 			 * @param {object} mq media query
  			 */
 			function _enterFn(mq) {
-				$timeout(function () {
+				$timeout(function() {
 					$scope.vs.viewformat = 'small';
 				});
 			}
@@ -33,7 +33,7 @@
 			 * @param {object} mq media query
 			 */
 			function _exitFn(mq) {
-				$timeout(function () {
+				$timeout(function() {
 					$scope.vs.viewformat = 'large';
 				});
 			}

@@ -9,8 +9,17 @@
 	function GlobalObj() {
 		var greeting = 'Hello';
 
+		/**
+		 * Say hello
+		 */
+		function sayHello() {
+			alert(greeting);
+		}
+
+		// callable members
 		return {
-			greeting: greeting
+			greeting: greeting,
+			sayHello: sayHello
 		};
 	}
 })();

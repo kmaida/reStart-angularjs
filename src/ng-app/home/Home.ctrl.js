@@ -11,16 +11,13 @@
 		// controllerAs ViewModel
 		var home = this;
 
-		Page.setTitle('Home');
-
-		// put global variables in scope
+		// bindable members
 		home.global = GlobalObj;
-
-		// simple data binding example
 		home.name = 'Visitor';
-
-		// simple SCE ng-bind-html example
 		home.stringOfHTML = '<strong style="color: green;">Some green text</strong> bound as HTML with a <a href="#">link</a>, trusted with SCE!';
+
+		// set page <title>
+		Page.setTitle('Home');
 
 		/**
 		 * Successful promise data

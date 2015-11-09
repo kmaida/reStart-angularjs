@@ -2,8 +2,8 @@
 	'use strict';
 
 	angular
-	.module('myApp')
-	.directive('navControl', navControl);
+		.module('myApp')
+		.directive('navControl', navControl);
 
 	navControl.$inject = ['mediaCheck', 'MQ', '$timeout', '$window'];
 

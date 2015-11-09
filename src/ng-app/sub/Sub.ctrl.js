@@ -3,18 +3,19 @@
 
 	angular
 		.module('myApp')
-		.controller('SubCtrl', subCtrl);
+		.controller('SubCtrl', SubCtrl);
 
-	subCtrl.$inject = ['GlobalObj', 'JSONData', 'Page'];
+	SubCtrl.$inject = ['GlobalObj', 'JSONData', 'Page'];
 
-	function subCtrl(GlobalObj, JSONData, Page) {
+	function SubCtrl(GlobalObj, JSONData, Page) {
 		// controllerAs ViewModel
 		var sub = this;
 
-		Page.setTitle('Subpage');
-
-		// put global variables in the scope
+		// bindable members
 		sub.global = GlobalObj;
+
+		// set page <title>
+		Page.setTitle('Subpage');
 
 		/**
 		 * Successful promise data

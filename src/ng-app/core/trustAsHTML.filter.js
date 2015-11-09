@@ -8,7 +8,7 @@
 	trustAsHTML.$inject = ['$sce'];
 
 	function trustAsHTML($sce) {
-		return function (text) {
+		return function(text) {
 			return $sce.trustAsHtml(text);
 		};
 	}
