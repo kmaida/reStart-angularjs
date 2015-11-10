@@ -18,6 +18,35 @@
 	 * @returns {object} directive
 	 */
 	function sampleDirective() {
+
+		SampleDirectiveCtrl.$inject = ['$scope'];
+		/**
+		 * sampleDirective CONTROLLER
+		 *
+		 * @param $scope
+		 */
+		function SampleDirectiveCtrl($scope) {
+			var sd = this;
+		}
+
+		sampleDirectiveLink.$inject = ['$scope', '$element', '$attrs', 'sd'];
+		/**
+		 * sampleDirective LINK function
+		 *
+		 * @param $scope
+		 * @param $element
+		 * @param $attrs
+		 * @param sd {controller}
+		 */
+		function sampleDirectiveLink($scope, $element, $attrs, sd) {
+			// watch for async data to become available and update
+			$scope.$watch('sd.jsonData', function(newVal, oldVal) {
+				if (newVal) {
+					sd.jsonData = newVal;
+				}
+			});
+		}
+
 		return {
 			restrict: 'EA',
 			replace: true,
@@ -31,34 +60,6 @@
 			bindToController: true,
 			link: sampleDirectiveLink
 		};
-	}
-
-	SampleDirectiveCtrl.$inject = ['$scope'];
-	/**
-	 * sampleDirective CONTROLLER
-	 *
-	 * @param $scope
-	 */
-	function SampleDirectiveCtrl($scope) {
-		var sd = this;
-	}
-
-	sampleDirectiveLink.$inject = ['$scope', '$element', '$attrs', 'sd'];
-	/**
-	 * sampleDirective LINK function
-	 *
-	 * @param $scope
-	 * @param $element
-	 * @param $attrs
-	 * @param sd {controller}
-	 */
-	function sampleDirectiveLink($scope, $element, $attrs, sd) {
-		// watch for async data to become available and update
-		$scope.$watch('sd.jsonData', function(newVal, oldVal) {
-			if (newVal) {
-				sd.jsonData = newVal;
-			}
-		});
 	}
 
 })();
