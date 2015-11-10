@@ -38,7 +38,12 @@
 	}
 
 	resolveLocalData.$inject = ['JSONData'];
-
+	/**
+	 * Get local data for route resolve
+	 *
+	 * @param JSONData {factory}
+	 * @returns {promise}
+	 */
 	function resolveLocalData(JSONData) {
 		return JSONData.getLocalData();
 	}

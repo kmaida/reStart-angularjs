@@ -1,6 +1,6 @@
 // Directives (and associated attributes) are camelCase in JS and snake-case in HTML
 // Angular's built-in <a> directive automatically implements preventDefault on links that don't have an href attribute
-// Complex JavaScript DOM manipulation should always be done in directives, and $apply should never be used in a controller! Simpler DOM manipulation should be in the view.
+// Complex JavaScript DOM manipulation should always be done in directive link functions, and $apply should never be used in a controller! Simple DOM manipulation should be in the view.
 
 /*--- Sample Directive with a $watch ---*/
 (function() {
@@ -10,6 +10,7 @@
 		.module('myApp')
 		.directive('sampleDirective', sampleDirective);
 
+	sampleDirective.$inject = ['$timeout'];
 	/**
 	 * sampleDirective directive
 	 * Sample directive with isolate scope,
@@ -17,17 +18,7 @@
 	 *
 	 * @returns {object} directive
 	 */
-	function sampleDirective() {
-
-		SampleDirectiveCtrl.$inject = ['$scope'];
-		/**
-		 * sampleDirective CONTROLLER
-		 *
-		 * @param $scope
-		 */
-		function SampleDirectiveCtrl($scope) {
-			var sd = this;
-		}
+	function sampleDirective($timeout) {
 
 		sampleDirectiveLink.$inject = ['$scope', '$element', '$attrs', 'sd'];
 		/**
@@ -43,6 +34,10 @@
 			$scope.$watch('sd.jsonData', function(newVal, oldVal) {
 				if (newVal) {
 					sd.jsonData = newVal;
+
+					$timeout(function() {
+						console.log('hi');
+					}, 1000);
 				}
 			});
 		}
@@ -60,6 +55,14 @@
 			bindToController: true,
 			link: sampleDirectiveLink
 		};
+	}
+
+	SampleDirectiveCtrl.$inject = [];
+	/**
+	 * sampleDirective CONTROLLER
+	 */
+	function SampleDirectiveCtrl() {
+		var sd = this;
 	}
 
 })();
