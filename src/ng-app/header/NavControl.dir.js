@@ -9,12 +9,9 @@
 
 	function navControl(mediaCheck, MQ, $timeout, $window) {
 
-		navControlLink.$inject = ['$scope', '$element', '$attrs'];
+		navControlLink.$inject = ['$scope', '$element', '$attrs', 'nav'];
 
-		function navControlLink($scope, $element, $attrs) {
-			// data object
-			$scope.nav = {};
-
+		function navControlLink($scope, $element, $attrs, nav) {
 			var _$win = angular.element($window);
 			var _$body = angular.element('body');
 			var _layoutCanvas = _$body.find('.layout-canvas');
@@ -75,6 +72,17 @@
 			}
 
 			/**
+			 * Toggle nav open/closed
+			 */
+			function toggleNav() {
+				if (!_navOpen) {
+					_openNav();
+				} else {
+					_closeNav();
+				}
+			}
+
+			/**
 			 * Function to execute when entering mobile media query
 			 * Close nav and set up menu toggling functionality
 			 *
@@ -84,14 +92,8 @@
 				_closeNav();
 
 				$timeout(function () {
-					// toggle mobile navigation open/closed
-					$scope.nav.toggleNav = function () {
-						if (!_navOpen) {
-							_openNav();
-						} else {
-							_closeNav();
-						}
-					};
+					// bind function to toggle mobile navigation open/closed
+					nav.toggleNav = toggleNav;
 				});
 
 				$scope.$on('$locationChangeStart', _closeNav);
@@ -105,7 +107,8 @@
 			 */
 			function _exitMobile() {
 				$timeout(function () {
-					$scope.nav.toggleNav = null;
+					// unbind function to toggle mobile navigation open/closed
+					nav.toggleNav = null;
 				});
 
 				_$body.removeClass('nav-closed nav-open');
@@ -129,8 +132,17 @@
 
 		return {
 			restrict: 'EA',
+			controller: navControlCtrl,
+			controllerAs: 'nav',
+			bindToController: true,
 			link: navControlLink
 		};
+	}
+
+	navControlCtrl.$inject = [];
+
+	function navControlCtrl() {
+		var nc = this;
 	}
 
 })();
