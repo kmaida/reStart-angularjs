@@ -42,7 +42,7 @@
 	 * Get local data for route resolve
 	 *
 	 * @param JSONData {factory}
-	 * @returns {promise}
+	 * @returns {promise} data
 	 */
 	function resolveLocalData(JSONData) {
 		return JSONData.getLocalData();

@@ -36,7 +36,7 @@
 					sd.jsonData = newVal;
 
 					$timeout(function() {
-						console.log('hi');
+						console.log('demonstrate $timeout injection in a directive link function');
 					}, 1000);
 				}
 			});

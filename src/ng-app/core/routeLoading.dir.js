@@ -5,6 +5,7 @@
 		.module('myApp')
 		.directive('routeLoading', routeLoading);
 
+	routeLoading.$inject = [];
 	/**
 	 * routeLoading directive
 	 * Sample directive with isolate scope,
@@ -13,6 +14,28 @@
 	 * @returns {object} directive
 	 */
 	function routeLoading() {
+
+		routeLoadingLink.$inject = ['$scope', '$element', '$attrs', 'loading'];
+
+		function routeLoadingLink($scope, $element, $attrs, loading) {
+			var _$body = angular.element('body');
+			var _winHeight = window.innerHeight + 'px';
+
+			$scope.$watch('loading.active', function(newVal, oldVal) {
+				if (newVal) {
+					_$body.css({
+						height: _winHeight,
+						overflowY: 'hidden'
+					});
+				} else {
+					_$body.css({
+						height: 'auto',
+						overflowY: 'auto'
+					});
+				}
+			});
+		}
+
 		return {
 			restrict: 'EA',
 			replace: true,
@@ -20,7 +43,8 @@
 			transclude: true,
 			controller: routeLoadingCtrl,
 			controllerAs: 'loading',
-			bindToController: true
+			bindToController: true,
+			link: routeLoadingLink
 		};
 	}
 

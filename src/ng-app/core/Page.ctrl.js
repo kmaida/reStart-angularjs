@@ -5,9 +5,9 @@
 		.module('myApp')
 		.controller('PageCtrl', PageCtrl);
 
-	PageCtrl.$inject = ['$scope', 'Page'];
+	PageCtrl.$inject = ['Page'];
 
-	function PageCtrl($scope, Page) {
+	function PageCtrl(Page) {
 		var page = this;
 
 		// associate page <title>
