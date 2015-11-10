@@ -5,9 +5,9 @@
 		.module('myApp')
 		.controller('HeaderCtrl', HeaderCtrl);
 
-	HeaderCtrl.$inject = ['$scope', '$location', 'JSONData'];
+	HeaderCtrl.$inject = ['$location', 'JSONData'];
 
-	function HeaderCtrl($scope, $location, JSONData) {
+	function HeaderCtrl($location, JSONData) {
 		// controllerAs ViewModel
 		var header = this;
 
