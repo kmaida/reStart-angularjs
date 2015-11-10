@@ -13,12 +13,18 @@
 			.when('/', {
 				templateUrl: 'ng-app/home/Home.view.html',
 				controller: 'HomeCtrl',
-				controllerAs: 'home'
+				controllerAs: 'home',
+				resolve: {
+					resolveLocalData: resolveLocalData
+				}
 			})
 			.when('/subpage', {
 				templateUrl: 'ng-app/sub/Sub.view.html',
 				controller: 'SubCtrl',
-				controllerAs: 'sub'
+				controllerAs: 'sub',
+				resolve: {
+					resolveLocalData: resolveLocalData
+				}
 			})
 			.otherwise({
 				redirectTo: '/'
@@ -29,5 +35,11 @@
 				enabled: true
 			})
 			.hashPrefix('!');
+	}
+
+	resolveLocalData.$inject = ['JSONData'];
+
+	function resolveLocalData(JSONData) {
+		return JSONData.getLocalData();
 	}
 })();

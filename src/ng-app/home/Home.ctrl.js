@@ -5,9 +5,9 @@
 		.module('myApp')
 		.controller('HomeCtrl', HomeCtrl);
 
-	HomeCtrl.$inject = ['GlobalObj', 'JSONData', 'Page'];
+	HomeCtrl.$inject = ['GlobalObj', 'Page', 'resolveLocalData'];
 
-	function HomeCtrl(GlobalObj, JSONData, Page) {
+	function HomeCtrl(GlobalObj, Page, resolveLocalData) {
 		// controllerAs ViewModel
 		var home = this;
 
@@ -19,17 +19,7 @@
 		// set page <title>
 		Page.setTitle('Home');
 
-		/**
-		 * Successful promise data
-		 *
-		 * @param data {json}
-		 * @private
-		 */
-		function _getJsonSuccess(data) {
-			home.json = data;
-		}
-
-		// get the data from JSON
-		JSONData.getLocalData().then(_getJsonSuccess);
+		// data from route resolve
+		home.json = resolveLocalData;
 	}
 })();

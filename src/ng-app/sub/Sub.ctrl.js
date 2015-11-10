@@ -5,9 +5,9 @@
 		.module('myApp')
 		.controller('SubCtrl', SubCtrl);
 
-	SubCtrl.$inject = ['GlobalObj', 'JSONData', 'Page'];
+	SubCtrl.$inject = ['GlobalObj', 'Page', 'resolveLocalData'];
 
-	function SubCtrl(GlobalObj, JSONData, Page) {
+	function SubCtrl(GlobalObj, Page, resolveLocalData) {
 		// controllerAs ViewModel
 		var sub = this;
 
@@ -17,18 +17,8 @@
 		// set page <title>
 		Page.setTitle('Subpage');
 
-		/**
-		 * Successful promise data
-		 *
-		 * @param data {json}
-		 * @private
-		 */
-		function _getJsonSuccess(data) {
-			sub.json = data;
-		}
-
-		// get the data from JSON
-		JSONData.getLocalData().then(_getJsonSuccess);
+		// data from route resolve
+		sub.json = resolveLocalData;
 	}
 
 })();
