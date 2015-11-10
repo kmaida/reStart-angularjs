@@ -38,9 +38,9 @@
 			console.log(msg);
 
 			/**
-			 * On routing error, go to another route/state.
+			 * On routing error, show an error.
 			 */
-			$location.path('/');
+			alert('An error occurred. Please try again.');
 		}
 
 		$rootScope.$on('$routeChangeError', _routeChangeError);
