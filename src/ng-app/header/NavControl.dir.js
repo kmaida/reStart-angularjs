@@ -11,13 +11,13 @@
 
 		navControlLink.$inject = ['$scope', '$element', '$attrs'];
 
-		function navControlLink($scope) {
+		function navControlLink($scope, $element, $attrs) {
 			// data object
 			$scope.nav = {};
 
-			var _win = angular.element($window);
-			var _body = angular.element('body');
-			var _layoutCanvas = _body.find('.layout-canvas');
+			var _$win = angular.element($window);
+			var _$body = angular.element('body');
+			var _layoutCanvas = _$body.find('.layout-canvas');
 			var _navOpen;
 			var _debounceResize;
 
@@ -27,7 +27,9 @@
 			 * @private
 			 */
 			function _resized() {
-				_layoutCanvas.css('min-height', $window.innerHeight + 'px');
+				_layoutCanvas.css({
+					minHeight: $window.innerHeight + 'px'
+				});
 			}
 
 			/**
@@ -44,7 +46,7 @@
 			_layoutHeight();
 
 			// bind height calculation to window resize
-			_win.bind('resize', _layoutHeight);
+			_$win.bind('resize', _layoutHeight);
 
 			/**
 			 * Open mobile navigation
@@ -52,9 +54,9 @@
 			 * @private
 			 */
 			function _openNav() {
-				_body
-				.removeClass('nav-closed')
-				.addClass('nav-open');
+				_$body
+					.removeClass('nav-closed')
+					.addClass('nav-open');
 
 				_navOpen = true;
 			}
@@ -65,9 +67,9 @@
 			 * @private
 			 */
 			function _closeNav() {
-				_body
-				.removeClass('nav-open')
-				.addClass('nav-closed');
+				_$body
+					.removeClass('nav-open')
+					.addClass('nav-closed');
 
 				_navOpen = false;
 			}
@@ -106,14 +108,14 @@
 					$scope.nav.toggleNav = null;
 				});
 
-				_body.removeClass('nav-closed nav-open');
+				_$body.removeClass('nav-closed nav-open');
 			}
 
 			/**
 			 * Unbind resize listener on destruction of scope
 			 */
 			$scope.$on('$destroy', function() {
-				win.unbind('resize', _layoutHeight);
+				_$win.unbind('resize', _layoutHeight);
 			});
 
 			// Set up functionality to run on enter/exit of media query

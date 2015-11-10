@@ -5,23 +5,65 @@
 		.module('myApp')
 		.directive('routeLoading', routeLoading);
 
-	routeLoading.$inject = [];
-	/**
-	 * routeLoading directive
-	 * Sample directive with isolate scope,
-	 * controller, link, transclusion
-	 *
-	 * @returns {object} directive
-	 */
-	function routeLoading() {
+	routeLoading.$inject = ['$window', '$timeout'];
+
+	function routeLoading($window, $timeout) {
 
 		routeLoadingLink.$inject = ['$scope', '$element', '$attrs', 'loading'];
 
+		/**
+		 * routeLoading LINK
+		 * Disables page scrolling when loading overlay is open
+		 *
+		 * @param $scope
+		 * @param $element
+		 * @param $attrs
+		 * @param loading {controller}
+		 */
 		function routeLoadingLink($scope, $element, $attrs, loading) {
+			var _$win = angular.element($window);
 			var _$body = angular.element('body');
-			var _winHeight = window.innerHeight + 'px';
+			var _winHeight = $window.innerHeight + 'px';
+			var _debounceResize;
 
-			$scope.$watch('loading.active', function(newVal, oldVal) {
+			/**
+			 * Window resized
+			 * If loading, reapply body height
+			 * to prevent scrollbar
+			 *
+			 * @private
+			 */
+			function _resized() {
+				_winHeight = $window.innerHeight + 'px';
+
+				if (loading.active) {
+					_$body.css({
+						height: _winHeight,
+						overflowY: 'hidden'
+					});
+				}
+			}
+
+			/**
+			 * Resize handler
+			 * Debounce resized function
+			 *
+			 * @private
+			 */
+			function _resizeHandler() {
+				$timeout.cancel(_debounceResize);
+				_debounceResize = $timeout(_resized, 200);
+			}
+
+			_$win.bind('resize', _resizeHandler);
+
+			/**
+			 * $watch loading.active
+			 *
+			 * @param newVal {boolean}
+			 * @param oldVal {undefined|boolean}
+			 */
+			function $watchActive(newVal, oldVal) {
 				if (newVal) {
 					_$body.css({
 						height: _winHeight,
@@ -33,6 +75,15 @@
 						overflowY: 'auto'
 					});
 				}
+			}
+
+			$scope.$watch('loading.active', $watchActive);
+
+			/**
+			 * $destroy - unbind resize handler
+			 */
+			$scope.$on('$destroy', function() {
+				_$win.unbind(_resizeHandler);
 			});
 		}
 
@@ -51,6 +102,8 @@
 	routeLoadingCtrl.$inject = ['$scope'];
 	/**
 	 * routeLoading CONTROLLER
+	 * Update the loading status based
+	 * on routeChange state
 	 */
 	function routeLoadingCtrl($scope) {
 		var loading = this;

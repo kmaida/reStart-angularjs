@@ -26,8 +26,13 @@
 					resolveLocalData: resolveLocalData
 				}
 			})
+			.when('/404', {
+				templateUrl: 'ng-app/404/404.view.html',
+				controller: 'Error404Ctrl',
+				controllerAs: 'e404'
+			})
 			.otherwise({
-				redirectTo: '/'
+				redirectTo: '/404'
 			});
 
 		$locationProvider

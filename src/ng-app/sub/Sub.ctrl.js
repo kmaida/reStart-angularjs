@@ -12,10 +12,11 @@
 		var sub = this;
 
 		// bindable members
+		sub.title = 'Subpage';
 		sub.global = GlobalObj;
 
 		// set page <title>
-		Page.setTitle('Subpage');
+		Page.setTitle(sub.title);
 
 		// data from route resolve
 		sub.json = resolveLocalData;
