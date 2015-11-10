@@ -63,6 +63,8 @@
 	 */
 	function SampleDirectiveCtrl() {
 		var sd = this;
+
+		// controller logic goes here
 	}
 
 })();
