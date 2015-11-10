@@ -9,9 +9,12 @@
 
 	function navControl(mediaCheck, MQ, $timeout, $window) {
 
-		navControlLink.$inject = ['$scope', '$element', '$attrs', 'nav'];
+		navControlLink.$inject = ['$scope', '$element', '$attrs'];
 
-		function navControlLink($scope, $element, $attrs, nav) {
+		function navControlLink($scope, $element, $attrs) {
+			// data model
+			$scope.nav = {};
+
 			var _$win = angular.element($window);
 			var _$body = angular.element('body');
 			var _layoutCanvas = _$body.find('.layout-canvas');
@@ -93,7 +96,7 @@
 
 				$timeout(function () {
 					// bind function to toggle mobile navigation open/closed
-					nav.toggleNav = toggleNav;
+					$scope.nav.toggleNav = toggleNav;
 				});
 
 				$scope.$on('$locationChangeStart', _closeNav);
@@ -106,9 +109,9 @@
 			 * @private
 			 */
 			function _exitMobile() {
-				$timeout(function () {
+				$timeout(function() {
 					// unbind function to toggle mobile navigation open/closed
-					nav.toggleNav = null;
+					$scope.nav.toggleNav = null;
 				});
 
 				_$body.removeClass('nav-closed nav-open');
@@ -132,17 +135,8 @@
 
 		return {
 			restrict: 'EA',
-			controller: navControlCtrl,
-			controllerAs: 'nav',
-			bindToController: true,
 			link: navControlLink
 		};
-	}
-
-	navControlCtrl.$inject = [];
-
-	function navControlCtrl() {
-		var nc = this;
 	}
 
 })();
