@@ -9,9 +9,9 @@
 
 	function navControl(mediaCheck, MQ, $timeout, $window) {
 
-		navControlLink.$inject = ['$scope', '$element', '$attrs'];
+		navControlLink.$inject = ['$scope'];
 
-		function navControlLink($scope, $element, $attrs) {
+		function navControlLink($scope) {
 			// data model
 			$scope.nav = {};
 

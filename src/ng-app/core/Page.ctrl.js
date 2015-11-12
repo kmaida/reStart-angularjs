@@ -5,9 +5,9 @@
 		.module('myApp')
 		.controller('PageCtrl', PageCtrl);
 
-	PageCtrl.$inject = ['Page', '$rootScope', '$location'];
+	PageCtrl.$inject = ['Page', '$rootScope'];
 
-	function PageCtrl(Page, $rootScope, $location) {
+	function PageCtrl(Page, $rootScope) {
 		var page = this;
 
 		// private variables
