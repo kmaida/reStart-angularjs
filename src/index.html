@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <!--[if lte IE 8]><html lang="en" class="no-js oldIE ie no-angular"><![endif]-->
-<!--[if IE 9]><html lang="en" class="no-js ie9 ie" ng-app="myApp" ng-controller="PageCtrl as page"><![endif]-->
-<!--[if gt IE 9|!IE]><!--><html class="no-js" ng-app="myApp" ng-controller="PageCtrl as page"><!-- <![endif]-->
+<!--[if IE 9]><html lang="en" class="no-js ie9 ie" ng-app="myApp" ng-controller="PageCtrl as page" ng-cloak><![endif]-->
+<!--[if gt IE 9|!IE]><!--><html class="no-js" ng-app="myApp" ng-controller="PageCtrl as page" ng-cloak><!-- <![endif]-->
 	<head>
 		<meta charset="utf-8">
 		<title>reStart Angular | {{page.pageTitle.title()}}</title>
@@ -17,7 +17,7 @@
 		<script src="/assets/js/vendor/modernizr.min.js"></script>
 	</head>
 
-	<body ng-cloak>
+	<body>
 		<div class="layout-overflow">
 			<div class="layout-canvas">
 			

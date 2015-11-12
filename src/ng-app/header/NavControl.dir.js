@@ -15,6 +15,7 @@
 			// data model
 			$scope.nav = {};
 
+			// private variables
 			var _$win = angular.element($window);
 			var _$body = angular.element('body');
 			var _layoutCanvas = _$body.find('.layout-canvas');
