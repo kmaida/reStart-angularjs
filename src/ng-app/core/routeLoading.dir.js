@@ -5,9 +5,9 @@
 		.module('myApp')
 		.directive('routeLoading', routeLoading);
 
-	routeLoading.$inject = ['$window', '$timeout'];
+	routeLoading.$inject = ['$window', '$timeout', 'resize'];
 
-	function routeLoading($window, $timeout) {
+	function routeLoading($window, $timeout, resize) {
 
 		routeLoadingLink.$inject = ['$scope', '$element', '$attrs', 'loading'];
 
@@ -21,10 +21,8 @@
 		 * @param loading {controller}
 		 */
 		function routeLoadingLink($scope, $element, $attrs, loading) {
-			var _$win = angular.element($window);
 			var _$body = angular.element('body');
 			var _winHeight = $window.innerHeight + 'px';
-			var _debounceResize;
 
 			/**
 			 * Window resized
@@ -45,17 +43,13 @@
 			}
 
 			/**
-			 * Resize handler
-			 * Debounce resized function
-			 *
-			 * @private
+			 * Initialize debounced resize
 			 */
-			function _resizeHandler() {
-				$timeout.cancel(_debounceResize);
-				_debounceResize = $timeout(_resized, 200);
-			}
-
-			_$win.bind('resize', _resizeHandler);
+			resize.init({
+				scope: $scope,
+				resizedFn: _resized,
+				debounce: 200
+			});
 
 			/**
 			 * $watch loading.active
@@ -78,13 +72,6 @@
 			}
 
 			$scope.$watch('loading.active', $watchActive);
-
-			/**
-			 * $destroy - unbind resize handler
-			 */
-			$scope.$on('$destroy', function() {
-				_$win.unbind(_resizeHandler);
-			});
 		}
 
 		return {

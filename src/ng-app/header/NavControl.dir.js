@@ -5,9 +5,9 @@
 		.module('myApp')
 		.directive('navControl', navControl);
 
-	navControl.$inject = ['mediaCheck', 'MQ', '$timeout', '$window'];
+	navControl.$inject = ['mediaCheck', 'MQ', '$timeout', '$window', 'resize'];
 
-	function navControl(mediaCheck, MQ, $timeout, $window) {
+	function navControl(mediaCheck, MQ, $timeout, $window, resize) {
 
 		navControlLink.$inject = ['$scope'];
 
@@ -16,11 +16,9 @@
 			$scope.nav = {};
 
 			// private variables
-			var _$win = angular.element($window);
 			var _$body = angular.element('body');
 			var _layoutCanvas = _$body.find('.layout-canvas');
 			var _navOpen;
-			var _debounceResize;
 
 			/**
 			 * Resized window (debounced)
@@ -34,28 +32,13 @@
 			}
 
 			/**
-			 * Bind resize event to window
-			 * Apply min-height to layout to
-			 * make nav full-height
+			 * Initialize debounced resize
 			 */
-			function _layoutHeight() {
-				$timeout.cancel(_debounceResize);
-				_debounceResize = $timeout(_resized, 200);
-			}
-
-			// run initial layout height calculation
-			_layoutHeight();
-
-			// bind height calculation to window resize
-			_$win.bind('resize', _layoutHeight);
-
-			/**
-			 * Unbind resize listener (on destruction of $scope)
-			 */
-			function _unbindResize() {
-				_$win.unbind('resize', _layoutHeight);
-			}
-			$scope.$on('$destroy', _unbindResize);
+			resize.init({
+				scope: $scope,
+				resizedFn: _resized,
+				debounce: 200
+			});
 
 			/**
 			 * Open mobile navigation
