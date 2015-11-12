@@ -4,18 +4,18 @@
 	angular.module('mediaCheck', []).service('mediaCheck', ['$window', '$timeout', function($window, $timeout) {
 		this.init = function(options) {
 			var $scope = options['scope'],
-					query = options['mq'],
-					debounce = options['debounce'],
-					$win = angular.element($window),
-					breakpoints,
-					createListener = void 0,
-					hasMatchMedia = $window.matchMedia !== undefined && !!$window.matchMedia('!').addListener,
-					mqListListener,
-					mmListener,
-					debounceResize,
-					mq = void 0,
-					mqChange = void 0,
-					debounceSpeed = !!debounce || debounce === 0 ? debounce : 250;
+				query = options['mq'],
+				debounce = options['debounce'],
+				$win = angular.element($window),
+				breakpoints,
+				createListener = void 0,
+				hasMatchMedia = $window.matchMedia !== undefined && !!$window.matchMedia('!').addListener,
+				mqListListener,
+				mmListener,
+				debounceResize,
+				mq = void 0,
+				mqChange = void 0,
+				debounceSpeed = !!debounce || debounce === 0 ? debounce : 250;
 
 			function timeoutFn(fn, mq) {
 				if (typeof fn === 'function') {
@@ -106,10 +106,10 @@
 
 				mmListener = function() {
 					var parts = query.match(/\((.*)-.*:\s*([\d\.]*)(.*)\)/),
-							constraint = parts[1],
-							value = getPXValue(parseInt(parts[2], 10), parts[3]),
-							fakeMatchMedia = {},
-							windowWidth = $window.innerWidth || document.documentElement.clientWidth;
+						constraint = parts[1],
+						value = getPXValue(parseInt(parts[2], 10), parts[3]),
+						fakeMatchMedia = {},
+						windowWidth = $window.innerWidth || document.documentElement.clientWidth;
 
 					fakeMatchMedia.matches = constraint === 'max' && value > windowWidth || constraint === 'min' && value < windowWidth;
 
