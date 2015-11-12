@@ -6,50 +6,42 @@
 		.module('myApp')
 		.directive('viewSwitch', viewSwitch);
 
-	viewSwitch.$inject = ['mediaCheck', 'MQ', '$timeout'];
+	function viewSwitch() {
+		return {
+			restrict: 'A',
+			controller: viewSwitchCtrl
+		};
+	}
 
-	function viewSwitch(mediaCheck, MQ, $timeout) {
+	viewSwitchCtrl.$inject = ['$scope', 'mediaCheck', 'MQ', '$rootScope'];
 
-		viewSwitchLink.$inject = ['$scope'];
-
-		function viewSwitchLink($scope) {
-			// data object
-			$scope.vs = {};
-
-			/**
-			 * Function to run on enter media query
-			 *
-			 * @param {object} mq media query
- 			 */
-			function _enterFn(mq) {
-				$timeout(function() {
-					$scope.vs.viewformat = 'small';
-				});
-			}
-
-			/**
-			 * Function to run on exit media query
-			 *
-			 * @param {object} mq media query
-			 */
-			function _exitFn(mq) {
-				$timeout(function() {
-					$scope.vs.viewformat = 'large';
-				});
-			}
-
-			// initialize mediaCheck
-			mediaCheck.init({
-				scope: $scope,
-				mq: MQ.SMALL,
-				enter: _enterFn,
-				exit: _exitFn
-			});
+	function viewSwitchCtrl($scope, mediaCheck, MQ, $rootScope) {
+		/**
+		 * Function to run on enter media query
+		 * $broadcast 'enter-mobile' event
+		 *
+		 * @param {object} mq media query
+		 */
+		function _enterFn(mq) {
+			$rootScope.$broadcast('enter-mobile');
 		}
 
-		return {
-			restrict: 'EA',
-			link: viewSwitchLink
-		};
+		/**
+		 * Function to run on exit media query
+		 * $broadcast 'exit-mobile' event
+		 *
+		 * @param {object} mq media query
+		 */
+		function _exitFn(mq) {
+			$rootScope.$broadcast('exit-mobile');
+		}
+
+		// initialize mediaCheck
+		mediaCheck.init({
+			scope: $scope,
+			mq: MQ.SMALL,
+			enter: _enterFn,
+			exit: _exitFn
+		});
 	}
 })();

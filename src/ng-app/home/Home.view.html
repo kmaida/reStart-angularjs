@@ -18,15 +18,15 @@
 		<p>The following view is manipulated by the current media query. Resize your browser window to see the
 			display change.</p>
 
-		<p><strong>Display:</strong> {{vs.viewformat === 'large' ? 'Table (large view)' : 'List (small view)'}}</p>
+		<p><strong>Display:</strong> {{home.viewformat === 'large' ? 'Table (large view)' : 'List (small view)'}}</p>
 
-		<div id="markupView-wrapper" class="markupView-wrapper" ng-switch on="vs.viewformat">
+		<div id="markupView-wrapper" class="markupView-wrapper" ng-switch="home.viewformat">
 			<div ng-switch-when="large">
-				<section ng-include src="'ng-app/home/large.tpl.html'"></section>
+				<section ng-include="'ng-app/home/large.tpl.html'"></section>
 			</div>
 
 			<div ng-switch-when="small">
-				<section ng-include src="'ng-app/home/small.tpl.html'"></section>
+				<section ng-include="'ng-app/home/small.tpl.html'"></section>
 			</div>
 		</div>
 	</section>

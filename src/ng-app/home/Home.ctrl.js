@@ -5,9 +5,9 @@
 		.module('myApp')
 		.controller('HomeCtrl', HomeCtrl);
 
-	HomeCtrl.$inject = ['GlobalObj', 'Page', 'resolveLocalData'];
+	HomeCtrl.$inject = ['$scope', 'GlobalObj', 'Page', 'resolveLocalData'];
 
-	function HomeCtrl(GlobalObj, Page, resolveLocalData) {
+	function HomeCtrl($scope, GlobalObj, Page, resolveLocalData) {
 		// controllerAs ViewModel
 		var home = this;
 
@@ -22,5 +22,28 @@
 
 		// data from route resolve
 		home.json = resolveLocalData;
+
+		/**
+		 * Enter small mq
+		 * Set home.viewformat
+		 *
+		 * @private
+		 */
+		function _enterMobile() {
+			home.viewformat = 'small';
+		}
+
+		/**
+		 * Exit small mq
+		 * Set home.viewformat
+		 *
+		 * @private
+		 */
+		function _exitMobile() {
+			home.viewformat = 'large';
+		}
+
+		$scope.$on('enter-mobile', _enterMobile);
+		$scope.$on('exit-mobile', _exitMobile);
 	}
 })();

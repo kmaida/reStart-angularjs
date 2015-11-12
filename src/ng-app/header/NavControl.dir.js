@@ -50,6 +50,14 @@
 			_$win.bind('resize', _layoutHeight);
 
 			/**
+			 * Unbind resize listener (on destruction of $scope)
+			 */
+			function _unbindResize() {
+				_$win.unbind('resize', _layoutHeight);
+			}
+			$scope.$on('$destroy', _unbindResize);
+
+			/**
 			 * Open mobile navigation
 			 *
 			 * @private
@@ -117,13 +125,6 @@
 
 				_$body.removeClass('nav-closed nav-open');
 			}
-
-			/**
-			 * Unbind resize listener on destruction of scope
-			 */
-			$scope.$on('$destroy', function() {
-				_$win.unbind('resize', _layoutHeight);
-			});
 
 			// Set up functionality to run on enter/exit of media query
 			mediaCheck.init({
