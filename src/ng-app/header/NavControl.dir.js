@@ -78,21 +78,25 @@
 			}
 
 			/**
+			 * When changing location, close the nav if it's open
+			 */
+			$scope.$on('$locationChangeStart', function() {
+				if (_navOpen) {
+					_closeNav();
+				}
+			});
+
+			/**
 			 * Function to execute when entering mobile media query
 			 * Close nav and set up menu toggling functionality
 			 *
 			 * @private
 			 */
 			function _enterMobile(mq) {
-				console.log('enter mobile', mq);
-
 				_closeNav();
 
 				// bind function to toggle mobile navigation open/closed
 				$scope.nav.toggleNav = toggleNav;
-
-				// move this so it doesn't continually get rebound
-				$scope.$on('$locationChangeStart', _closeNav);
 			}
 
 			/**
@@ -102,10 +106,8 @@
 			 * @private
 			 */
 			function _exitMobile(mq) {
-				console.log('exit mobile', mq);
-
 				// unbind function to toggle mobile navigation open/closed
-				//$scope.nav.toggleNav = null;
+				$scope.nav.toggleNav = null;
 
 				_$body.removeClass('nav-closed nav-open');
 			}
