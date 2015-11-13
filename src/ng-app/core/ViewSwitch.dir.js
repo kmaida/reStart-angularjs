@@ -23,7 +23,6 @@
 		 * @param {object} mq media query
 		 */
 		function _enterFn(mq) {
-			console.log('vs');
 			$rootScope.$broadcast('enter-mobile');
 		}
 
@@ -34,7 +33,6 @@
 		 * @param {object} mq media query
 		 */
 		function _exitFn(mq) {
-			console.log('vs');
 			$rootScope.$broadcast('exit-mobile');
 		}
 

@@ -1,15 +1,18 @@
 (function() {
 	'use strict';
 
-	angular.module('mediaCheck', []).service('mediaCheck', ['$window', '$timeout', function($window, $timeout) {
+	angular.module('mediaCheck', []);
+
+	angular.module('mediaCheck').service('mediaCheck', ['$window', '$timeout', function($window, $timeout) {
 		var self = this;
+
 		var hasMatchMedia = $window.matchMedia !== undefined && !!$window.matchMedia('!').addListener;
 
-		self.globals = {
+		// shared settings
+		self.shared = {
 			query: null,
 			mqChange: void 0,
 			breakpoints: null,
-			mmListener: null,
 			enterFn: null,
 			exitFn: null,
 			changeFn: null
@@ -39,26 +42,34 @@
 		 * @public
 		 */
 		self.init = function(options) {
+			// general
+			var query = options['mq'];
+			var mqChange = void 0;
 			var $scope = options['scope'];
-			var debounce = options['debounce'];
 			var $win = angular.element($window);
+
+			// media query changing functions
+			var enterFn = options.enter;
+			var exitFn = options.exit;
+			var changeFn = options.change;
+
+			// matchMedia supported
+			var mmListener;
+			var mq = void 0;
 			var createListener = void 0;
 			var mqListListener;
+
+			// matchMedia not supported
+			var debounce = options['debounce'];
+			var breakpoints;
 			var debounceResize;
-			var mq = void 0;
 			var debounceSpeed = !!debounce || debounce === 0 ? debounce : 250;
 
-			// set global variables from init options
-			self.globals.query = options['mq'];
-			self.globals.enterFn = options.enter;
-			self.globals.exitFn = options.exit;
-			self.globals.changeFn = options.change;
-
-			// get newly-set global variables to use here
-			var query = self.globals.query;
-			var enterFn = self.globals.enterFn;
-			var exitFn = self.globals.exitFn;
-			var changeFn = self.globals.changeFn;
+			// set shared options
+			self.shared.query = query;
+			self.shared.enterFn = enterFn;
+			self.shared.exitFn = exitFn;
+			self.shared.changeFn = changeFn;
 
 			/**
 			 * Convert ems to px
@@ -101,7 +112,14 @@
 
 			// Modern browser supports matchMedia
 			if (hasMatchMedia) {
-				self.globals.mqChange = function(mq) {
+
+				/**
+				 * Check for matches
+				 * Run functions appropriately
+				 *
+				 * @param mq {object} MediaQueryList object
+				 */
+				mqChange = function(mq) {
 					if (mq.matches) {
 						_timeoutFn(enterFn, mq);
 					} else {
@@ -110,9 +128,17 @@
 					_timeoutFn(changeFn, mq);
 				};
 
+				// share mqChange (matchMedia supported)
+				self.shared.mqChange = mqChange;
+
+				/**
+				 * Create listener for media query changes
+				 * Bind to orientation change
+				 * Unbind on $scope destruction
+				 */
 				createListener = function() {
 					mq = $window.matchMedia(query);
-					mqListListener = function() { return self.globals.mqChange(mq) };
+					mqListListener = function() { return mqChange(mq) };
 
 					mq.addListener(mqListListener);
 
@@ -127,36 +153,51 @@
 						});
 					}
 
-					return self.globals.mqChange(mq);
+					return mqChange(mq);
 				};
 
 				return createListener();
 
-				// Browser does not support matchMedia (<=IE9, IE Mobile)
+			// Browser does not support matchMedia (<=IE9, IE Mobile)
 			} else {
-				self.globals.breakpoints = {};
+				breakpoints = {};
 
-				self.globals.mqChange = function(mq) {
+				/**
+				 * Check for matches
+				 * Run functions appropriately
+				 *
+				 * @param mq {object}
+				 * @returns {*} set breakpoint matching boolean
+				 */
+				mqChange = function(mq) {
 					if (mq.matches) {
-						if (!!self.globals.breakpoints[query] === false) {
+						if (!!breakpoints[query] === false) {
 							_timeoutFn(enterFn, mq);
 						}
 					} else {
-						if (self.globals.breakpoints[query] === true || self.globals.breakpoints[query] == null) {
+						if (breakpoints[query] === true || breakpoints[query] == null) {
 							_timeoutFn(exitFn, mq);
 						}
 					}
 
-					if ((mq.matches && (!self.globals.breakpoints[query]) || (!mq.matches && (self.globals.breakpoints[query] === true || self.globals.breakpoints[query] == null)))) {
+					if ((mq.matches && (!breakpoints[query]) || (!mq.matches && (breakpoints[query] === true || breakpoints[query] == null)))) {
 						_timeoutFn(changeFn, mq);
 					}
 
-					return self.globals.breakpoints[query] = mq.matches;
+					return breakpoints[query] = mq.matches;
 				};
 
-				self.globals.breakpoints[query] = null;
+				// share mqChange (matchMedia unsupported)
+				self.shared.mqChange = mqChange;
 
-				self.globals.mmListener = function() {
+				breakpoints[query] = null;
+
+				/**
+				 * Create matchMedia listener when matchMedia not supported
+				 *
+				 * @returns {*} mqChange function
+				 */
+				mmListener = function() {
 					var parts = query.match(/\((.*)-.*:\s*([\d\.]*)(.*)\)/);
 					var constraint = parts[1];
 					var value = _getPXValue(parseInt(parts[2], 10), parts[3]);
@@ -165,12 +206,15 @@
 
 					fakeMatchMedia.matches = constraint === 'max' && value > windowWidth || constraint === 'min' && value < windowWidth;
 
-					return self.globals.mqChange(fakeMatchMedia);
+					return mqChange(fakeMatchMedia);
 				};
 
+				/**
+				 * Window resized
+				 */
 				var fakeMatchMediaResize = function() {
 					$timeout.cancel(debounceResize);
-					debounceResize = $timeout(self.globals.mmListener, debounceSpeed);
+					debounceResize = $timeout(mmListener, debounceSpeed);
 				};
 
 				$win.bind('resize', fakeMatchMediaResize);
@@ -181,7 +225,10 @@
 					});
 				}
 
-				return self.globals.mmListener();
+				// share breakpoints
+				self.shared.breakpoints = breakpoints;
+
+				return mmListener();
 			}
 		};
 
@@ -192,17 +239,20 @@
 		 */
 		self.matchCurrent = function() {
 			var mq;
-			var query = self.globals.query;
-			var enterFn = self.globals.enterFn;
-			var exitFn = self.globals.exitFn;
-			var changeFn = self.globals.changeFn;
-			var breakpoints = self.globals.breakpoints;
 
-			if (query && typeof self.globals.mqChange === 'function') {
+			// collect shared data from .init()
+			var query = self.shared.query;
+			var mqChange = self.shared.mqChange;
+			var breakpoints = self.shared.breakpoints;
+			var enterFn = self.shared.enterFn;
+			var exitFn = self.shared.exitFn;
+			var changeFn = self.shared.changeFn;
+
+			if (query && typeof mqChange === 'function') {
 				if (hasMatchMedia) {
 					mq = $window.matchMedia(query);
 
-					self.globals.mqChange(mq);
+					mqChange(mq);
 				} else {
 					if (breakpoints) {
 						mq = {
