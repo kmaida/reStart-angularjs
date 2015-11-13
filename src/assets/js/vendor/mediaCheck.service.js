@@ -2,42 +2,117 @@
 	'use strict';
 
 	angular.module('mediaCheck', []).service('mediaCheck', ['$window', '$timeout', function($window, $timeout) {
-		this.init = function(options) {
-			var $scope = options['scope'],
-				query = options['mq'],
-				debounce = options['debounce'],
-				$win = angular.element($window),
-				breakpoints,
-				createListener = void 0,
-				hasMatchMedia = $window.matchMedia !== undefined && !!$window.matchMedia('!').addListener,
-				mqListListener,
-				mmListener,
-				debounceResize,
-				mq = void 0,
-				mqChange = void 0,
-				debounceSpeed = !!debounce || debounce === 0 ? debounce : 250;
+		var self = this;
+		var hasMatchMedia = $window.matchMedia !== undefined && !!$window.matchMedia('!').addListener;
 
-			function timeoutFn(fn, mq) {
-				if (typeof fn === 'function') {
-					$timeout(function() {
-						fn(mq);
-					});
-				}
+		self.globals = {
+			query: null,
+			mqChange: void 0,
+			breakpoints: null,
+			mmListener: null,
+			enterFn: null,
+			exitFn: null,
+			changeFn: null
+		};
+
+		/**
+		 * Wrap handlers in $timeout
+		 * to prevent $digest errors
+		 *
+		 * @param fn {function}
+		 * @param mq {object} matchMedia query
+		 * @private
+		 */
+		function _timeoutFn(fn, mq) {
+			if (typeof fn === 'function') {
+				$timeout(function() {
+					fn(mq);
+				});
+			}
+		}
+
+		/**
+		 * INIT method
+		 *
+		 * @param options {object}
+		 * @returns {*}
+		 * @public
+		 */
+		self.init = function(options) {
+			var $scope = options['scope'];
+			var debounce = options['debounce'];
+			var $win = angular.element($window);
+			var createListener = void 0;
+			var mqListListener;
+			var debounceResize;
+			var mq = void 0;
+			var debounceSpeed = !!debounce || debounce === 0 ? debounce : 250;
+
+			// set global variables from init options
+			self.globals.query = options['mq'];
+			self.globals.enterFn = options.enter;
+			self.globals.exitFn = options.exit;
+			self.globals.changeFn = options.change;
+
+			// get newly-set global variables to use here
+			var query = self.globals.query;
+			var enterFn = self.globals.enterFn;
+			var exitFn = self.globals.exitFn;
+			var changeFn = self.globals.changeFn;
+
+			/**
+			 * Convert ems to px
+			 *
+			 * @param value {number}
+			 * @returns {number}
+			 * @private
+			 */
+			function _convertEmToPx(value) {
+				var emElement = document.createElement('div');
+
+				emElement.style.width = '1em';
+				emElement.style.position = 'absolute';
+				document.body.appendChild(emElement);
+				document.body.removeChild(emElement);
+
+				return value * emElement.offsetWidth;
 			}
 
+			/**
+			 * Get pixel value
+			 *
+			 * @param width {number}
+			 * @param unit {string}
+			 * @returns {string}
+			 * @private
+			 */
+			function _getPXValue(width, unit) {
+				var value;
+				value = void 0;
+				switch (unit) {
+					case 'em':
+						value = _convertEmToPx(width);
+						break;
+					default:
+						value = width;
+				}
+				return value;
+			}
+
+			// Modern browser supports matchMedia
 			if (hasMatchMedia) {
-				mqChange = function(mq) {
+				self.globals.mqChange = function(mq) {
 					if (mq.matches) {
-						timeoutFn(options.enter, mq);
+						_timeoutFn(enterFn, mq);
 					} else {
-						timeoutFn(options.exit, mq);
+						_timeoutFn(exitFn, mq);
 					}
-					timeoutFn(options.change, mq);
+					_timeoutFn(changeFn, mq);
 				};
 
 				createListener = function() {
 					mq = $window.matchMedia(query);
-					mqListListener = function() { return mqChange(mq) };
+					mqListListener = function() { return self.globals.mqChange(mq) };
 
 					mq.addListener(mqListListener);
 
@@ -52,73 +127,50 @@
 						});
 					}
 
-					return mqChange(mq);
+					return self.globals.mqChange(mq);
 				};
 
 				return createListener();
 
+				// Browser does not support matchMedia (<=IE9, IE Mobile)
 			} else {
-				breakpoints = {};
+				self.globals.breakpoints = {};
 
-				mqChange = function(mq) {
+				self.globals.mqChange = function(mq) {
 					if (mq.matches) {
-						if (!!breakpoints[query] === false) {
-							timeoutFn(options.enter, mq);
+						if (!!self.globals.breakpoints[query] === false) {
+							_timeoutFn(enterFn, mq);
 						}
 					} else {
-						if (breakpoints[query] === true || breakpoints[query] == null) {
-							timeoutFn(options.exit, mq);
+						if (self.globals.breakpoints[query] === true || self.globals.breakpoints[query] == null) {
+							_timeoutFn(exitFn, mq);
 						}
 					}
 
-					if ((mq.matches && (!breakpoints[query]) || (!mq.matches && (breakpoints[query] === true || breakpoints[query] == null)))) {
-						timeoutFn(options.change, mq);
+					if ((mq.matches && (!self.globals.breakpoints[query]) || (!mq.matches && (self.globals.breakpoints[query] === true || self.globals.breakpoints[query] == null)))) {
+						_timeoutFn(changeFn, mq);
 					}
 
-					return breakpoints[query] = mq.matches;
+					return self.globals.breakpoints[query] = mq.matches;
 				};
 
-				var convertEmToPx = function(value) {
-					var emElement = document.createElement('div');
+				self.globals.breakpoints[query] = null;
 
-					emElement.style.width = '1em';
-					emElement.style.position = 'absolute';
-					document.body.appendChild(emElement);
-					document.body.removeChild(emElement);
-
-					return value * emElement.offsetWidth;
-				};
-
-				var getPXValue = function(width, unit) {
-					var value;
-					value = void 0;
-					switch (unit) {
-						case 'em':
-							value = convertEmToPx(width);
-							break;
-						default:
-							value = width;
-					}
-					return value;
-				};
-
-				breakpoints[query] = null;
-
-				mmListener = function() {
-					var parts = query.match(/\((.*)-.*:\s*([\d\.]*)(.*)\)/),
-						constraint = parts[1],
-						value = getPXValue(parseInt(parts[2], 10), parts[3]),
-						fakeMatchMedia = {},
-						windowWidth = $window.innerWidth || document.documentElement.clientWidth;
+				self.globals.mmListener = function() {
+					var parts = query.match(/\((.*)-.*:\s*([\d\.]*)(.*)\)/);
+					var constraint = parts[1];
+					var value = _getPXValue(parseInt(parts[2], 10), parts[3]);
+					var fakeMatchMedia = {};
+					var windowWidth = $window.innerWidth || document.documentElement.clientWidth;
 
 					fakeMatchMedia.matches = constraint === 'max' && value > windowWidth || constraint === 'min' && value < windowWidth;
 
-					return mqChange(fakeMatchMedia);
+					return self.globals.mqChange(fakeMatchMedia);
 				};
 
 				var fakeMatchMediaResize = function() {
 					$timeout.cancel(debounceResize);
-					debounceResize = $timeout(mmListener, debounceSpeed);
+					debounceResize = $timeout(self.globals.mmListener, debounceSpeed);
 				};
 
 				$win.bind('resize', fakeMatchMediaResize);
@@ -129,7 +181,45 @@
 					});
 				}
 
-				return mmListener();
+				return self.globals.mmListener();
+			}
+		};
+
+		/**
+		 * MATCHCURRENT method
+		 * Check for media query match
+		 * Must be executed after init() method called
+		 */
+		self.matchCurrent = function() {
+			var mq;
+			var query = self.globals.query;
+			var enterFn = self.globals.enterFn;
+			var exitFn = self.globals.exitFn;
+			var changeFn = self.globals.changeFn;
+			var breakpoints = self.globals.breakpoints;
+
+			if (query && typeof self.globals.mqChange === 'function') {
+				if (hasMatchMedia) {
+					mq = $window.matchMedia(query);
+
+					self.globals.mqChange(mq);
+				} else {
+					if (breakpoints) {
+						mq = {
+							media: query,
+							matches: breakpoints[query]
+						};
+
+						if (breakpoints[query]) {
+							_timeoutFn(enterFn, mq);
+						} else {
+							_timeoutFn(exitFn, mq);
+						}
+						_timeoutFn(changeFn, mq);
+					}
+				}
+			} else {
+				throw new Error('mediaCheck must be initialized before mediaCheck.match() can be used.');
 			}
 		};
 	}]);

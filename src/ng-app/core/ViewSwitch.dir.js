@@ -23,6 +23,7 @@
 		 * @param {object} mq media query
 		 */
 		function _enterFn(mq) {
+			console.log('vs');
 			$rootScope.$broadcast('enter-mobile');
 		}
 
@@ -33,6 +34,7 @@
 		 * @param {object} mq media query
 		 */
 		function _exitFn(mq) {
+			console.log('vs');
 			$rootScope.$broadcast('exit-mobile');
 		}
 
@@ -41,7 +43,8 @@
 			scope: $scope,
 			mq: MQ.SMALL,
 			enter: _enterFn,
-			exit: _exitFn
+			exit: _exitFn,
+			debounce: 200
 		});
 	}
 })();

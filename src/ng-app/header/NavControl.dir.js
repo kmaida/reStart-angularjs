@@ -83,14 +83,15 @@
 			 *
 			 * @private
 			 */
-			function _enterMobile() {
+			function _enterMobile(mq) {
+				console.log('enter mobile', mq);
+
 				_closeNav();
 
-				$timeout(function () {
-					// bind function to toggle mobile navigation open/closed
-					$scope.nav.toggleNav = toggleNav;
-				});
+				// bind function to toggle mobile navigation open/closed
+				$scope.nav.toggleNav = toggleNav;
 
+				// move this so it doesn't continually get rebound
 				$scope.$on('$locationChangeStart', _closeNav);
 			}
 
@@ -100,11 +101,11 @@
 			 *
 			 * @private
 			 */
-			function _exitMobile() {
-				$timeout(function() {
-					// unbind function to toggle mobile navigation open/closed
-					$scope.nav.toggleNav = null;
-				});
+			function _exitMobile(mq) {
+				console.log('exit mobile', mq);
+
+				// unbind function to toggle mobile navigation open/closed
+				//$scope.nav.toggleNav = null;
 
 				_$body.removeClass('nav-closed nav-open');
 			}
@@ -114,7 +115,8 @@
 				scope: $scope,
 				mq: MQ.SMALL,
 				enter: _enterMobile,
-				exit: _exitMobile
+				exit: _exitMobile,
+				debounce: 200
 			});
 		}
 
