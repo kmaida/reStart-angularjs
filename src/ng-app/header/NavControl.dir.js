@@ -5,9 +5,9 @@
 		.module('myApp')
 		.directive('navControl', navControl);
 
-	navControl.$inject = ['mediaCheck', 'MQ', '$window', 'resize'];
+	navControl.$inject = ['$window', 'resize'];
 
-	function navControl(mediaCheck, MQ, $window, resize) {
+	function navControl($window, resize) {
 
 		navControlLink.$inject = ['$scope'];
 
