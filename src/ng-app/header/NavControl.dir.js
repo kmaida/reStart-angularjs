@@ -112,14 +112,8 @@
 				_$body.removeClass('nav-closed nav-open');
 			}
 
-			// Set up functionality to run on enter/exit of media query
-			mediaCheck.init({
-				scope: $scope,
-				mq: MQ.SMALL,
-				enter: _enterMobile,
-				exit: _exitMobile,
-				debounce: 200
-			});
+			$scope.$on('enter-mobile', _enterMobile);
+			$scope.$on('exit-mobile', _exitMobile);
 		}
 
 		return {

@@ -5,9 +5,9 @@
 		.module('myApp')
 		.controller('PageCtrl', PageCtrl);
 
-	PageCtrl.$inject = ['Page', '$rootScope'];
+	PageCtrl.$inject = ['Page', '$scope', '$rootScope','MQ', 'mediaCheck'];
 
-	function PageCtrl(Page, $rootScope) {
+	function PageCtrl(Page, $scope, $rootScope, MQ, mediaCheck) {
 		var page = this;
 
 		// private variables
@@ -15,6 +15,51 @@
 
 		// associate page <title>
 		page.pageTitle = Page;
+
+		/**
+		 * Enter mobile media query
+		 * $broadcast 'enter-mobile' event
+		 *
+		 * @private
+		 */
+		function _enterMobile() {
+			$rootScope.$broadcast('enter-mobile');
+		}
+
+		/**
+		 * xit mobile media query
+		 * $broadcast 'exit-mobile' event
+		 *
+		 * @private
+		 */
+		function _exitMobile() {
+			$rootScope.$broadcast('exit-mobile');
+		}
+
+		// Set up functionality to run on enter/exit of media query
+		mediaCheck.init({
+			scope: $scope,
+			mq: MQ.SMALL,
+			enter: _enterMobile,
+			exit: _exitMobile,
+			debounce: 200
+		});
+
+		/**
+		 * Match current media query and run appropriate function
+		 *
+		 * @param $event {event}
+		 * @param current {object}
+		 * @param previous {object}
+		 * @private
+		 */
+		function _routeChangeSuccess($event, current, previous) {
+			if (previous) {
+				mediaCheck.matchCurrent();
+			}
+		}
+
+		$rootScope.$on('$routeChangeSuccess', _routeChangeSuccess);
 
 		/**
 		 * Route change error handler
