@@ -5,9 +5,9 @@
 		.module('myApp')
 		.directive('routeLoading', routeLoading);
 
-	routeLoading.$inject = ['$window', '$timeout', 'resize'];
+	routeLoading.$inject = ['$window', 'resize'];
 
-	function routeLoading($window, $timeout, resize) {
+	function routeLoading($window, resize) {
 
 		routeLoadingLink.$inject = ['$scope', '$element', '$attrs', 'loading'];
 
