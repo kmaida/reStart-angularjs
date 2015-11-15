@@ -8,8 +8,17 @@
 
 		var hasMatchMedia = $window.matchMedia !== undefined && !!$window.matchMedia('!').addListener;
 
-		// set up matchCurrent() method
-		self.matchCurrent = null;
+		self.matchMap = {};
+
+		/**
+		 * matchCurrent() method
+		 * Execute function mapped to query param
+		 *
+		 * @param matchQuery {string} mediaquery
+		 */
+		self.matchCurrent = function(matchQuery) {
+			self.matchMap[matchQuery]();
+		};
 
 		/**
 		 * Wrap handlers in $timeout
@@ -30,36 +39,17 @@
 		/**
 		 * INIT method
 		 *
-		 * @param options {object}
+		 * @param setup {object|Array}
 		 * @returns {*}
 		 * @public
 		 */
-		self.init = function(options) {
-			// general
-			var query = options['mq'];
-			var mqChange = void 0;
-			var $scope = options['scope'];
+		self.init = function(setup) {
+			var media = setup['media'];
+			var optionsIsArr = Object.prototype.toString.call(media) === '[object Array]';
+			var $scope = setup['scope'];
+			var debounce = setup['debounce'];
+			var debounceSpeed = !!debounce || debounce === 0 ? debounce : 150;
 			var $win = angular.element($window);
-
-			// media query changing functions
-			var enterFn = options.enter;
-			var exitFn = options.exit;
-			var changeFn = options.change;
-
-			// matchMedia supported
-			var mmListener;
-			var mq = void 0;
-			var createListener = void 0;
-			var mqListListener;
-
-			// matchMedia not supported
-			var debounce = options['debounce'];
-			var breakpoints;
-			var debounceResize;
-			var debounceSpeed = !!debounce || debounce === 0 ? debounce : 250;
-
-			// set shared options
-			var matchCurrent = null;
 
 			/**
 			 * Convert ems to px
@@ -100,151 +90,193 @@
 				return value;
 			}
 
-			if (hasMatchMedia) {
-				// Modern browser supports matchMedia
+			/**
+			 * Setup mediaquery
+			 *
+			 * @param options {object}
+			 * @returns {*}
+			 * @private
+			 */
+			function _setupMQ(options) {
+				// general
+				var query = options['mq'];
+				var mqChange = void 0;
+				// media query changing functions
+				var enterFn = options.enter;
+				var exitFn = options.exit;
+				var changeFn = options.change;
+				// matchMedia supported
+				var mmListener;
+				var mq = void 0;
+				var createListener = void 0;
+				var mqListListener;
+				// matchMedia not supported
+				var breakpoints;
+				var debounceResize;
+				// set shared options
+				var matchCurrent = null;
 
-				/**
-				 * Check for matches
-				 * Run functions appropriately
-				 *
-				 * @param mq {object} MediaQueryList object
-				 */
-				mqChange = function(mq) {
-					if (mq.matches) {
-						_timeoutFn(enterFn, mq);
-					} else {
-						_timeoutFn(exitFn, mq);
-					}
-					_timeoutFn(changeFn, mq);
-				};
+				if (hasMatchMedia) {
+					// Modern browser supports matchMedia
 
-				mq = $window.matchMedia(query);
+					/**
+					 * Check for matches
+					 * Run functions appropriately
+					 *
+					 * @param mq {object} MediaQueryList object
+					 */
+					mqChange = function(mq) {
+						if (mq.matches) {
+							_timeoutFn(enterFn, mq);
+						} else {
+							_timeoutFn(exitFn, mq);
+						}
+						_timeoutFn(changeFn, mq);
+					};
 
-				/**
-				 * Set up matchCurrent (matchMedia supported)
-				 * Run proper function for current breakpoint
-				 * Run mqChange on-demand
-				 */
-				matchCurrent = function() {
-					mqChange(mq);
-				};
+					mq = $window.matchMedia(query);
 
-				// SET PUBLIC matchCurrent method
-				self.matchCurrent = matchCurrent;
+					/**
+					 * Set up matchCurrent (matchMedia supported)
+					 * Run proper function for current breakpoint
+					 * Run mqChange on-demand
+					 */
+					matchCurrent = function() {
+						mqChange(mq);
+					};
 
-				/**
-				 * Create listener for media query changes
-				 * Bind to orientation change
-				 * Unbind on $scope destruction
-				 */
-				createListener = function() {
-					mqListListener = function() { return mqChange(mq) };
+					// SET PUBLIC matchMap function mapping for matchCurrent()
+					self.matchMap[query] = matchCurrent;
 
-					mq.addListener(mqListListener);
+					/**
+					 * Create listener for media query changes
+					 * Bind to orientation change
+					 * Unbind on $scope destruction
+					 */
+					createListener = function() {
+						mqListListener = function() {
+							return mqChange(mq)
+						};
 
-					// bind to the orientationchange event and fire mqChange
-					$win.bind('orientationchange', mqListListener);
+						mq.addListener(mqListListener);
 
-					// cleanup listeners when $scope is $destroyed
+						// bind to the orientationchange event and fire mqChange
+						$win.bind('orientationchange', mqListListener);
+
+						// cleanup listeners when $scope is $destroyed
+						if ($scope) {
+							$scope.$on('$destroy', function() {
+								mq.removeListener(mqListListener);
+								$win.unbind('orientationchange', mqListListener);
+							});
+						}
+
+						return mqChange(mq);
+					};
+
+					return createListener();
+
+				} else {
+					// Browser does not support matchMedia (<=IE9, IE Mobile)
+
+					breakpoints = {};
+
+					/**
+					 * Check for matches
+					 * Run functions appropriately
+					 *
+					 * @param mq {object}
+					 * @returns {*} set breakpoint matching boolean
+					 */
+					mqChange = function(mq) {
+						if (mq.matches) {
+							if (!!breakpoints[query] === false) {
+								_timeoutFn(enterFn, mq);
+							}
+						} else {
+							if (breakpoints[query] === true || breakpoints[query] == null) {
+								_timeoutFn(exitFn, mq);
+							}
+						}
+
+						if ((mq.matches && (!breakpoints[query]) || (!mq.matches && (breakpoints[query] === true || breakpoints[query] == null)))) {
+							_timeoutFn(changeFn, mq);
+						}
+
+						return breakpoints[query] = mq.matches;
+					};
+
+					breakpoints[query] = null;
+
+					/**
+					 * Create matchMedia listener when matchMedia not supported
+					 *
+					 * @returns {*} mqChange function
+					 */
+					mmListener = function() {
+						var parts = query.match(/\((.*)-.*:\s*([\d\.]*)(.*)\)/);
+						var constraint = parts[1];
+						var value = _getPXValue(parseInt(parts[2], 10), parts[3]);
+						var fakeMatchMedia = {};
+						var windowWidth = $window.innerWidth || document.documentElement.clientWidth;
+
+						fakeMatchMedia.matches = constraint === 'max' && value > windowWidth || constraint === 'min' && value < windowWidth;
+
+						return mqChange(fakeMatchMedia);
+					};
+
+					/**
+					 * Window resized
+					 */
+					var fakeMatchMediaResize = function() {
+						$timeout.cancel(debounceResize);
+						debounceResize = $timeout(mmListener, debounceSpeed);
+					};
+
+					$win.bind('resize', fakeMatchMediaResize);
+
 					if ($scope) {
 						$scope.$on('$destroy', function() {
-							mq.removeListener(mqListListener);
-							$win.unbind('orientationchange', mqListListener);
+							$win.unbind('resize', fakeMatchMediaResize);
 						});
 					}
 
-					return mqChange(mq);
-				};
+					/**
+					 * Set up matchCurrent (matchMedia not supported)
+					 * Run proper function for current breakpoint
+					 */
+					matchCurrent = function() {
+						mq = {
+							media: query,
+							matches: breakpoints[query]
+						};
 
-				return createListener();
-
-			} else {
-				// Browser does not support matchMedia (<=IE9, IE Mobile)
-
-				breakpoints = {};
-
-				/**
-				 * Check for matches
-				 * Run functions appropriately
-				 *
-				 * @param mq {object}
-				 * @returns {*} set breakpoint matching boolean
-				 */
-				mqChange = function(mq) {
-					if (mq.matches) {
-						if (!!breakpoints[query] === false) {
+						if (breakpoints[query]) {
 							_timeoutFn(enterFn, mq);
-						}
-					} else {
-						if (breakpoints[query] === true || breakpoints[query] == null) {
+						} else {
 							_timeoutFn(exitFn, mq);
 						}
-					}
-
-					if ((mq.matches && (!breakpoints[query]) || (!mq.matches && (breakpoints[query] === true || breakpoints[query] == null)))) {
 						_timeoutFn(changeFn, mq);
-					}
-
-					return breakpoints[query] = mq.matches;
-				};
-
-				breakpoints[query] = null;
-
-				/**
-				 * Create matchMedia listener when matchMedia not supported
-				 *
-				 * @returns {*} mqChange function
-				 */
-				mmListener = function() {
-					var parts = query.match(/\((.*)-.*:\s*([\d\.]*)(.*)\)/);
-					var constraint = parts[1];
-					var value = _getPXValue(parseInt(parts[2], 10), parts[3]);
-					var fakeMatchMedia = {};
-					var windowWidth = $window.innerWidth || document.documentElement.clientWidth;
-
-					fakeMatchMedia.matches = constraint === 'max' && value > windowWidth || constraint === 'min' && value < windowWidth;
-
-					return mqChange(fakeMatchMedia);
-				};
-
-				/**
-				 * Window resized
-				 */
-				var fakeMatchMediaResize = function() {
-					$timeout.cancel(debounceResize);
-					debounceResize = $timeout(mmListener, debounceSpeed);
-				};
-
-				$win.bind('resize', fakeMatchMediaResize);
-
-				if ($scope) {
-					$scope.$on('$destroy', function() {
-						$win.unbind('resize', fakeMatchMediaResize);
-					});
-				}
-
-				/**
-				 * Set up matchCurrent (matchMedia not supported)
-				 * Run proper function for current breakpoint
-				 */
-				matchCurrent = function() {
-					mq = {
-						media: query,
-						matches: breakpoints[query]
 					};
 
-					if (breakpoints[query]) {
-						_timeoutFn(enterFn, mq);
-					} else {
-						_timeoutFn(exitFn, mq);
+					// SET PUBLIC matchMap function mapping for matchCurrent()
+					self.matchMap[query] = matchCurrent;
+
+					return mmListener();
+				}
+			}
+
+			// Run setup function
+			if (optionsIsArr) {
+				for (var i = 0; i < media.length; i++) {
+					var optionsItem = media[i];
+
+					if (typeof optionsItem === 'object') {
+						_setupMQ(optionsItem);
 					}
-					_timeoutFn(changeFn, mq);
-				};
-
-				// SET PUBLIC matchCurrent method
-				self.matchCurrent = matchCurrent;
-
-				return mmListener();
+				}
+			} else if (!optionsIsArr && typeof media === 'object') {
+				_setupMQ(media);
 			}
 		};
 	}]);
