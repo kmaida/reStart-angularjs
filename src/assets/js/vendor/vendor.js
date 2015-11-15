@@ -40475,15 +40475,8 @@
 
 		var hasMatchMedia = $window.matchMedia !== undefined && !!$window.matchMedia('!').addListener;
 
-		// shared settings
-		self.shared = {
-			query: null,
-			mqChange: void 0,
-			breakpoints: null,
-			enterFn: null,
-			exitFn: null,
-			changeFn: null
-		};
+		// set up matchCurrent() method
+		self.matchCurrent = null;
 
 		/**
 		 * Wrap handlers in $timeout
@@ -40533,10 +40526,7 @@
 			var debounceSpeed = !!debounce || debounce === 0 ? debounce : 250;
 
 			// set shared options
-			self.shared.query = query;
-			self.shared.enterFn = enterFn;
-			self.shared.exitFn = exitFn;
-			self.shared.changeFn = changeFn;
+			var matchCurrent = null;
 
 			/**
 			 * Convert ems to px
@@ -40577,8 +40567,8 @@
 				return value;
 			}
 
-			// Modern browser supports matchMedia
 			if (hasMatchMedia) {
+				// Modern browser supports matchMedia
 
 				/**
 				 * Check for matches
@@ -40595,8 +40585,19 @@
 					_timeoutFn(changeFn, mq);
 				};
 
-				// share mqChange (matchMedia supported)
-				self.shared.mqChange = mqChange;
+				mq = $window.matchMedia(query);
+
+				/**
+				 * Set up matchCurrent (matchMedia supported)
+				 * Run proper function for current breakpoint
+				 * Run mqChange on-demand
+				 */
+				matchCurrent = function() {
+					mqChange(mq);
+				};
+
+				// SET PUBLIC matchCurrent method
+				self.matchCurrent = matchCurrent;
 
 				/**
 				 * Create listener for media query changes
@@ -40604,7 +40605,6 @@
 				 * Unbind on $scope destruction
 				 */
 				createListener = function() {
-					mq = $window.matchMedia(query);
 					mqListListener = function() { return mqChange(mq) };
 
 					mq.addListener(mqListListener);
@@ -40625,8 +40625,9 @@
 
 				return createListener();
 
-			// Browser does not support matchMedia (<=IE9, IE Mobile)
 			} else {
+				// Browser does not support matchMedia (<=IE9, IE Mobile)
+
 				breakpoints = {};
 
 				/**
@@ -40653,9 +40654,6 @@
 
 					return breakpoints[query] = mq.matches;
 				};
-
-				// share mqChange (matchMedia unsupported)
-				self.shared.mqChange = mqChange;
 
 				breakpoints[query] = null;
 
@@ -40692,51 +40690,28 @@
 					});
 				}
 
-				// share breakpoints
-				self.shared.breakpoints = breakpoints;
+				/**
+				 * Set up matchCurrent (matchMedia not supported)
+				 * Run proper function for current breakpoint
+				 */
+				matchCurrent = function() {
+					mq = {
+						media: query,
+						matches: breakpoints[query]
+					};
+
+					if (breakpoints[query]) {
+						_timeoutFn(enterFn, mq);
+					} else {
+						_timeoutFn(exitFn, mq);
+					}
+					_timeoutFn(changeFn, mq);
+				};
+
+				// SET PUBLIC matchCurrent method
+				self.matchCurrent = matchCurrent;
 
 				return mmListener();
-			}
-		};
-
-		/**
-		 * MATCHCURRENT method
-		 * Check for media query match
-		 * Must be executed after init() method called
-		 */
-		self.matchCurrent = function() {
-			var mq;
-
-			// collect shared data from .init()
-			var query = self.shared.query;
-			var mqChange = self.shared.mqChange;
-			var breakpoints = self.shared.breakpoints;
-			var enterFn = self.shared.enterFn;
-			var exitFn = self.shared.exitFn;
-			var changeFn = self.shared.changeFn;
-
-			if (query && typeof mqChange === 'function') {
-				if (hasMatchMedia) {
-					mq = $window.matchMedia(query);
-
-					mqChange(mq);
-				} else {
-					if (breakpoints) {
-						mq = {
-							media: query,
-							matches: breakpoints[query]
-						};
-
-						if (breakpoints[query]) {
-							_timeoutFn(enterFn, mq);
-						} else {
-							_timeoutFn(exitFn, mq);
-						}
-						_timeoutFn(changeFn, mq);
-					}
-				}
-			} else {
-				throw new Error('mediaCheck must be initialized before mediaCheck.match() can be used.');
 			}
 		};
 	}]);
