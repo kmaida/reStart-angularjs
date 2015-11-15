@@ -95,20 +95,30 @@
 	function routeLoadingCtrl($scope) {
 		var loading = this;
 
-		// for first page load
-		loading.active = true;
-
-		$scope.$on('$routeChangeStart', function($event, next, current) {
+		/**
+		 * Set loading to active
+		 *
+		 * @private
+		 */
+		function _loadingActive() {
 			loading.active = true;
-		});
+		}
 
-		$scope.$on('$routeChangeSuccess', function($event, current, previous) {
+		/**
+		 * Set loading to inactive
+		 *
+		 * @private
+		 */
+		function _loadingInactive() {
 			loading.active = false;
-		});
+		}
 
-		$scope.$on('$routeChangeError', function($event, current, previous, rejection) {
-			loading.active = false;
-		});
+		// loading active on init
+		_loadingActive();
+
+		$scope.$on('$routeChangeStart', _loadingActive);
+		$scope.$on('$routeChangeSuccess', _loadingInactive);
+		$scope.$on('$routeChangeError', _loadingInactive);
 	}
 
 })();
