@@ -10,16 +10,18 @@
 		var greeting = 'Hello';
 
 		/**
-		 * Say hello
+		 * Alert greeting
+		 *
+		 * @param name {string}
 		 */
-		function sayHello() {
-			alert(greeting);
+		function alertGreeting(name) {
+			alert(greeting + ', ' + name + '!');
 		}
 
 		// callable members
 		return {
 			greeting: greeting,
-			sayHello: sayHello
+			alertGreeting: alertGreeting
 		};
 	}
 })();

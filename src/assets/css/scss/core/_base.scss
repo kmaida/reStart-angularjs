@@ -100,8 +100,14 @@ input[type="password"],
 textarea {
 	font-size: 16px;	/* for iOS phones */
 }
-
 input.ng-dirty.ng-invalid {
 	border-color: $color-invalid-rgba;
 	box-shadow: 0 0 6px $color-invalid-rgba;
+}
+button {
+	border-radius: 4px;
+	display: inline-block;
+	font-size: inherit;
+	padding: 5px 4px;
+	vertical-align: middle;
 }

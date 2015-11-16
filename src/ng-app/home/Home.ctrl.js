@@ -15,6 +15,7 @@
 		home.title = 'Home';
 		home.global = GlobalObj;
 		home.name = 'Visitor';
+		home.alertGreeting = GlobalObj.alertGreeting;
 		home.stringOfHTML = '<strong style="color: green;">Some green text</strong> bound as HTML with a <a href="#">link</a>, trusted with SCE!';
 
 		// set page <title>
