@@ -65,6 +65,7 @@
 
 		/**
 		 * Route change error handler
+		 * Handle route resolve failures
 		 *
 		 * @param $event {event}
 		 * @param current {object}
