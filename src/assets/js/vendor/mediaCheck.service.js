@@ -13,22 +13,21 @@
 		/**
 		 * matchCurrent() method
 		 * Execute function mapped to query param
+		 * If no mediaquery passed, execute all
 		 *
 		 * @param matchQuery {string} mediaquery
 		 */
 		self.matchCurrent = function(matchQuery) {
-			var objLen = Object.keys(self.matchMap).length;
-
-			if (objLen >= 1) {
-				if (matchQuery && self.matchMap.hasOwnProperty(matchQuery)) {
+			if (matchQuery) {
+				if (typeof self.matchMap[matchQuery] === 'function') {
 					self.matchMap[matchQuery]();
-				} else if (!matchQuery && objLen === 1) {
-					self.matchMap[Object.keys(self.matchMap)[0]]();
 				} else {
-					throw new Error('matchMedia.matchCurrent() missing media query parameter to match!');
+					throw new Error('Requested mediaquery not found in mediaCheck');
 				}
 			} else {
-				throw new Error('matchMedia could not find functions to execute.');
+				angular.forEach(self.matchMap, function(value, key) {
+					value();
+				});
 			}
 		};
 
