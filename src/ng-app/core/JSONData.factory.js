@@ -12,6 +12,7 @@
 		/**
 		 * Promise response function - success
 		 * Checks typeof data returned and succeeds if JS object, throws error if not
+		 * Useful for APIs (ie, with nginx) where server error HTML page may be returned in error
 		 *
 		 * @param response {*} data from $http
 		 * @returns {object|Array}
@@ -21,7 +22,7 @@
 			if (typeof response.data === 'object') {
 				return response.data;
 			} else {
-				throw new Error('retrieved data is not typeof object.');
+				throw new Error('Retrieved data is not typeof object.');
 			}
 		}
 
@@ -33,7 +34,7 @@
 		 * @private
 		 */
 		function _errorRes(error) {
-			throw new Error('error retrieving data', error);
+			throw new Error('Error retrieving data', error);
 		}
 
 		/**
