@@ -1,27 +1,39 @@
 reStart-angular
 ==========
 
-A mobile-first, responsive boilerplate in AngularJS.
+A mobile-first, responsive boilerplate in AngularJS with all basic features needed to get a scalable single page application started.
 
-Currently supports modern browsers and IE9+. This framework will attempt to stay in sync with latest Angular stable 
+Currently supports modern browsers and IE9+. This boilerplate will attempt to stay in sync with latest Angular stable 
 releases, so the browser support may change over time.
 
 ## Dependencies
  
 * AngularJS v1.4.7
 * jQuery v2.1.4
-* Node >= 0.10 
+* Node >= v0.10 
 * Gulp 
-* Sass
+* Sass (Node/libsass, not Ruby)
+
+## Style
+
+* single responsibility 
+* modular 
+* scalable
+* for more on style, see [https://github.com/johnpapa/angular-styleguide](Angular Styleguide)
 
 ## Features
 
-* single responsibility 
-* mostly flat file structure
-* modular 
+* route resolve
+* loading states
+* sample API promises
+* error handling
+* mobile navigation
 * mediaquery-based view switching
-* example services, factories, filters, directives 
-* for more on style, see [https://github.com/johnpapa/angular-styleguide](Angular Styleguide)
+* utility filters
+* example factories and directives 
+* controller and directive namespacing
+* mobile-first SCSS, reset, normalize
+* jsDoc comments
 
 ## Demo
 
@@ -36,6 +48,7 @@ Run `gulp --prod` to use the `production` flag, minifying files (no server, no `
 
 ## Changelog
 
+* 11/16/15: App-wide updates to greatly enhance base features, upgrade dependencies, and comply much more fully with John Papa's AngularJS styleguide
 * 10/18/15: Upgrade to Angular 1.4.7, upgrade `gulp-sass` to use latest and lowercase package name (for Node v4), add
  error response to `$http` promises
 * 8/23/15: Add gulp `connect` and server task
