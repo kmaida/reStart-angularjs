@@ -5,7 +5,7 @@
 		.module('myApp')
 		.controller('PageCtrl', PageCtrl);
 
-	PageCtrl.$inject = ['Page', '$scope', '$rootScope','MQ', 'mediaCheck'];
+	PageCtrl.$inject = ['Page', '$scope', '$rootScope', 'MQ', 'mediaCheck'];
 
 	function PageCtrl(Page, $scope, $rootScope, MQ, mediaCheck) {
 		var page = this;
@@ -56,9 +56,7 @@
 		 * @private
 		 */
 		function _routeChangeSuccess($event, current, previous) {
-			if (previous) {
-				mediaCheck.matchCurrent(MQ.SMALL);
-			}
+			mediaCheck.matchCurrent(MQ.SMALL);
 		}
 
 		$rootScope.$on('$routeChangeSuccess', _routeChangeSuccess);
