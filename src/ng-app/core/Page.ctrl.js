@@ -27,7 +27,7 @@
 		}
 
 		/**
-		 * xit mobile media query
+		 * Exit mobile media query
 		 * $broadcast 'exit-mobile' event
 		 *
 		 * @private
