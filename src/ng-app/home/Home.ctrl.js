@@ -5,9 +5,9 @@
 		.module('myApp')
 		.controller('HomeCtrl', HomeCtrl);
 
-	HomeCtrl.$inject = ['$scope', 'GlobalObj', 'Page', 'resolveLocalData'];
+	HomeCtrl.$inject = ['$scope', 'GlobalObj', 'Page', 'JSONData'];
 
-	function HomeCtrl($scope, GlobalObj, Page, resolveLocalData) {
+	function HomeCtrl($scope, GlobalObj, Page, JSONData) {
 		// controllerAs ViewModel
 		var home = this;
 
@@ -17,12 +17,36 @@
 		home.name = 'Visitor';
 		home.alertGreeting = GlobalObj.alertGreeting;
 		home.stringOfHTML = '<strong style="color: green;">Some green text</strong> bound as HTML with a <a href="#">link</a>, trusted with SCE!';
+		home.viewformat = null;
 
 		// set page <title>
 		Page.setTitle(home.title);
 
-		// data from route resolve
-		home.json = resolveLocalData;
+		// activate controller
+		_activate();
+
+		/**
+		 * Controller activate
+		 * Get JSON data
+		 *
+		 * @returns {*}
+		 * @private
+		 */
+		function _activate() {
+			/**
+			 * Successful promise data
+			 *
+			 * @param data {json}
+			 * @private
+			 */
+			function _getJsonSuccess(data) {
+				home.json = data;
+				return home.json;
+			}
+
+			// get the data from JSON
+			return JSONData.getLocalData().then(_getJsonSuccess);
+		}
 
 		/**
 		 * Enter small mq

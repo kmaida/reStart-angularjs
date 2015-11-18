@@ -13,10 +13,7 @@
 			.when('/', {
 				templateUrl: 'ng-app/home/Home.view.html',
 				controller: 'HomeCtrl',
-				controllerAs: 'home',
-				resolve: {
-					resolveLocalData: resolveLocalData
-				}
+				controllerAs: 'home'
 			})
 			.when('/subpage', {
 				templateUrl: 'ng-app/sub/Sub.view.html',
