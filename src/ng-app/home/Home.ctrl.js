@@ -22,6 +22,9 @@
 		// set page <title>
 		Page.setTitle(home.title);
 
+		$scope.$on('enter-mobile', _enterMobile);
+		$scope.$on('exit-mobile', _exitMobile);
+
 		// activate controller
 		_activate();
 
@@ -41,8 +44,15 @@
 			 */
 			function _getJsonSuccess(data) {
 				home.json = data;
+
+				// stop loading
+				$scope.$emit('loading-off');
+
 				return home.json;
 			}
+
+			// start loading
+			$scope.$emit('loading-on');
 
 			// get the data from JSON
 			return JSONData.getLocalData().then(_getJsonSuccess);
@@ -67,8 +77,5 @@
 		function _exitMobile() {
 			home.viewformat = 'large';
 		}
-
-		$scope.$on('enter-mobile', _enterMobile);
-		$scope.$on('exit-mobile', _exitMobile);
 	}
 })();

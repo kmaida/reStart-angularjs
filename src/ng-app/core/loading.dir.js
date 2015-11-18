@@ -3,16 +3,16 @@
 
 	angular
 		.module('myApp')
-		.directive('routeLoading', routeLoading);
+		.directive('loading', loading);
 
-	routeLoading.$inject = ['$window', 'resize'];
+	loading.$inject = ['$window', 'resize'];
 
-	function routeLoading($window, resize) {
+	function loading($window, resize) {
 
-		routeLoadingLink.$inject = ['$scope', '$element', '$attrs', 'loading'];
+		loadingLink.$inject = ['$scope', '$element', '$attrs', 'loading'];
 
 		/**
-		 * routeLoading LINK
+		 * loading LINK
 		 * Disables page scrolling when loading overlay is open
 		 *
 		 * @param $scope
@@ -20,7 +20,7 @@
 		 * @param $attrs
 		 * @param loading {controller}
 		 */
-		function routeLoadingLink($scope, $element, $attrs, loading) {
+		function loadingLink($scope, $element, $attrs, loading) {
 			var _$body = angular.element('body');
 			var _winHeight = $window.innerHeight + 'px';
 
@@ -59,40 +59,60 @@
 			 */
 			function $watchActive(newVal, oldVal) {
 				if (newVal) {
-					_$body.css({
-						height: _winHeight,
-						overflowY: 'hidden'
-					});
+					_open();
 				} else {
-					_$body.css({
-						height: 'auto',
-						overflowY: 'auto'
-					});
+					_close();
 				}
 			}
 
 			$scope.$watch('loading.active', $watchActive);
+
+			/**
+			 * Open loading
+			 * Disable scroll
+			 *
+			 * @private
+			 */
+			function _open() {
+				_$body.css({
+					height: _winHeight,
+					overflowY: 'hidden'
+				});
+			}
+
+			/**
+			 * Close loading
+			 * Enable scroll
+			 *
+			 * @private
+			 */
+			function _close() {
+				_$body.css({
+					height: 'auto',
+					overflowY: 'auto'
+				});
+			}
 		}
 
 		return {
 			restrict: 'EA',
 			replace: true,
-			templateUrl: 'ng-app/core/routeLoading.tpl.html',
+			templateUrl: 'ng-app/core/loading.tpl.html',
 			transclude: true,
-			controller: routeLoadingCtrl,
+			controller: loadingCtrl,
 			controllerAs: 'loading',
 			bindToController: true,
-			link: routeLoadingLink
+			link: loadingLink
 		};
 	}
 
-	routeLoadingCtrl.$inject = ['$scope'];
+	loadingCtrl.$inject = ['$scope'];
 	/**
-	 * routeLoading CONTROLLER
+	 * loading CONTROLLER
 	 * Update the loading status based
 	 * on routeChange state
 	 */
-	function routeLoadingCtrl($scope) {
+	function loadingCtrl($scope) {
 		var loading = this;
 
 		/**
@@ -113,12 +133,8 @@
 			loading.active = false;
 		}
 
-		// loading active on init
-		_loadingActive();
-
-		$scope.$on('$routeChangeStart', _loadingActive);
-		$scope.$on('$routeChangeSuccess', _loadingInactive);
-		$scope.$on('$routeChangeError', _loadingInactive);
+		$scope.$on('loading-on', _loadingActive);
+		$scope.$on('loading-off', _loadingInactive);
 	}
 
 })();

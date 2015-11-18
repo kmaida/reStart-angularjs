@@ -5,9 +5,9 @@
 		.module('myApp')
 		.controller('PageCtrl', PageCtrl);
 
-	PageCtrl.$inject = ['Page', '$scope', '$rootScope', 'MQ', 'mediaCheck'];
+	PageCtrl.$inject = ['Page', '$scope', 'MQ', 'mediaCheck'];
 
-	function PageCtrl(Page, $scope, $rootScope, MQ, mediaCheck) {
+	function PageCtrl(Page, $scope, MQ, mediaCheck) {
 		var page = this;
 
 		// private variables
@@ -15,26 +15,6 @@
 
 		// associate page <title>
 		page.pageTitle = Page;
-
-		/**
-		 * Enter mobile media query
-		 * $broadcast 'enter-mobile' event
-		 *
-		 * @private
-		 */
-		function _enterMobile() {
-			$rootScope.$broadcast('enter-mobile');
-		}
-
-		/**
-		 * Exit mobile media query
-		 * $broadcast 'exit-mobile' event
-		 *
-		 * @private
-		 */
-		function _exitMobile() {
-			$rootScope.$broadcast('exit-mobile');
-		}
 
 		// Set up functionality to run on enter/exit of media query
 		mediaCheck.init({
@@ -47,25 +27,86 @@
 			debounce: 200
 		});
 
+		$scope.$on('$routeChangeStart', _routeChangeStart);
+		$scope.$on('$routeChangeSuccess', _routeChangeSuccess);
+		$scope.$on('$routeChangeError', _routeChangeError);
+
 		/**
-		 * Match current media query and run appropriate function
+		 * Enter mobile media query
+		 * $broadcast 'enter-mobile' event
 		 *
-		 * @param $event {event}
+		 * @private
+		 */
+		function _enterMobile() {
+			$scope.$broadcast('enter-mobile');
+		}
+
+		/**
+		 * Exit mobile media query
+		 * $broadcast 'exit-mobile' event
+		 *
+		 * @private
+		 */
+		function _exitMobile() {
+			$scope.$broadcast('exit-mobile');
+		}
+
+		/**
+		 * Turn on loading state
+		 *
+		 * @private
+		 */
+		function _loadingOn() {
+			$scope.$broadcast('loading-on');
+		}
+
+		/**
+		 * Turn off loading state
+		 *
+		 * @private
+		 */
+		function _loadingOff() {
+			$scope.$broadcast('loading-off');
+		}
+
+		/**
+		 * Route change start handler
+		 * If next route has resolve, turn on loading
+		 *
+		 * @param $event {object}
+		 * @param next {object}
+		 * @param current {object}
+		 * @private
+		 */
+		function _routeChangeStart($event, next, current) {
+			if (next.$$route.resolve) {
+				_loadingOn();
+			}
+		}
+
+		/**
+		 * Route change success handler
+		 * Match current media query and run appropriate function
+		 * If current route has been resolved, turn off loading
+		 *
+		 * @param $event {object}
 		 * @param current {object}
 		 * @param previous {object}
 		 * @private
 		 */
 		function _routeChangeSuccess($event, current, previous) {
 			mediaCheck.matchCurrent(MQ.SMALL);
-		}
 
-		$rootScope.$on('$routeChangeSuccess', _routeChangeSuccess);
+			if (current.$$route.resolve) {
+				_loadingOff();
+			}
+		}
 
 		/**
 		 * Route change error handler
 		 * Handle route resolve failures
 		 *
-		 * @param $event {event}
+		 * @param $event {object}
 		 * @param current {object}
 		 * @param previous {object}
 		 * @param rejection {object}
@@ -77,6 +118,7 @@
 			}
 
 			_handlingRouteChangeError = true;
+			_loadingOff();
 
 			var destination = (current && (current.title || current.name || current.loadedTemplateUrl)) || 'unknown target';
 			var msg = 'Error routing to ' + destination + '. ' + (rejection.msg || '');
@@ -88,7 +130,5 @@
 			 */
 			alert('An error occurred. Please try again.');
 		}
-
-		$rootScope.$on('$routeChangeError', _routeChangeError);
 	}
 })();
