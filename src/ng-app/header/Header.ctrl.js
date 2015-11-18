@@ -15,24 +15,14 @@
 		header.indexIsActive = indexIsActive;
 		header.navIsActive = navIsActive;
 
-		/**
-		 * Successful promise data
-		 *
-		 * @param data {json}
-		 * @private
-		 */
-		function _getJsonSuccess(data) {
-			header.json = data;
-		}
-
-		// get the data from JSON
-		JSONData.getLocalData().then(_getJsonSuccess);
+		// activate controller
+		_activate();
 
 		/**
 		 * Apply class to index nav if active
 		 *
 		 * @param {string} path
- 		 */
+		 */
 		function indexIsActive(path) {
 			// path should be '/'
 			return $location.path() === path;
@@ -43,8 +33,30 @@
 		 *
 		 * @param {string} path
 		 */
-		 function navIsActive(path) {
+		function navIsActive(path) {
 			return $location.path().substr(0, path.length) === path;
+		}
+
+		/**
+		 * Controller activate
+		 * Get JSON data
+		 *
+		 * @returns {*}
+		 * @private
+		 */
+		function _activate() {
+			/**
+			 * Successful promise data
+			 *
+			 * @param data {json}
+			 * @private
+			 */
+			function _getJsonSuccess(data) {
+				header.json = data;
+			}
+
+			// get the data from JSON
+			JSONData.getLocalData().then(_getJsonSuccess);
 		}
 	}
 
