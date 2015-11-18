@@ -53,10 +53,11 @@
 			 */
 			function _getJsonSuccess(data) {
 				header.json = data;
+				return header.json;
 			}
 
 			// get the data from JSON
-			JSONData.getLocalData().then(_getJsonSuccess);
+			return JSONData.getLocalData().then(_getJsonSuccess);
 		}
 	}
 
