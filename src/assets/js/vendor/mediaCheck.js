@@ -2,11 +2,11 @@
 	'use strict';
 
 	angular
-	.module('mediaCheck', []);  // module setter
+		.module('mediaCheck', []);  // module setter
 
 	angular
-	.module('mediaCheck')   // module getter
-	.factory('mediaCheck', mediaCheck); // factory
+		.module('mediaCheck')   // module getter
+		.factory('mediaCheck', mediaCheck); // factory
 
 	// inject dependencies
 	mediaCheck.$inject = ['$window', '$timeout'];
