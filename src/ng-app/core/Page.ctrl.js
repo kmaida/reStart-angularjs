@@ -17,7 +17,7 @@
 		page.pageTitle = Page;
 
 		// Set up functionality to run on enter/exit of media query
-		mediaCheck.init({
+		var mc = mediaCheck.init({
 			scope: $scope,
 			media: {
 				mq: MQ.SMALL,
@@ -95,7 +95,7 @@
 		 * @private
 		 */
 		function _routeChangeSuccess($event, current, previous) {
-			mediaCheck.matchCurrent(MQ.SMALL);
+			mc.matchCurrent(MQ.SMALL);
 
 			if (current.$$route.resolve) {
 				_loadingOff();
