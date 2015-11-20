@@ -34,7 +34,7 @@
 			/**
 			 * Initialize debounced resize
 			 */
-			resize.init({
+			var _rs = resize.init({
 				scope: $scope,
 				resizedFn: _resized,
 				debounce: 200
