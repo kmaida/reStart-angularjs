@@ -77,16 +77,20 @@
 		}
 
 		/**
-		 * MediaCheck constructor function
+		 * MediaCheck constructor object
 		 *
-		 * @param options {object}
-		 * @constructor
+		 * @type {{buildInstance: buildInstance, matchCurrent: matchCurrent}}
 		 */
 		var MediaCheck = {
 			buildInstance: buildInstance,
 			matchCurrent: matchCurrent
 		};
 
+		/**
+		 * Create instance
+		 *
+		 * @param options {object}
+		 */
 		function buildInstance(options) {
 			this.options = options;
 			this.matchMap = {};
@@ -330,7 +334,7 @@
 		 * Return constructor to assign and use
 		 *
 		 * @param options {object} options
-		 * @returns {MediaCheck}
+		 * @returns {object} MediaCheck
 		 */
 		function init(options) {
 			var MC = Object.create(MediaCheck);
