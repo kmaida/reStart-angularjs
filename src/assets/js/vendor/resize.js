@@ -82,6 +82,7 @@
 			return RS;
 		}
 
+		// callable members
 		return {
 			init: init
 		}

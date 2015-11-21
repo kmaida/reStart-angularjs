@@ -40890,8 +40890,8 @@
 		/**
 		 * Return constructor to assign and use
 		 *
-		 * @param options
-		 * @returns {instance} Resize
+		 * @param options {object}
+		 * @returns {object} Resize
 		 */
 		function init(options) {
 			var RS = Object.create(Resize);
@@ -40901,6 +40901,7 @@
 			return RS;
 		}
 
+		// callable members
 		return {
 			init: init
 		}
