@@ -97,7 +97,7 @@
 		return {
 			restrict: 'EA',
 			replace: true,
-			templateUrl: 'ng-app/core/loading.tpl.html',
+			templateUrl: 'reStart-app/core/loading.tpl.html',
 			transclude: true,
 			controller: loadingCtrl,
 			controllerAs: 'loading',

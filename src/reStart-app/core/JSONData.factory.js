@@ -44,7 +44,7 @@
 		 */
 		function getLocalData() {
 			return $http
-				.get('/ng-app/data/data.json')
+				.get('/reStart-app/data/data.json')
 				.then(_successRes, _errorRes);
 		}
 

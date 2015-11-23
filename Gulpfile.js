@@ -35,8 +35,8 @@ var path = {
 		dest: basePath.dest + '/assets/js/vendor/'
 	},
 	jsAngular: {
-		src: basePath.src + '/ng-app/',
-		dest: basePath.dest + '/ng-app/'
+		src: basePath.src + '/reStart-app/',
+		dest: basePath.dest + '/reStart-app/'
 	}
 };
 
@@ -126,9 +126,9 @@ function jsVendor() {
  * Save
  */
 function jsAngular() {
-	return gulp.src([path.jsAngular.src + 'core/app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'ng-app.js'])
+	return gulp.src([path.jsAngular.src + 'core/app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js'])
 		.pipe(sourcemaps.init())
-		.pipe(concat('ng-app.js'))
+		.pipe(concat('reStart-app.js'))
 		.pipe(sourcemaps.write())
 		.pipe(isProduction ? uglify() : gutil.noop() )
 		.pipe(gulp.dest(path.jsAngular.dest));
@@ -173,6 +173,6 @@ gulp.task('default', ['serve', 'styles', 'jsVendor', 'js', 'jsAngular'], functio
 		gulp.watch(path.css.src + '**/*.scss', ['styles']);
 		gulp.watch([path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'vendor.js'], ['jsVendor']);
 		gulp.watch([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'], ['js']);
-		gulp.watch([path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'ng-app.js'], ['jsAngular']);
+		gulp.watch([path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js'], ['jsAngular']);
 	}
 });

@@ -1,8 +1,7 @@
 /**
  * Directives (and associated attributes) are always declared as camelCase in JS and snake-case in HTML
  * Angular's built-in <a> directive automatically implements preventDefault on links that don't have an href attribute
- * Complex JavaScript DOM manipulation should always be done in directive link functions,
- * and $apply should never be used in a controller! Simple DOM manipulation should be in the view.
+ * Complex JavaScript DOM manipulation should always be done in directive link functions, and $apply should never be used in a controller! Simple DOM manipulation should be in the view.
  */
 
 /*--- Sample Directive with a $watch ---*/
@@ -14,7 +13,6 @@
 		.directive('sampleDirective', sampleDirective);
 
 	sampleDirective.$inject = ['$timeout'];
-	
 	/**
 	 * sampleDirective directive
 	 * Sample directive with isolate scope,
@@ -52,7 +50,7 @@
 			scope: {
 				jsonData: '='
 			},
-			templateUrl: 'ng-app/sub/sample.tpl.html',
+			templateUrl: 'reStart-app/sub/sample.tpl.html',
 			transclude: true,
 			controller: SampleDirectiveCtrl,
 			controllerAs: 'sd',
