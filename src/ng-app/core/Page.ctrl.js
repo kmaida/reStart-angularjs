@@ -2,7 +2,7 @@
 	'use strict';
 
 	angular
-		.module('myApp')
+		.module('reStart')
 		.controller('PageCtrl', PageCtrl);
 
 	PageCtrl.$inject = ['Page', '$scope', 'MQ', 'mediaCheck'];

@@ -3,7 +3,7 @@
 	'use strict';
 
 	angular
-		.module('myApp')
+		.module('reStart')
 		.factory('GlobalObj', GlobalObj);
 
 	function GlobalObj() {

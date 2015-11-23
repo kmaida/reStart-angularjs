@@ -1,16 +1,20 @@
-// Directives (and associated attributes) are camelCase in JS and snake-case in HTML
-// Angular's built-in <a> directive automatically implements preventDefault on links that don't have an href attribute
-// Complex JavaScript DOM manipulation should always be done in directive link functions, and $apply should never be used in a controller! Simple DOM manipulation should be in the view.
+/**
+ * Directives (and associated attributes) are always declared as camelCase in JS and snake-case in HTML
+ * Angular's built-in <a> directive automatically implements preventDefault on links that don't have an href attribute
+ * Complex JavaScript DOM manipulation should always be done in directive link functions,
+ * and $apply should never be used in a controller! Simple DOM manipulation should be in the view.
+ */
 
 /*--- Sample Directive with a $watch ---*/
 (function() {
 	'use strict';
 
 	angular
-		.module('myApp')
+		.module('reStart')
 		.directive('sampleDirective', sampleDirective);
 
 	sampleDirective.$inject = ['$timeout'];
+	
 	/**
 	 * sampleDirective directive
 	 * Sample directive with isolate scope,

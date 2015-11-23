@@ -2,7 +2,7 @@
 	'use strict';
 
 	angular
-		.module('myApp')
+		.module('reStart')
 		.controller('HeaderCtrl', HeaderCtrl);
 
 	HeaderCtrl.$inject = ['$location', 'JSONData'];

@@ -1,2 +1,2 @@
 angular
-	.module('myApp', ['ngRoute', 'ngResource', 'ngSanitize', 'mediaCheck', 'resize']);
+	.module('reStart', ['ngRoute', 'ngResource', 'ngSanitize', 'mediaCheck', 'resize']);

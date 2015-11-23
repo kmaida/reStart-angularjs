@@ -2,7 +2,7 @@
 	'use strict';
 
 	angular
-		.module('myApp')
+		.module('reStart')
 		.controller('SubCtrl', SubCtrl);
 
 	SubCtrl.$inject = ['GlobalObj', 'Page', 'resolveLocalData'];

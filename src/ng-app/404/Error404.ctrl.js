@@ -2,7 +2,7 @@
 	'use strict';
 
 	angular
-		.module('myApp')
+		.module('reStart')
 		.controller('Error404Ctrl', Error404Ctrl);
 
 	Error404Ctrl.$inject = ['Page'];

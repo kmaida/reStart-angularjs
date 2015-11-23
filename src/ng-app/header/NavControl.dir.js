@@ -2,7 +2,7 @@
 	'use strict';
 
 	angular
-		.module('myApp')
+		.module('reStart')
 		.directive('navControl', navControl);
 
 	navControl.$inject = ['$window', 'resize'];

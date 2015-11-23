@@ -48,6 +48,7 @@ Run `gulp --prod` to use the `production` flag, minifying files (no server, no `
 
 ## Changelog
 
+* 11/23/15: Rename module and folders for better scalability. Additional dependency upgrades and styleguide compliance edits.
 * 11/16/15: App-wide updates to greatly enhance base features, upgrade dependencies, and comply much more fully with John Papa's AngularJS styleguide
 * 10/18/15: Upgrade to Angular 1.4.7, upgrade `gulp-sass` to use latest and lowercase package name (for Node v4), add
  error response to `$http` promises

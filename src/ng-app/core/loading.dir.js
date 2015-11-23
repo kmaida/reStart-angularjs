@@ -2,7 +2,7 @@
 	'use strict';
 
 	angular
-		.module('myApp')
+		.module('reStart')
 		.directive('loading', loading);
 
 	loading.$inject = ['$window', 'resize'];
