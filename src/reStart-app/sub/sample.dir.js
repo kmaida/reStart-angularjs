@@ -32,8 +32,18 @@
 		 * @param sd {controller}
 		 */
 		function sampleDirectiveLink($scope, $element, $attrs, sd) {
+
 			// watch for async data to become available and update
-			$scope.$watch('sd.jsonData', function(newVal, oldVal) {
+			$scope.$watch('sd.jsonData', _$watchJsonData);
+
+			/**
+			 * $watch for sd.jsonData to become available
+			 *
+			 * @param newVal {*}
+			 * @param oldVal {*}
+			 * @private
+			 */
+			function _$watchJsonData(newVal, oldVal) {
 				if (newVal) {
 					sd.jsonData = newVal;
 
@@ -41,7 +51,7 @@
 						console.log('demonstrate $timeout injection in a directive link function');
 					}, 1000);
 				}
-			});
+			}
 		}
 
 		return {

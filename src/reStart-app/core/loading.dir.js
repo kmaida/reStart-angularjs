@@ -21,8 +21,18 @@
 		 * @param loading {controller}
 		 */
 		function loadingLink($scope, $element, $attrs, loading) {
+			// private variables
 			var _$body = angular.element('body');
 			var _winHeight = $window.innerHeight + 'px';
+			// initialize debounced resize
+			var _rs = resize.init({
+				scope: $scope,
+				resizedFn: _resized,
+				debounce: 200
+			});
+
+			// $watch active state
+			$scope.$watch('loading.active', _$watchActive);
 
 			/**
 			 * Window resized
@@ -43,29 +53,19 @@
 			}
 
 			/**
-			 * Initialize debounced resize
-			 */
-			var _rs = resize.init({
-				scope: $scope,
-				resizedFn: _resized,
-				debounce: 200
-			});
-
-			/**
 			 * $watch loading.active
 			 *
 			 * @param newVal {boolean}
 			 * @param oldVal {undefined|boolean}
+			 * @private
 			 */
-			function $watchActive(newVal, oldVal) {
+			function _$watchActive(newVal, oldVal) {
 				if (newVal) {
 					_open();
 				} else {
 					_close();
 				}
 			}
-
-			$scope.$watch('loading.active', $watchActive);
 
 			/**
 			 * Open loading
@@ -115,6 +115,9 @@
 	function loadingCtrl($scope) {
 		var loading = this;
 
+		$scope.$on('loading-on', _loadingActive);
+		$scope.$on('loading-off', _loadingInactive);
+
 		/**
 		 * Set loading to active
 		 *
@@ -132,9 +135,6 @@
 		function _loadingInactive() {
 			loading.active = false;
 		}
-
-		$scope.$on('loading-on', _loadingActive);
-		$scope.$on('loading-off', _loadingInactive);
 	}
 
 })();

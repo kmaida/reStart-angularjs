@@ -10,6 +10,7 @@
 	function Error404Ctrl(Page) {
 		var e404 = this;
 
+		// bindable members
 		e404.title = '404 - Page Not Found';
 
 		// set page <title>

@@ -14,12 +14,10 @@
 		// bindable members
 		sub.title = 'Subpage';
 		sub.global = GlobalObj;
+		sub.json = resolveLocalData;
 
 		// set page <title>
 		Page.setTitle(sub.title);
-
-		// data from route resolve
-		sub.json = resolveLocalData;
 	}
 
 })();

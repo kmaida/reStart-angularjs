@@ -12,10 +12,6 @@
 
 		// private variables
 		var _handlingRouteChangeError = false;
-
-		// associate page <title>
-		page.pageTitle = Page;
-
 		// Set up functionality to run on enter/exit of media query
 		var mc = mediaCheck.init({
 			scope: $scope,
@@ -26,6 +22,9 @@
 			},
 			debounce: 200
 		});
+
+		// associate page <title>
+		page.pageTitle = Page;
 
 		$scope.$on('$routeChangeStart', _routeChangeStart);
 		$scope.$on('$routeChangeSuccess', _routeChangeSuccess);
