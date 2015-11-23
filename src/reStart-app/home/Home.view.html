@@ -1,6 +1,6 @@
 <article id="content-wrapper" class="content-wrapper home-wrapper">
 	<section id="content-main" class="content-main home-content clearfix" ng-cloak>
-		<h1 class="content-heading">{{::home.title}}</h1>
+		<h1 class="content-heading" ng-bind="::home.title"></h1>
 
 		<p>
 			<label>Name:</label>
@@ -10,7 +10,7 @@
 
 		<h2>{{::home.global.greeting}}, {{home.name}}!</h2>
 		
-		<p>{{::home.json.summary}}</p>
+		<p ng-bind="::home.json.summary"></p>
 
 		<p ng-bind-html="home.stringOfHTML | trustAsHTML"></p>
 
