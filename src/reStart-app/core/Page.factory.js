@@ -11,7 +11,7 @@
 
 		// callable members
 		return {
-			title: title,
+			getTitle: getTitle,
 			setTitle: setTitle
 		};
 
@@ -21,7 +21,7 @@
 		 *
 		 * @returns {string} site title + page title
 		 */
-		function title() {
+		function getTitle() {
 			return siteTitle + ' | ' + pageTitle;
 		}
 
