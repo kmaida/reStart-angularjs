@@ -19,14 +19,24 @@
 		home.stringOfHTML = '<strong style="color: green;">Some green text</strong> bound as HTML with a <a href="#">link</a>, trusted with SCE!';
 		home.viewformat = null;
 
-		// set page <title>
-		Page.setTitle(home.title);
+		_init();
 
-		$scope.$on('enter-mobile', _enterMobile);
-		$scope.$on('exit-mobile', _exitMobile);
+		/**
+		 * INIT function executes procedural code
+		 *
+		 * @private
+		 */
+		function _init() {
+			// set page <title>
+			Page.setTitle(home.title);
 
-		// activate controller
-		_activate();
+			// activate controller
+			_activate();
+
+			// mediaquery events
+			$scope.$on('enter-mobile', _enterMobile);
+			$scope.$on('exit-mobile', _exitMobile);
+		}
 
 		/**
 		 * Controller activate

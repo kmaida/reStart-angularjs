@@ -13,7 +13,16 @@
 		// bindable members
 		e404.title = '404 - Page Not Found';
 
-		// set page <title>
-		Page.setTitle(e404.title);
+		_init();
+
+		/**
+		 * INIT function executes procedural code
+		 *
+		 * @private
+		 */
+		function _init() {
+			// set page <title>
+			Page.setTitle(e404.title);
+		}
 	}
 })();

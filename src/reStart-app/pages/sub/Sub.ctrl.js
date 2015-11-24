@@ -16,8 +16,16 @@
 		sub.global = GlobalObj;
 		sub.json = resolveLocalData;
 
-		// set page <title>
-		Page.setTitle(sub.title);
-	}
+		_init();
 
+		/**
+		 * INIT function executes procedural code
+		 *
+		 * @private
+		 */
+		function _init() {
+			// set page <title>
+			Page.setTitle(sub.title);
+		}
+	}
 })();

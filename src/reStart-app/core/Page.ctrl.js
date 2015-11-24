@@ -23,12 +23,21 @@
 			debounce: 200
 		});
 
-		// associate page <title>
-		page.pageTitle = Page;
+		_init();
 
-		$scope.$on('$routeChangeStart', _routeChangeStart);
-		$scope.$on('$routeChangeSuccess', _routeChangeSuccess);
-		$scope.$on('$routeChangeError', _routeChangeError);
+		/**
+		 * INIT function executes procedural code
+		 *
+		 * @private
+		 */
+		function _init() {
+			// associate page <title>
+			page.pageTitle = Page;
+
+			$scope.$on('$routeChangeStart', _routeChangeStart);
+			$scope.$on('$routeChangeSuccess', _routeChangeSuccess);
+			$scope.$on('$routeChangeError', _routeChangeError);
+		}
 
 		/**
 		 * Enter mobile media query

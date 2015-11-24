@@ -27,16 +27,26 @@
 			var _$body = angular.element('body');
 			var _layoutCanvas = _$body.find('.layout-canvas');
 			var _navOpen;
-			// initialize debounced resize
-			var _rs = resize.init({
-				scope: $scope,
-				resizedFn: _resized,
-				debounce: 200
-			});
 
-			$scope.$on('$locationChangeStart', _$locationChangeStart);
-			$scope.$on('enter-mobile', _enterMobile);
-			$scope.$on('exit-mobile', _exitMobile);
+			_init();
+
+			/**
+			 * INIT function executes procedural code
+			 *
+			 * @private
+			 */
+			function _init() {
+				// initialize debounced resize
+				var _rs = resize.init({
+					scope: $scope,
+					resizedFn: _resized,
+					debounce: 100
+				});
+
+				$scope.$on('$locationChangeStart', _$locationChangeStart);
+				$scope.$on('enter-mobile', _enterMobile);
+				$scope.$on('exit-mobile', _exitMobile);
+			}
 
 			/**
 			 * Resized window (debounced)

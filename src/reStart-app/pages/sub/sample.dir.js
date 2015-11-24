@@ -39,8 +39,17 @@
 		 * @param sd {controller}
 		 */
 		function sampleDirectiveLink($scope, $element, $attrs, sd) {
-			// watch for async data to become available and update
-			$scope.$watch('sd.jsonData', _$watchJsonData);
+			_init();
+
+			/**
+			 * INIT function executes procedural code
+			 *
+			 * @private
+			 */
+			function _init() {
+				// watch for async data to become available and update
+				$scope.$watch('sd.jsonData', _$watchJsonData);
+			}
 
 			/**
 			 * $watch for sd.jsonData to become available

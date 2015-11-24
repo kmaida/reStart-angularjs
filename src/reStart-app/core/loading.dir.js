@@ -33,15 +33,25 @@
 			// private variables
 			var _$body = angular.element('body');
 			var _winHeight = $window.innerHeight + 'px';
-			// initialize debounced resize
-			var _rs = resize.init({
-				scope: $scope,
-				resizedFn: _resized,
-				debounce: 200
-			});
 
-			// $watch active state
-			$scope.$watch('loading.active', _$watchActive);
+			_init();
+
+			/**
+			 * INIT function executes procedural code
+			 *
+			 * @private
+			 */
+			function _init() {
+				// initialize debounced resize
+				var _rs = resize.init({
+					scope: $scope,
+					resizedFn: _resized,
+					debounce: 200
+				});
+
+				// $watch active state
+				$scope.$watch('loading.active', _$watchActive);
+			}
 
 			/**
 			 * Window resized
@@ -113,8 +123,17 @@
 	function loadingCtrl($scope) {
 		var loading = this;
 
-		$scope.$on('loading-on', _loadingActive);
-		$scope.$on('loading-off', _loadingInactive);
+		_init();
+
+		/**
+		 * INIT function executes procedural code
+		 *
+		 * @private
+		 */
+		function _init() {
+			$scope.$on('loading-on', _loadingActive);
+			$scope.$on('loading-off', _loadingInactive);
+		}
 
 		/**
 		 * Set loading to active
