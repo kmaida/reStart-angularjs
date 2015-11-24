@@ -11,12 +11,12 @@
 	function appConfig($routeProvider, $locationProvider) {
 		$routeProvider
 			.when('/', {
-				templateUrl: 'reStart-app/home/Home.view.html',
+				templateUrl: 'reStart-app/pages/home/Home.view.html',
 				controller: 'HomeCtrl',
 				controllerAs: 'home'
 			})
 			.when('/subpage', {
-				templateUrl: 'reStart-app/sub/Sub.view.html',
+				templateUrl: 'reStart-app/pages/sub/Sub.view.html',
 				controller: 'SubCtrl',
 				controllerAs: 'sub',
 				resolve: {
@@ -24,7 +24,7 @@
 				}
 			})
 			.when('/404', {
-				templateUrl: 'reStart-app/404/404.view.html',
+				templateUrl: 'reStart-app/pages/404/404.view.html',
 				controller: 'Error404Ctrl',
 				controllerAs: 'e404'
 			})

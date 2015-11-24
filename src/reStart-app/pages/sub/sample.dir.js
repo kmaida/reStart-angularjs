@@ -28,7 +28,7 @@
 			scope: {
 				jsonData: '='
 			},
-			templateUrl: 'reStart-app/sub/sample.tpl.html',
+			templateUrl: 'reStart-app/pages/sub/sample.tpl.html',
 			transclude: true,
 			controller: SampleDirectiveCtrl,
 			controllerAs: 'sd',
