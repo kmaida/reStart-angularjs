@@ -21,8 +21,21 @@
 	 * @returns {object} directive
 	 */
 	function sampleDirective($timeout) {
+		// return directive
+		return {
+			restrict: 'EA',
+			replace: true,
+			scope: {
+				jsonData: '='
+			},
+			templateUrl: 'reStart-app/sub/sample.tpl.html',
+			transclude: true,
+			controller: SampleDirectiveCtrl,
+			controllerAs: 'sd',
+			bindToController: true,
+			link: sampleDirectiveLink
+		};
 
-		sampleDirectiveLink.$inject = ['$scope', '$element', '$attrs', 'sd'];
 		/**
 		 * sampleDirective LINK function
 		 *
@@ -53,20 +66,6 @@
 				}
 			}
 		}
-
-		return {
-			restrict: 'EA',
-			replace: true,
-			scope: {
-				jsonData: '='
-			},
-			templateUrl: 'reStart-app/sub/sample.tpl.html',
-			transclude: true,
-			controller: SampleDirectiveCtrl,
-			controllerAs: 'sd',
-			bindToController: true,
-			link: sampleDirectiveLink
-		};
 	}
 
 	SampleDirectiveCtrl.$inject = [];

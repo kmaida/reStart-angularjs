@@ -8,8 +8,17 @@
 	loading.$inject = ['$window', 'resize'];
 
 	function loading($window, resize) {
-
-		loadingLink.$inject = ['$scope', '$element', '$attrs', 'loading'];
+		// return directive
+		return {
+			restrict: 'EA',
+			replace: true,
+			templateUrl: 'reStart-app/core/loading.tpl.html',
+			transclude: true,
+			controller: loadingCtrl,
+			controllerAs: 'loading',
+			bindToController: true,
+			link: loadingLink
+		};
 
 		/**
 		 * loading LINK
@@ -93,17 +102,6 @@
 				});
 			}
 		}
-
-		return {
-			restrict: 'EA',
-			replace: true,
-			templateUrl: 'reStart-app/core/loading.tpl.html',
-			transclude: true,
-			controller: loadingCtrl,
-			controllerAs: 'loading',
-			bindToController: true,
-			link: loadingLink
-		};
 	}
 
 	loadingCtrl.$inject = ['$scope'];

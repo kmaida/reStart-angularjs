@@ -9,6 +9,11 @@
 	JSONData.$inject = ['$http'];
 
 	function JSONData($http) {
+		// callable members
+		return {
+			getLocalData: getLocalData
+		};
+
 		/**
 		 * Promise response function - success
 		 * Checks typeof data returned and succeeds if JS object, throws error if not
@@ -46,11 +51,6 @@
 			return $http
 				.get('/data/data.json')
 				.then(_successRes, _errorRes);
-		}
-
-		// callable members
-		return {
-			getLocalData: getLocalData
 		}
 	}
 })();

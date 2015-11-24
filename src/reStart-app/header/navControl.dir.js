@@ -8,9 +8,17 @@
 	navControl.$inject = ['$window', 'resize'];
 
 	function navControl($window, resize) {
+		// return directive
+		return {
+			restrict: 'EA',
+			link: navControlLink
+		};
 
-		navControlLink.$inject = ['$scope'];
-
+		/**
+		 * navControl link function
+		 *
+		 * @param $scope
+		 */
 		function navControlLink($scope) {
 			// data model
 			$scope.nav = {};
@@ -113,12 +121,6 @@
 				_$body.removeClass('nav-closed nav-open');
 			}
 		}
-
-		// return directive
-		return {
-			restrict: 'EA',
-			link: navControlLink
-		};
 	}
 
 })();

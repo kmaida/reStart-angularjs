@@ -9,6 +9,12 @@
 		var siteTitle = 'reStart Angular';
 		var pageTitle = 'Home';
 
+		// callable members
+		return {
+			title: title,
+			setTitle: setTitle
+		};
+
 		/**
 		 * Title function
 		 * Sets site title and page title
@@ -26,12 +32,6 @@
 		 */
 		function setTitle(newTitle) {
 			pageTitle = newTitle;
-		}
-
-		// callable members
-		return {
-			title: title,
-			setTitle: setTitle
 		}
 	}
 })();

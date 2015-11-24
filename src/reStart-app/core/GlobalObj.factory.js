@@ -9,6 +9,12 @@
 	function GlobalObj() {
 		var greeting = 'Hello';
 
+		// callable members
+		return {
+			greeting: greeting,
+			alertGreeting: alertGreeting
+		};
+
 		/**
 		 * Alert greeting
 		 *
@@ -17,11 +23,5 @@
 		function alertGreeting(name) {
 			alert(greeting + ', ' + name + '!');
 		}
-
-		// callable members
-		return {
-			greeting: greeting,
-			alertGreeting: alertGreeting
-		};
 	}
 })();
