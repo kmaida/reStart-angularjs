@@ -6,6 +6,7 @@
 		.factory('Page', Page);
 
 	function Page() {
+		// private vars
 		var siteTitle = 'reStart Angular';
 		var pageTitle = 'Home';
 
