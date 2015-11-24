@@ -8,6 +8,7 @@
 
 /*-- Core --*/
 
+// partials
 @import 'core/partials/colors.vars';
 @import 'core/partials/layout.vars';
 @import 'core/partials/responsive.partial';
@@ -23,5 +24,8 @@
 @import 'modules/header';
 @import 'modules/nav';
 @import 'modules/footer';
-@import 'modules/404';
 @import 'modules/loading';
+
+/*-- Pages --*/
+
+@import 'pages/404';
