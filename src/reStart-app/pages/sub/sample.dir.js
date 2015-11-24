@@ -13,26 +13,20 @@
 		.directive('sampleDirective', sampleDirective);
 
 	sampleDirective.$inject = ['$timeout'];
-	/**
-	 * sampleDirective directive
-	 * Sample directive with isolate scope,
-	 * controller, link, transclusion
-	 *
-	 * @returns {object} directive
-	 */
+
 	function sampleDirective($timeout) {
 		// return directive
 		return {
 			restrict: 'EA',
 			replace: true,
-			scope: {
-				jsonData: '='
-			},
+			scope: {},
 			templateUrl: 'reStart-app/pages/sub/sample.tpl.html',
 			transclude: true,
 			controller: SampleDirectiveCtrl,
 			controllerAs: 'sd',
-			bindToController: true,
+			bindToController: {
+				jsonData: '='
+			},
 			link: sampleDirectiveLink
 		};
 
@@ -45,7 +39,6 @@
 		 * @param sd {controller}
 		 */
 		function sampleDirectiveLink($scope, $element, $attrs, sd) {
-
 			// watch for async data to become available and update
 			$scope.$watch('sd.jsonData', _$watchJsonData);
 

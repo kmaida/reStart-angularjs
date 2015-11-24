@@ -15,7 +15,7 @@
 		};
 
 		/**
-		 * navControl link function
+		 * navControl LINK function
 		 *
 		 * @param $scope
 		 */

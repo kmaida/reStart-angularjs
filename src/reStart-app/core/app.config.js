@@ -1,4 +1,4 @@
-// config
+// application config
 (function() {
 	'use strict';
 
