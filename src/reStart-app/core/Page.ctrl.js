@@ -87,7 +87,7 @@
 		 * @private
 		 */
 		function _routeChangeStart($event, next, current) {
-			if (next.$$route.resolve) {
+			if (next.$$route && next.$$route.resolve) {
 				_loadingOn();
 			}
 		}
@@ -105,7 +105,7 @@
 		function _routeChangeSuccess($event, current, previous) {
 			mc.matchCurrent(MQ.SMALL);
 
-			if (current.$$route.resolve) {
+			if (current.$$route && current.$$route.resolve) {
 				_loadingOff();
 			}
 		}
