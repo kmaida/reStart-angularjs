@@ -4,9 +4,9 @@
 
 	angular
 		.module('reStart')
-		.factory('GlobalObj', GlobalObj);
+		.factory('Utils', Utils);
 
-	function GlobalObj() {
+	function Utils() {
 		var greeting = 'Hello';
 
 		// callable members

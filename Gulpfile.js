@@ -126,7 +126,7 @@ function jsVendor() {
  * Save
  */
 function jsAngular() {
-	return gulp.src([path.jsAngular.src + 'core/app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js'])
+	return gulp.src([path.jsAngular.src + 'core/app-setup/app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js'])
 		.pipe(sourcemaps.init())
 		.pipe(concat('reStart-app.js'))
 		.pipe(sourcemaps.write())

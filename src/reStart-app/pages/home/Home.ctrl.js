@@ -5,17 +5,17 @@
 		.module('reStart')
 		.controller('HomeCtrl', HomeCtrl);
 
-	HomeCtrl.$inject = ['$scope', 'GlobalObj', 'Page', 'JSONData'];
+	HomeCtrl.$inject = ['$scope', 'Utils', 'Page', 'JSONData'];
 
-	function HomeCtrl($scope, GlobalObj, Page, JSONData) {
+	function HomeCtrl($scope, Utils, Page, JSONData) {
 		// controllerAs ViewModel
 		var home = this;
 
 		// bindable members
 		home.title = 'Home';
-		home.global = GlobalObj;
+		home.global = Utils;
 		home.name = 'Visitor';
-		home.alertGreeting = GlobalObj.alertGreeting;
+		home.alertGreeting = Utils.alertGreeting;
 		home.stringOfHTML = '<strong style="color: green;">Some green text</strong> bound as HTML with a <a href="#">link</a>, trusted with SCE!';
 		home.viewformat = null;
 
@@ -46,26 +46,26 @@
 		 * @private
 		 */
 		function _activate() {
-			/**
-			 * Successful promise data
-			 *
-			 * @param data {json}
-			 * @private
-			 */
-			function _getJsonSuccess(data) {
-				home.json = data;
-
-				// stop loading
-				$scope.$emit('loading-off');
-
-				return home.json;
-			}
-
 			// start loading
 			$scope.$emit('loading-on');
 
 			// get the data from JSON
 			return JSONData.getLocalData().then(_getJsonSuccess);
+		}
+
+		/**
+		 * Successful promise data
+		 *
+		 * @param data {json}
+		 * @private
+		 */
+		function _getJsonSuccess(data) {
+			home.json = data;
+
+			// stop loading
+			$scope.$emit('loading-off');
+
+			return home.json;
 		}
 
 		/**

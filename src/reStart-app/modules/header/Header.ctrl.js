@@ -28,6 +28,29 @@
 		}
 
 		/**
+		 * Controller activate
+		 * Get JSON data
+		 *
+		 * @returns {*}
+		 * @private
+		 */
+		function _activate() {
+			// get the data from JSON
+			return JSONData.getLocalData().then(_getJsonSuccess);
+		}
+
+		/**
+		 * Successful promise data
+		 *
+		 * @param data {json}
+		 * @private
+		 */
+		function _getJsonSuccess(data) {
+			header.json = data;
+			return header.json;
+		}
+
+		/**
 		 * Apply class to index nav if active
 		 *
 		 * @param {string} path
@@ -44,29 +67,6 @@
 		 */
 		function navIsActive(path) {
 			return $location.path().substr(0, path.length) === path;
-		}
-
-		/**
-		 * Controller activate
-		 * Get JSON data
-		 *
-		 * @returns {*}
-		 * @private
-		 */
-		function _activate() {
-			/**
-			 * Successful promise data
-			 *
-			 * @param data {json}
-			 * @private
-			 */
-			function _getJsonSuccess(data) {
-				header.json = data;
-				return header.json;
-			}
-
-			// get the data from JSON
-			return JSONData.getLocalData().then(_getJsonSuccess);
 		}
 	}
 

@@ -5,15 +5,15 @@
 		.module('reStart')
 		.controller('SubCtrl', SubCtrl);
 
-	SubCtrl.$inject = ['GlobalObj', 'Page', 'resolveLocalData'];
+	SubCtrl.$inject = ['Utils', 'Page', 'resolveLocalData'];
 
-	function SubCtrl(GlobalObj, Page, resolveLocalData) {
+	function SubCtrl(Utils, Page, resolveLocalData) {
 		// controllerAs ViewModel
 		var sub = this;
 
 		// bindable members
 		sub.title = 'Subpage';
-		sub.global = GlobalObj;
+		sub.global = Utils;
 		sub.json = resolveLocalData;
 
 		_init();

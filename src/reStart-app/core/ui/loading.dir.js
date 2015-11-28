@@ -12,7 +12,7 @@
 		return {
 			restrict: 'EA',
 			replace: true,
-			templateUrl: 'reStart-app/core/loading.tpl.html',
+			templateUrl: 'reStart-app/core/ui/loading.tpl.html',
 			transclude: true,
 			controller: loadingCtrl,
 			controllerAs: 'loading',
