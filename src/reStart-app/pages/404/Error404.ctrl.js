@@ -5,9 +5,9 @@
 		.module('reStart')
 		.controller('Error404Ctrl', Error404Ctrl);
 
-	Error404Ctrl.$inject = ['Page'];
+	Error404Ctrl.$inject = ['$scope', 'Page'];
 
-	function Error404Ctrl(Page) {
+	function Error404Ctrl($scope, Page) {
 		var e404 = this;
 
 		// bindable members
@@ -23,6 +23,8 @@
 		function _init() {
 			// set page <title>
 			Page.setTitle(e404.title);
+
+			$scope.$emit('loading-off');
 		}
 	}
 })();
