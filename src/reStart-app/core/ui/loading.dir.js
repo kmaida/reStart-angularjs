@@ -131,6 +131,9 @@
 		 * @private
 		 */
 		function _init() {
+			// turn on loading for initial page load
+			_loadingActive();
+
 			$scope.$on('loading-on', _loadingActive);
 			$scope.$on('loading-off', _loadingInactive);
 		}
