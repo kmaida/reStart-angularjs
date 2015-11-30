@@ -24,7 +24,7 @@
 				}
 			})
 			.otherwise({
-				templateUrl: 'reStart-app/pages/404/404.view.html',
+				templateUrl: 'reStart-app/pages/error404/Error404.view.html',
 				controller: 'Error404Ctrl',
 				controllerAs: 'e404'
 			});

@@ -24,6 +24,7 @@
 			// set page <title>
 			Page.setTitle(e404.title);
 
+			// no data to load, but loading state might be on
 			$scope.$emit('loading-off');
 		}
 	}
