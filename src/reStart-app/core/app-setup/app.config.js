@@ -23,13 +23,10 @@
 					resolveLocalData: resolveLocalData
 				}
 			})
-			.when('/404', {
+			.otherwise({
 				templateUrl: 'reStart-app/pages/404/404.view.html',
 				controller: 'Error404Ctrl',
 				controllerAs: 'e404'
-			})
-			.otherwise({
-				redirectTo: '/404'
 			});
 
 		$locationProvider
