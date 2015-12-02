@@ -21,7 +21,7 @@
 		 * @returns {*} object, array
 		 */
 		function success(response) {
-			if (typeof response.data === 'object') {
+			if (angular.isObject(response.data)) {
 				return response.data;
 			} else {
 				throw new Error('retrieved data is not typeof object.');
