@@ -21,7 +21,12 @@
   "requireSpaceBeforeBlockStatements": true,
   "requireSpacesInForStatement": true,
   "requireSpacesInConditionalExpression": true,
-  "validateIndentation": { "value": "\t" },
-  "validateQuoteMarks": { "mark": "'", "escape": true },
+  "validateIndentation": {
+    "value": "\t"
+  },
+  "validateQuoteMarks": {
+    "mark": "'",
+    "escape": true
+  },
   "validateParameterSeparator": ", "
 }
