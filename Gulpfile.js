@@ -115,7 +115,7 @@ function jsValidate() {
 }
 
 /**
- * function js()
+ * function jsUser()
  *
  * Init sourcemaps
  * Concatenate JS files
@@ -123,7 +123,7 @@ function jsValidate() {
  * Uglify / minify (if production)
  * Save
  */
-function js() {
+function jsUser() {
 	return gulp.src([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'])
 		.pipe(sourcemaps.init())
 		.pipe(concat('scripts.js'))
@@ -181,25 +181,13 @@ function serve() {
 }
 
 /**
- * Gulp tasks
- */
-
-gulp.task('styles', styles);
-gulp.task('jsValidate', jsValidate);
-gulp.task('js', js);
-gulp.task('jsVendor', jsVendor);
-gulp.task('jsAngular', jsAngular);
-gulp.task('serve', serve);
-
-/**
  * Default build task
  *
  * If not production, watch for file changes and execute the appropriate task
  *
  * Use "gulp --prod" to trigger production/build mode from commandline
  */
-
-gulp.task('default', ['serve', 'styles', 'jsVendor', 'jsValidate', 'js', 'jsAngular'], function() {
+function defaultTask() {
 	// if no production flag, start watching
 	if (!isProduction) {
 		// compile SCSS
@@ -212,9 +200,22 @@ gulp.task('default', ['serve', 'styles', 'jsVendor', 'jsValidate', 'js', 'jsAngu
 		gulp.watch(jsUserSrc, ['jsValidate']);
 
 		// compile JS asset files
-		gulp.watch([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'], ['js']);
+		gulp.watch([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'], ['jsUser']);
 
 		// compile JS Angular files
 		gulp.watch([path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + jsAngularScript], ['jsAngular']);
 	}
-});
+}
+
+/**
+ * Gulp tasks
+ */
+
+gulp.task('styles', styles);
+gulp.task('jsValidate', jsValidate);
+gulp.task('jsUser', jsUser);
+gulp.task('jsVendor', jsVendor);
+gulp.task('jsAngular', jsAngular);
+gulp.task('serve', serve);
+gulp.task('js', ['jsVendor', 'jsValidate', 'jsUser', 'jsAngular']);
+gulp.task('default', ['serve', 'styles', 'js'], defaultTask);
