@@ -16,13 +16,15 @@ var concat = require('gulp-concat');
 
 /**
  * File paths
+ * Make sure to update these paths for your project!
  */
 
+var jsAngularDir = 'reStart-app';
+var jsAngularScript = jsAngularDir + '.js';
 var basePath = {
 	src: './src',
 	dest: './src'
 };
-
 var path = {
 	css: {
 		src: basePath.src + '/assets/css/scss/',
@@ -37,12 +39,11 @@ var path = {
 		dest: basePath.dest + '/assets/js/vendor/'
 	},
 	jsAngular: {
-		src: basePath.src + '/reStart-app/',
-		dest: basePath.dest + '/reStart-app/'
+		src: basePath.src + '/' + jsAngularDir + '/',
+		dest: basePath.dest + '/' + jsAngularDir + '/'
 	}
 };
-
-var jsUserSrc = [path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js', '!' + path.js.src + 'vendor/*'];
+var jsUserSrc = [path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + jsAngularScript, '!' + path.js.src + 'vendor/*'];
 
 /**
  * Run "gulp --prod" to trigger production/build mode
@@ -90,32 +91,27 @@ function styles() {
 
 
 /**
- * function lint()
+ * function jsValidate()
  *
  * Lint JavaScript with ESLint
+ * Style-check JavaScript with JSCS
  * Exclude vendor files
+ * Print results
  */
-function lint() {
-	return gulp.src(jsUserSrc)
-		.pipe(eslint({
-			extends: ['eslint:recommended']
-		}))
-		.pipe(eslint.format())
-		.pipe(eslint.results(function(results) {
-			console.log('ESLint Warnings: ' + results.warningCount);
-			console.log('ESLint Errors: ' + results.errorCount);
-		}));
-}
-
-/**
- * function jsStyle()
- *
- * Run JSCS on all user JavaScript
- */
-function jsStyle() {
-	return gulp.src(jsUserSrc)
-		.pipe(jscs())
-		.pipe(jscs.reporter());
+function jsValidate() {
+	if (!isProduction) {
+		return gulp.src(jsUserSrc)
+			.pipe(eslint({
+				extends: ['eslint:recommended']
+			}))
+			.pipe(eslint.format())
+			.pipe(eslint.results(function(results) {
+				console.log('ESLint Warnings: ' + results.warningCount);
+				console.log('ESLint Errors: ' + results.errorCount);
+			}))
+			.pipe(jscs())
+			.pipe(jscs.reporter());
+	}
 }
 
 /**
@@ -160,9 +156,9 @@ function jsVendor() {
  * Save
  */
 function jsAngular() {
-	return gulp.src([path.jsAngular.src + 'core/app-setup/app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js'])
+	return gulp.src([path.jsAngular.src + 'core/app-setup/app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + jsAngularScript])
 		.pipe(sourcemaps.init())
-		.pipe(concat('reStart-app.js'))
+		.pipe(concat(jsAngularScript))
 		.pipe(sourcemaps.write())
 		.pipe(isProduction ? uglify() : gutil.noop() )
 		.pipe(gulp.dest(path.jsAngular.dest));
@@ -189,8 +185,7 @@ function serve() {
  */
 
 gulp.task('styles', styles);
-gulp.task('lint', lint);
-gulp.task('jsStyle', jsStyle);
+gulp.task('jsValidate', jsValidate);
 gulp.task('js', js);
 gulp.task('jsVendor', jsVendor);
 gulp.task('jsAngular', jsAngular);
@@ -204,12 +199,22 @@ gulp.task('serve', serve);
  * Use "gulp --prod" to trigger production/build mode from commandline
  */
 
-gulp.task('default', ['serve', 'styles', 'jsVendor', 'lint', 'jsStyle', 'js', 'jsAngular'], function() {
+gulp.task('default', ['serve', 'styles', 'jsVendor', 'jsValidate', 'js', 'jsAngular'], function() {
+	// if no production flag, start watching
 	if (!isProduction) {
+		// compile SCSS
 		gulp.watch(path.css.src + '**/*.scss', ['styles']);
-		gulp.watch([path.js.src + '**/*.js', path.jsAngular.src + '**/*.js'], ['lint', 'jsStyle']);
+
+		// compile JS vendor files
 		gulp.watch([path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'vendor.js'], ['jsVendor']);
+
+		// validate user JS: linting / style-checking
+		gulp.watch(jsUserSrc, ['jsValidate']);
+
+		// compile JS asset files
 		gulp.watch([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'], ['js']);
-		gulp.watch([path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js'], ['jsAngular']);
+
+		// compile JS Angular files
+		gulp.watch([path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + jsAngularScript], ['jsAngular']);
 	}
 });

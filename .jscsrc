@@ -19,7 +19,6 @@
     "beforeOpeningCurlyBrace": true
   },
   "requireSpaceBeforeBlockStatements": true,
-  //"requireVarDeclFirst": true,
   "requireSpacesInForStatement": true,
   "requireSpacesInConditionalExpression": true,
   "validateIndentation": { "value": "\t" },

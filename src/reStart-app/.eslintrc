@@ -55,7 +55,7 @@
     "angular/no-cookiestore": 2,
     "angular/no-digest": 2,
     "angular/no-http-callback": 2,
-    "angular/no-inline-template": [0, {"allowSimple": true}],
+    "angular/no-inline-template": [1, {"allowSimple": true}],
     "angular/no-jquery-angularelement": 2,
     "angular/no-private-call": 0,
     "angular/no-service-method": 2,

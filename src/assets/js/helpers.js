@@ -22,6 +22,7 @@ window.helpers = (function() {
 	function fixBrowsers() {
 		var ua = navigator.userAgent.toLowerCase();
 		var chrome = ua.lastIndexOf('chrome/') > 0;
+		//var chromeversion = null;
 		var $html = $('html');
 		
 		// Modernizr 2 bug: Chrome on Windows 8 gives a false negative for transforms3d support
