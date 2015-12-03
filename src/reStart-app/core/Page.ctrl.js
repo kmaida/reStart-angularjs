@@ -121,15 +121,15 @@
 		 * @private
 		 */
 		function _routeChangeError($event, current, previous, rejection) {
+			var destination = (current && (current.title || current.name || current.loadedTemplateUrl)) || 'unknown target';
+			var msg = 'Error routing to ' + destination + '. ' + (rejection.msg || '');
+
 			if (_handlingRouteChangeError) {
 				return;
 			}
 
 			_handlingRouteChangeError = true;
 			_loadingOff();
-
-			var destination = (current && (current.title || current.name || current.loadedTemplateUrl)) || 'unknown target';
-			var msg = 'Error routing to ' + destination + '. ' + (rejection.msg || '');
 
 			console.log(msg);
 

@@ -20,13 +20,13 @@
 		 * @param $scope
 		 */
 		function navControlLink($scope) {
-			// data model
-			$scope.nav = {};
-
 			// private variables
 			var _$body = angular.element('body');
 			var _layoutCanvas = _$body.find('.layout-canvas');
 			var _navOpen;
+
+			// data model
+			$scope.nav = {};
 
 			_init();
 

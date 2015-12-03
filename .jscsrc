@@ -13,6 +13,8 @@
   "disallowSpacesInFunctionExpression": {
     "beforeOpeningRoundBrace": true
   },
+  "requireLineBreakAfterVariableAssignment": true,
+  "requireVarDeclFirst": true,
   "requireSemicolons": true,
   "requireSpaceBeforeBinaryOperators": true,
   "requireSpacesInAnonymousFunctionExpression": {
