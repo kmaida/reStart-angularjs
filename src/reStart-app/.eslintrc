@@ -24,6 +24,13 @@
     "no-undef": 0,
     "no-use-before-define": 0,
 
+    // Best Practices
+    "no-loop-func": 2,
+    "no-return-assign": 2,
+
+    // Stylistic issues
+
+
     // Angular
     "angular/angularelement": 1,
     "angular/controller-as": 2,
