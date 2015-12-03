@@ -7,6 +7,7 @@ var connect = require('gulp-connect');
 var gutil = require('gulp-util');
 var uglify = require('gulp-uglify');
 var eslint = require('gulp-eslint');
+var jscs = require('gulp-jscs');
 var sass = require('gulp-sass');
 var sourcemaps = require('gulp-sourcemaps');
 var minifyCSS = require('gulp-minify-css');
@@ -40,6 +41,8 @@ var path = {
 		dest: basePath.dest + '/reStart-app/'
 	}
 };
+
+var jsUserSrc = [path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js', '!' + path.js.src + 'vendor/*'];
 
 /**
  * Run "gulp --prod" to trigger production/build mode
@@ -93,7 +96,7 @@ function styles() {
  * Exclude vendor files
  */
 function lint() {
-	return gulp.src([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js', '!' + path.js.src + 'vendor/*'])
+	return gulp.src(jsUserSrc)
 		.pipe(eslint({
 			extends: ['eslint:recommended']
 		}))
@@ -102,6 +105,17 @@ function lint() {
 			console.log('ESLint Warnings: ' + results.warningCount);
 			console.log('ESLint Errors: ' + results.errorCount);
 		}));
+}
+
+/**
+ * function jsStyle()
+ *
+ * Run JSCS on all user JavaScript
+ */
+function jsStyle() {
+	return gulp.src(jsUserSrc)
+		.pipe(jscs())
+		.pipe(jscs.reporter());
 }
 
 /**
@@ -176,6 +190,7 @@ function serve() {
 
 gulp.task('styles', styles);
 gulp.task('lint', lint);
+gulp.task('jsStyle', jsStyle);
 gulp.task('js', js);
 gulp.task('jsVendor', jsVendor);
 gulp.task('jsAngular', jsAngular);
@@ -189,10 +204,10 @@ gulp.task('serve', serve);
  * Use "gulp --prod" to trigger production/build mode from commandline
  */
 
-gulp.task('default', ['serve', 'styles', 'jsVendor', 'lint', 'js', 'jsAngular'], function() {
+gulp.task('default', ['serve', 'styles', 'jsVendor', 'lint', 'jsStyle', 'js', 'jsAngular'], function() {
 	if (!isProduction) {
 		gulp.watch(path.css.src + '**/*.scss', ['styles']);
-		gulp.watch([path.js.src + '**/*.js', path.jsAngular.src + '**/*.js'], ['lint']);
+		gulp.watch([path.js.src + '**/*.js', path.jsAngular.src + '**/*.js'], ['lint', 'jsStyle']);
 		gulp.watch([path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'vendor.js'], ['jsVendor']);
 		gulp.watch([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'], ['js']);
 		gulp.watch([path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js'], ['jsAngular']);

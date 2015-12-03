@@ -11,7 +11,6 @@
 
   "rules": {
     // ESLint
-    "quotes": [2, "single", "avoid-escape"],             // specify whether double or single quotes should be used
     "no-unused-vars": 0,
     "no-console": 0,
     "no-undef": 0,

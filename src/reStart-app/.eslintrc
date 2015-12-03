@@ -19,7 +19,6 @@
 
   "rules": {
     // ESLint
-    "quotes": [2, "single", "avoid-escape"],             // specify whether double or single quotes should be used
     "no-unused-vars": 0,
     "no-console": 0,
     "no-undef": 0,
@@ -36,7 +35,7 @@
     "angular/di": [2, "function"],
     "angular/di-order": [0, true],
     "angular/directive-name": 0,
-    "angular/directive-restrict": [0, {"restrict": "AE", "explicit": "never"}],
+    "angular/directive-restrict": [0, {"restrict": "EA", "explicit": "never"}],
     "angular/component-limit": [0, 1],
     "angular/document-service": 2,
     "angular/empty-controller": 0,
