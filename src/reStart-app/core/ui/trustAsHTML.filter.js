@@ -12,4 +12,4 @@
 			return $sce.trustAsHtml(text);
 		};
 	}
-})();
+}());

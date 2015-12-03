@@ -28,4 +28,4 @@
 			Page.setTitle(sub.title);
 		}
 	}
-})();
+}());

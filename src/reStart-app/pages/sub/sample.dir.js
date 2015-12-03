@@ -80,4 +80,4 @@
 		// controller logic goes here
 	}
 
-})();
+}());

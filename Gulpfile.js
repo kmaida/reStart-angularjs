@@ -7,7 +7,6 @@ var connect = require('gulp-connect');
 var gutil = require('gulp-util');
 var uglify = require('gulp-uglify');
 var eslint = require('gulp-eslint');
-var jscs = require('gulp-jscs');
 var sass = require('gulp-sass');
 var sourcemaps = require('gulp-sourcemaps');
 var minifyCSS = require('gulp-minify-css');
@@ -93,8 +92,7 @@ function styles() {
 /**
  * function jsValidate()
  *
- * Lint JavaScript with ESLint
- * Style-check JavaScript with JSCS
+ * Lint and stylecheck JavaScript with ESLint
  * Exclude vendor files
  * Print results
  */
@@ -106,11 +104,13 @@ function jsValidate() {
 			}))
 			.pipe(eslint.format())
 			.pipe(eslint.results(function(results) {
-				console.log('ESLint Warnings: ' + results.warningCount);
-				console.log('ESLint Errors: ' + results.errorCount);
-			}))
-			.pipe(jscs())
-			.pipe(jscs.reporter());
+				if (results.warningCount == 0) {
+					gutil.log(gutil.colors.green('No ESLint warnings.'));
+				}
+				if (results.errorCount == 0) {
+					gutil.log(gutil.colors.green('No ESLint errors.'));
+				}
+			}));
 	}
 }
 

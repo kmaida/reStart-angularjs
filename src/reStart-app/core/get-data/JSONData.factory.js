@@ -25,4 +25,4 @@
 				.then(Res.success, Res.error);
 		}
 	}
-})();
+}());
