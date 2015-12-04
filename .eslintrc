@@ -9,6 +9,8 @@
     "$"      : true
   },
 
+  "extends": ['eslint:recommended'],
+
   "rules": {
     // ESLint
     "no-unused-vars": 0,

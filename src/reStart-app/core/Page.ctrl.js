@@ -87,7 +87,7 @@
 		 * @private
 		 */
 		function _routeChangeStart($event, next, current) {
-			if (next.$$route && next.$$route.resolve) {
+			if (next.$$route && next.$$route.resolve) { // eslint-disable-line angular/no-private-call
 				_loadingOn();
 			}
 		}
@@ -105,7 +105,7 @@
 		function _routeChangeSuccess($event, current, previous) {
 			mc.matchCurrent(MQ.SMALL);
 
-			if (current.$$route && current.$$route.resolve) {
+			if (current.$$route && current.$$route.resolve) {   // eslint-disable-line angular/no-private-call
 				_loadingOff();
 			}
 		}

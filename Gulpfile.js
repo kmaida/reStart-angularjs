@@ -99,16 +99,13 @@ function styles() {
 function jsValidate() {
 	if (!isProduction) {
 		return gulp.src(jsUserSrc)
-			.pipe(eslint({
-				extends: ['eslint:recommended']
-			}))
+			.pipe(eslint())
 			.pipe(eslint.format())
 			.pipe(eslint.results(function(results) {
-				if (results.warningCount == 0) {
-					gutil.log(gutil.colors.green('No ESLint warnings.'));
-				}
-				if (results.errorCount == 0) {
-					gutil.log(gutil.colors.green('No ESLint errors.'));
+				if (results.warningCount == 0 && results.errorCount == 0) {
+					gutil.log(gutil.colors.green('Congratulations! No ESLint warnings or errors.'));
+				} else {
+					gutil.beep();
 				}
 			}));
 	}
