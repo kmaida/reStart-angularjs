@@ -5,9 +5,9 @@
 		.module('reStart')
 		.controller('PageCtrl', PageCtrl);
 
-	PageCtrl.$inject = ['Page', '$scope', 'MQ', 'mediaCheck'];
+	PageCtrl.$inject = ['Page', '$scope', 'MQ', 'mediaCheck', '$log'];
 
-	function PageCtrl(Page, $scope, MQ, mediaCheck) {
+	function PageCtrl(Page, $scope, MQ, mediaCheck, $log) {
 		var page = this;
 
 		// private variables
@@ -131,12 +131,7 @@
 			_handlingRouteChangeError = true;
 			_loadingOff();
 
-			console.log(msg);
-
-			/**
-			 * On routing error, show an error.
-			 */
-			alert('An error occurred. Please try again.');
+			$log.error(msg);
 		}
 	}
 }());
