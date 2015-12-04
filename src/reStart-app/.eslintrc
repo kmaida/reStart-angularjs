@@ -13,6 +13,10 @@
   ],
 
   "rules": {
+    // ESLint
+    "no-unused-vars": 0,
+    "valid-jsdoc": 0,
+
     // Angular
     "angular/angularelement": 2,
     "angular/controller-as": 2,

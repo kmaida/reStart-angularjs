@@ -6,22 +6,26 @@
   },
 
   "globals": {
-    "$"      : true
+    "$" : true
   },
 
   "extends": ["eslint:recommended"],
 
   "rules": {
     // ESLint
-    "no-unused-vars": 0,
     "no-console": 0,
     "no-undef": 0,
     "no-use-before-define": 0,
+    "valid-jsdoc": [1, {
+      "requireReturn": false,
+      "requireReturnDescription": false
+    }],
 
     // Best Practices
     "no-loop-func": 2,
     "no-return-assign": 2,
     "wrap-iife": 2,
+    "vars-on-top": 2,
 
     // Stylistic issues
     "quotes": [2, "single", "avoid-escape"],

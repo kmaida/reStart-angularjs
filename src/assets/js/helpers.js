@@ -4,7 +4,7 @@ window.helpers = (function() {
 
 	init();
 
-	/***
+	/**
 	 * function init()
 	 *
 	 * Initialize public window.helpers functions
@@ -13,7 +13,7 @@ window.helpers = (function() {
 		fixBrowsers();
 	}
 
-	/***
+	/**
 	 * function fixBrowsers()
 	 *
 	 * Fix browser weirdness
