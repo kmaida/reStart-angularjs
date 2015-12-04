@@ -36,4 +36,4 @@ window.helpers = (function() {
 			}
 		}
 	}
-})();
+}());
