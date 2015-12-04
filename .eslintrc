@@ -9,7 +9,7 @@
     "$"      : true
   },
 
-  "extends": ['eslint:recommended'],
+  "extends": ["eslint:recommended"],
 
   "rules": {
     // ESLint
