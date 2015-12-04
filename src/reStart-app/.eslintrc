@@ -1,5 +1,6 @@
 {
   // http://eslint.org/docs/rules/
+
   "globals": {
     "angular": true
   },
@@ -9,11 +10,11 @@
   },
 
   "plugins": [
-    "angular" // e.g. "react" (must run `npm install eslint-plugin-react` first)
+    "angular" // must npm install plugins and config
   ],
 
   "rules": {
-    // ESLint
+    // override inherited rules
     "no-unused-vars": 0,
     "valid-jsdoc": 0,
 
