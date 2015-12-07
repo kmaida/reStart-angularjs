@@ -15,11 +15,15 @@ var concat = require('gulp-concat');
 
 /**
  * File paths
- * Make sure to update these paths for your project!
+ *
+ ********************** IMPORTANT:
+ ********************** Make sure to update these paths for your project!
+ ********************** Modification to other sections should not be necessary if using default setup
  */
 
 var jsAngularDir = 'reStart-app';
 var jsAngularScript = jsAngularDir + '.js';
+var jsUserScript = 'scripts.js';
 var basePath = {
 	src: './src',
 	dest: './src'
@@ -42,12 +46,19 @@ var path = {
 		dest: basePath.dest + '/' + jsAngularDir + '/'
 	}
 };
+var jsModuleFile = path.jsAngular.src + 'core/app-setup/app.module.js';
+
+/**
+ * Files object
+ * Sets up file source arrays for tasks
+ * (No modification should be necessary)
+ */
 
 var files = {};
 
 files.scssSrc = [path.css.src + '**/*.scss'];
 files.jsUserSrcAngular = [path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + jsAngularScript];
-files.jsUserSrcAssets = [path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'];
+files.jsUserSrcAssets = [path.js.src + '**/*.js', '!' + path.js.src + jsUserScript, '!' + path.js.src + 'vendor/*'];
 files.jsUserSrcAll = files.jsUserSrcAngular.concat(files.jsUserSrcAssets);
 files.jsVendorSrc = [path.jsVendor.src + 'jquery.js', path.jsVendor.src + 'angular.js', path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'modernizr.min.js', '!' + path.jsVendor.src + 'vendor.js'];
 
@@ -132,7 +143,7 @@ function jsValidate() {
 function jsUser() {
 	return gulp.src(files.jsUserSrcAssets)
 		.pipe(sourcemaps.init())
-		.pipe(concat('scripts.js'))
+		.pipe(concat(jsUserScript))
 		.pipe(sourcemaps.write())
 		.pipe(isProduction ? uglify() : gutil.noop() )
 		.pipe(gulp.dest(path.js.dest));
@@ -162,7 +173,7 @@ function jsVendor() {
  * Save
  */
 function jsAngular() {
-	return gulp.src([path.jsAngular.src + 'core/app-setup/app.module.js'].concat(files.jsUserSrcAngular))
+	return gulp.src([jsModuleFile].concat(files.jsUserSrcAngular))
 		.pipe(sourcemaps.init())
 		.pipe(concat(jsAngularScript))
 		.pipe(sourcemaps.write())
