@@ -1,0 +1,39 @@
+{
+  // http://eslint.org/docs/rules/
+
+  "env": {
+    "jquery": true
+  },
+
+  "globals": {
+    "$" : true
+  },
+
+  "extends": ["eslint:recommended"],
+
+  "rules": {
+    // General
+    "no-console": 0,
+    "no-undef": 0,
+    "no-use-before-define": 0,
+    "valid-jsdoc": [1, {
+      "requireReturn": false,
+      "requireReturnDescription": false
+    }],
+
+    // Best Practices
+    "no-loop-func": 2,
+    "no-return-assign": 2,
+    "wrap-iife": 2,
+    "vars-on-top": 2,
+
+    // Stylistic issues
+    "quotes": [2, "single", "avoid-escape"],
+    "indent": [2, "tab"],
+    "one-var": [2, "never"],
+    "no-spaced-func": 2,
+    "space-before-function-paren": [2, "never"],
+    "space-before-blocks": [2, "always"],
+    "semi": 2
+  }
+}

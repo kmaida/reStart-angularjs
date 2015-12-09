@@ -32,4 +32,4 @@
 		    init: _init //test code
 		}               //test code
 	}
-})();
+}());

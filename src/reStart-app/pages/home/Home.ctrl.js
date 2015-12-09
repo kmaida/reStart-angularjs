@@ -100,4 +100,4 @@
             getView: getView                //test code
 		}                                   //test code
 	}
-})();
+}());

@@ -1,7 +1,6 @@
 /**
  * Dev dependencies
  */
-
 var gulp = require('gulp'),
 	connect = require('gulp-connect'),
 	gutil = require('gulp-util'),
@@ -18,13 +17,19 @@ var gulp = require('gulp'),
 
 /**
  * File paths
+ *
+ ********************** IMPORTANT:
+ ********************** Make sure to update these paths for your project!
+ ********************** Modification to other sections should not be necessary if using default setup
  */
 
+var jsAngularDir = 'reStart-app';
+var jsAngularScript = jsAngularDir + '.js';
+var jsUserScript = 'scripts.js';
 var basePath = {
 	src: './src',
 	dest: './src'
 };
-
 var path = {
 	css: {
 		src: basePath.src + '/assets/css/scss/',
@@ -39,14 +44,29 @@ var path = {
 		dest: basePath.dest + '/assets/js/vendor/'
 	},
 	jsAngular: {
-		src: basePath.src + '/reStart-app/',
-		dest: basePath.dest + '/reStart-app/'
+		src: basePath.src + '/' + jsAngularDir + '/',
+		dest: basePath.dest + '/' + jsAngularDir + '/'
 	},
 	e2e:{
 		src:'./tests/integration/',
 		dest:'./tests'
 	}
 };
+var jsModuleFile = path.jsAngular.src + 'core/app-setup/app.module.js';
+
+/**
+ * Files object
+ * Sets up file source arrays for tasks
+ * (No modification should be necessary)
+ */
+
+var files = {};
+
+files.scssSrc = [path.css.src + '**/*.scss'];
+files.jsUserSrcAngular = [path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + jsAngularScript];
+files.jsUserSrcAssets = [path.js.src + '**/*.js', '!' + path.js.src + jsUserScript, '!' + path.js.src + 'vendor/*'];
+files.jsUserSrcAll = files.jsUserSrcAngular.concat(files.jsUserSrcAssets);
+files.jsVendorSrc = [path.jsVendor.src + 'jquery.js', path.jsVendor.src + 'angular.js', path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'modernizr.min.js', '!' + path.jsVendor.src + 'vendor.js'];
 
 /**
  * Run "gulp --prod" to trigger production/build mode
@@ -80,7 +100,7 @@ function errorHandler(err){
  * Save
  */
 function styles() {
-	return gulp.src(path.css.src + 'styles.scss')
+	return gulp.src(files.scssSrc)
 		.pipe(sourcemaps.init())
 		.pipe(sass({ style: 'expanded' })).on('error', errorHandler)
 		.pipe(autoprefixer({
@@ -92,8 +112,33 @@ function styles() {
 		.pipe(gulp.dest(path.css.dest));
 }
 
+
 /**
- * function js()
+ * function jsValidate()
+ *
+ * Lint and stylecheck JavaScript with ESLint
+ * Exclude vendor files
+ * Print results
+ */
+function jsValidate() {
+	if (isProduction) {
+		return;
+	}
+
+	return gulp.src(files.jsUserSrcAll)
+		.pipe(eslint())
+		.pipe(eslint.format())
+		.pipe(eslint.results(function(results) {
+			if (results.warningCount == 0 && results.errorCount == 0) {
+				gutil.log(gutil.colors.green('Congratulations! No ESLint warnings or errors.'));
+			} else {
+				gutil.beep();
+			}
+		}));
+}
+
+/**
+ * function jsUser()
  *
  * Init sourcemaps
  * Concatenate JS files
@@ -101,10 +146,10 @@ function styles() {
  * Uglify / minify (if production)
  * Save
  */
-function js() {
-	return gulp.src([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'])
+function jsUser() {
+	return gulp.src(files.jsUserSrcAssets)
 		.pipe(sourcemaps.init())
-		.pipe(concat('scripts.js'))
+		.pipe(concat(jsUserScript))
 		.pipe(sourcemaps.write())
 		.pipe(isProduction ? uglify() : gutil.noop() )
 		.pipe(gulp.dest(path.js.dest));
@@ -118,7 +163,7 @@ function js() {
  * Save
  */
 function jsVendor() {
-	return gulp.src([path.jsVendor.src + 'jquery.js', path.jsVendor.src + 'angular.js', path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'modernizr.min.js', '!' + path.jsVendor.src + 'vendor.js'])
+	return gulp.src(files.jsVendorSrc)
 		.pipe(concat('vendor.js'))
 		.pipe(isProduction ? uglify() : gutil.noop() )	// to unminify vendor in dev, remove "isProduction" ternary
 		.pipe(gulp.dest(path.jsVendor.dest));
@@ -134,15 +179,15 @@ function jsVendor() {
  * Save
  */
 function jsAngular() {
-	return gulp.src([path.jsAngular.src + 'core/app-setup/app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js','!' + path.jsAngular.src + '**/*.spec.js'])	
+	return gulp.src([jsModuleFile].concat(files.jsUserSrcAngular))
 		//remove lines marked with //test code if production
 		.pipe(isProduction ?deleteLines({
 			'filters': [
 				/test code/
 			]
 		}): gutil.noop())	
-		.pipe(sourcemaps.init())	
-		.pipe(concat('reStart-app.js'))				
+		.pipe(sourcemaps.init())
+		.pipe(concat(jsAngularScript))
 		.pipe(sourcemaps.write())
 		.pipe(isProduction ? uglify() : gutil.noop() )
 		.pipe(gulp.dest(path.jsAngular.dest));
@@ -187,13 +232,15 @@ function e2e() {
  * localhost:8000
  */
 function serve() {
-	if (!isProduction) {
-		connect.server({
-			root: 'src',
-			port: 8000,
-			fallback: 'src/index.html'
-		});
+	if (isProduction) {
+		return;
 	}
+
+	connect.server({
+		root: 'src',
+		port: 8000,
+		fallback: 'src/index.html'
+	});
 }
 
 /**
@@ -231,11 +278,41 @@ function serve() {
 
  
 /**
+
+ * Default build task
+ *
+ * If not production, watch for file changes and execute the appropriate task
+ *
+ * Use "gulp --prod" to trigger production/build mode from commandline
+ */
+function defaultTask() {
+	// if no production flag, start watching
+	if (isProduction) {
+		return;
+	}
+
+	// compile SCSS
+	gulp.watch(files.scssSrc, ['styles']);
+
+	// compile JS vendor files
+	gulp.watch(files.jsVendorSrc, ['jsVendor']);
+
+	// validate user JS: linting / style-checking
+	gulp.watch(files.jsUserSrcAll, ['jsValidate']);
+
+	// compile JS asset files
+	gulp.watch(files.jsUserSrcAssets, ['jsUser']);
+
+	// compile JS Angular files
+	gulp.watch(files.jsUserSrcAngular, ['jsAngular']);
+}
+/**
  * Gulp tasks
  */
 
 gulp.task('styles', styles);
-gulp.task('js', js);
+gulp.task('jsValidate', jsValidate);
+gulp.task('jsUser', jsUser);
 gulp.task('jsVendor', jsVendor);
 gulp.task('jsAngular', jsAngular);
 gulp.task('tests', tests);
@@ -254,13 +331,5 @@ gulp.task('protractor',['e2e','serve'],e2eTests);
  * Use "gulp --prod" to trigger production/build mode from commandline
  */
 
-gulp.task('default', ['serve', 'styles', 'jsVendor', 'js', 'jsAngular','karma','protractor'], function() {
-	if (!isProduction) {
-		gulp.watch(path.css.src + '**/*.scss', ['styles']);
-		gulp.watch([path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'vendor.js'], ['jsVendor']);
-		gulp.watch([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'], ['js']);
-		gulp.watch([path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js', '!' + path.jsAngular.src + '**/*.spec.js'], ['jsAngular']);
-		gulp.watch([path.jsAngular.src + '**/*.spec.js','!'+ path.jsAngular.src+ 'reStart-app.spec.js'], ['tests','karma']);
-		gulp.watch([path.e2e.src + '**/*.spec.js'], ['e2e','protractor']);
-	}
-});
+gulp.task('js',['jsVendor', 'jsValidate', 'jsUser', 'jsAngular']);
+gulp.task('default',['serve', 'styles', 'js', 'karma', 'protractor'], defaultTask);

@@ -8,7 +8,7 @@ releases, so the browser support may change over time.
 
 ## Dependencies
  
-* AngularJS v1.4.7
+* AngularJS v1.4.8
 * jQuery v2.1.4
 * Node >= v0.10 
 * Gulp 
@@ -19,6 +19,7 @@ releases, so the browser support may change over time.
 * single responsibility 
 * modular 
 * scalable
+* opinionated ESLint
 * for more on style, see [https://github.com/johnpapa/angular-styleguide](Angular Styleguide)
 
 ## Features
@@ -34,6 +35,7 @@ releases, so the browser support may change over time.
 * controller and directive namespacing
 * mobile-first SCSS, reset, normalize
 * jsDoc comments
+* ESLint
 
 ## Demo
 
@@ -48,6 +50,7 @@ Run `gulp --prod` to use the `production` flag, minifying files (no server, no `
 
 ## Changelog
 
+* 12/04/15: Add ESLint and upgrade to Angular 1.4.8
 * 11/23/15: Rename module and folders for better scalability. Additional dependency upgrades and styleguide compliance edits.
 * 11/16/15: App-wide updates to greatly enhance base features, upgrade dependencies, and comply much more fully with John Papa's AngularJS styleguide
 * 10/18/15: Upgrade to Angular 1.4.7, upgrade `gulp-sass` to use latest and lowercase package name (for Node v4), add

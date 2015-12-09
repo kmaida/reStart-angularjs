@@ -46,4 +46,4 @@
 	function resolveLocalData(JSONData) {
 		return JSONData.getLocalData();
 	}
-})();
+}());

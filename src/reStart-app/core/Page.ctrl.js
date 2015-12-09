@@ -1,83 +1,83 @@
-(function () {
-    'use strict';
+(function() {
+	'use strict';
 
-    angular
+	angular
 		.module('reStart')
 		.controller('PageCtrl', PageCtrl);
 
-    PageCtrl.$inject = ['Page', '$scope', 'MQ', 'mediaCheck'];
+	PageCtrl.$inject = ['Page', '$scope', 'MQ', 'mediaCheck', '$log'];
 
-    function PageCtrl(Page, $scope, MQ, mediaCheck) {
-        var page = this;
+	function PageCtrl(Page, $scope, MQ, mediaCheck, $log) {
+		var page = this;
 
-        // private variables
-        var _handlingRouteChangeError = false;
-        // Set up functionality to run on enter/exit of media query
-        var mc = mediaCheck.init({
-            scope: $scope,
-            media: {
-                mq: MQ.SMALL,
-                enter: _enterMobile,
-                exit: _exitMobile
-            },
-            debounce: 200
-        });
+		// private variables
+		var _handlingRouteChangeError = false;
+		// Set up functionality to run on enter/exit of media query
+		var _mc = mediaCheck.init({
+			scope: $scope,
+			media: {
+				mq: MQ.SMALL,
+				enter: _enterMobile,
+				exit: _exitMobile
+			},
+			debounce: 200
+		});
 
-        _init();
+		_init();
 
-        /**
+		/**
 		 * INIT function executes procedural code
 		 *
 		 * @private
 		 */
-        function _init() {
-            // associate page <title>
-            page.pageTitle = Page;
+		function _init() {
+			// associate page <title>
+			page.pageTitle = Page;
 
-            $scope.$on('$routeChangeStart', _routeChangeStart);
-            $scope.$on('$routeChangeSuccess', _routeChangeSuccess);
-            $scope.$on('$routeChangeError', _routeChangeError);
-        }
+			$scope.$on('$routeChangeStart', _routeChangeStart);
+			$scope.$on('$routeChangeSuccess', _routeChangeSuccess);
+			$scope.$on('$routeChangeError', _routeChangeError);
+		}
 
-        /**
+		/**
 		 * Enter mobile media query
 		 * $broadcast 'enter-mobile' event
 		 *
 		 * @private
 		 */
-        function _enterMobile() {
-            $scope.$broadcast('enter-mobile');
-        }
+		function _enterMobile() {
+			$scope.$broadcast('enter-mobile');
+		}
 
-        /**
+		/**
 		 * Exit mobile media query
 		 * $broadcast 'exit-mobile' event
 		 *
 		 * @private
 		 */
-        function _exitMobile() {
-            $scope.$broadcast('exit-mobile');
-        }
+		function _exitMobile() {
+			$scope.$broadcast('exit-mobile');
+		}
 
-        /**
+		/**
 		 * Turn on loading state
 		 *
 		 * @private
 		 */
-        function _loadingOn() {
-            $scope.$broadcast('loading-on');
-        }
+		function _loadingOn() {
+			$scope.$broadcast('loading-on');
+		}
 
-        /**
+		/**
 		 * Turn off loading state
 		 *
 		 * @private
 		 */
-        function _loadingOff() {
-            $scope.$broadcast('loading-off');
-        }
+		function _loadingOff() {
+			$scope.$broadcast('loading-off');
+		}
 
-        /**
+		/**
 		 * Route change start handler
 		 * If next route has resolve, turn on loading
 		 *
@@ -86,13 +86,13 @@
 		 * @param current {object}
 		 * @private
 		 */
-        function _routeChangeStart($event, next, current) {
-            if (next.$$route && next.$$route.resolve) {
-                _loadingOn();
-            }
-        }
+		function _routeChangeStart($event, next, current) {
+			if (next.$$route && next.$$route.resolve) { // eslint-disable-line angular/no-private-call
+				_loadingOn();
+			}
+		}
 
-        /**
+		/**
 		 * Route change success handler
 		 * Match current media query and run appropriate function
 		 * If current route has been resolved, turn off loading
@@ -102,15 +102,15 @@
 		 * @param previous {object}
 		 * @private
 		 */
-        function _routeChangeSuccess($event, current, previous) {
-            mc.matchCurrent(MQ.SMALL);
+		function _routeChangeSuccess($event, current, previous) {
+			_mc.matchCurrent(MQ.SMALL);
 
-            if (current.$$route && current.$$route.resolve) {
-                _loadingOff();
-            }
-        }
+			if (current.$$route && current.$$route.resolve) {   // eslint-disable-line angular/no-private-call
+				_loadingOff();
+			}
+		}
 
-        /**
+		/**
 		 * Route change error handler
 		 * Handle route resolve failures
 		 *
@@ -120,29 +120,18 @@
 		 * @param rejection {object}
 		 * @private
 		 */
-        function _routeChangeError($event, current, previous, rejection) {
-            if (_handlingRouteChangeError) {
-                return;
-            }
+		function _routeChangeError($event, current, previous, rejection) {
+			var destination = (current && (current.title || current.name || current.loadedTemplateUrl)) || 'unknown target';
+			var msg = 'Error routing to ' + destination + '. ' + (rejection.msg || '');
 
-            _handlingRouteChangeError = true;
-            _loadingOff();
+			if (_handlingRouteChangeError) {
+				return;
+			}
 
-            var destination = (current && (current.title || current.name || current.loadedTemplateUrl)) || 'unknown target';
-            var msg = 'Error routing to ' + destination + '. ' + (rejection.msg || '');
+			_handlingRouteChangeError = true;
+			_loadingOff();
 
-            console.log(msg);
-
-            /**
-			 * On routing error, show an error.
-			 */
-            alert('An error occurred. Please try again.');
-        }
-
-        PageCtrl.enterMobile = _enterMobile;//test code
-        PageCtrl.exitMobile = _exitMobile;//test code
-        PageCtrl.loadingOn = _loadingOn;//test code
-        PageCtrl.loadingOff = _loadingOff;//test code
-        return PageCtrl;//test code
-    }
-})();
+			$log.error(msg);
+		}
+	}
+}());
