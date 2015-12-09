@@ -10,7 +10,11 @@ var gulp = require('gulp'),
 	sourcemaps = require('gulp-sourcemaps'),
 	minifyCSS = require('gulp-minify-css'),
 	autoprefixer = require('gulp-autoprefixer'),
-	concat = require('gulp-concat');
+	concat = require('gulp-concat'),
+	deleteLines = require('gulp-delete-lines'),
+	Server = require('karma').Server,
+    fpath = require('path'),
+    child_process = require('child_process');
 
 /**
  * File paths
@@ -37,6 +41,10 @@ var path = {
 	jsAngular: {
 		src: basePath.src + '/reStart-app/',
 		dest: basePath.dest + '/reStart-app/'
+	},
+	e2e:{
+		src:'./tests/integration/',
+		dest:'./tests'
 	}
 };
 
@@ -126,12 +134,50 @@ function jsVendor() {
  * Save
  */
 function jsAngular() {
-	return gulp.src([path.jsAngular.src + 'core/app-setup/app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js'])
-		.pipe(sourcemaps.init())
-		.pipe(concat('reStart-app.js'))
+	return gulp.src([path.jsAngular.src + 'core/app-setup/app.module.js', path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js','!' + path.jsAngular.src + '**/*.spec.js'])	
+		//remove lines marked with //test code if production
+		.pipe(isProduction ?deleteLines({
+			'filters': [
+				/test code/
+			]
+		}): gutil.noop())	
+		.pipe(sourcemaps.init())	
+		.pipe(concat('reStart-app.js'))				
 		.pipe(sourcemaps.write())
 		.pipe(isProduction ? uglify() : gutil.noop() )
 		.pipe(gulp.dest(path.jsAngular.dest));
+}
+
+/**
+ * function tests()
+ *
+ * Init sourcemaps
+ * Concatenate .spec files
+ * Write sourcemaps
+ * Save
+ */
+function tests() {
+	return gulp.src([path.jsAngular.src + '**/*.spec.js','!'+path.jsAngular.src+'reStart-app.spec.js'])
+		.pipe(sourcemaps.init())
+		.pipe(concat('reStart-app.spec.js'))
+		.pipe(sourcemaps.write())
+		.pipe(gulp.dest(path.jsAngular.dest));
+}
+
+/**
+ * function e2e()
+ *
+ * Init sourcemaps
+ * Concatenate .spec files
+ * Write sourcemaps
+ * Save
+ */
+function e2e() {
+	return gulp.src([path.e2e.src + '**/*.spec.js'])
+		.pipe(sourcemaps.init())
+		.pipe(concat('e2e.js'))
+		.pipe(sourcemaps.write())
+		.pipe(gulp.dest(path.e2e.dest));
 }
 
 /**
@@ -151,6 +197,40 @@ function serve() {
 }
 
 /**
+ * function karma()
+ *
+ * Start karma test runner
+ * Use singleRun false for CI testing 
+ */
+ function karma(){
+	return gulp.task('karma', function (done) {
+		new Server({
+			configFile: __dirname + '/karma.conf.js',
+			singleRun: true
+		}, done).start();
+	});
+ }
+ 
+/**
+ * function e2eTests
+ * 
+ * Start protractor and runs e2e tests
+ */
+  function e2eTests(){
+	var argv = process.argv.slice(3); // forward args to protractor
+    return child_process.spawn(getProtractorBinary('protractor'), argv, {
+        stdio: 'inherit'
+    })//.once('close', done);
+  }
+ function getProtractorBinary(binaryName){
+    var winExt = /^win/.test(process.platform)? '.cmd' : '';
+    var pkgPath = require.resolve('protractor');
+    var protractorDir = fpath.resolve(fpath.join(fpath.dirname(pkgPath), '..', 'bin'));
+    return fpath.join(protractorDir, '/'+binaryName+winExt);
+}
+
+ 
+/**
  * Gulp tasks
  */
 
@@ -158,7 +238,13 @@ gulp.task('styles', styles);
 gulp.task('js', js);
 gulp.task('jsVendor', jsVendor);
 gulp.task('jsAngular', jsAngular);
+gulp.task('tests', tests);
+gulp.task('e2e', e2e);
 gulp.task('serve', serve);
+//Start karma after files have been rebuilt and test compiled
+gulp.task('karma',['js','jsVendor','jsAngular','tests'],karma);
+//Start protractor after karma runs
+gulp.task('protractor',['e2e','serve'],e2eTests);
 
 /**
  * Default build task
@@ -168,11 +254,13 @@ gulp.task('serve', serve);
  * Use "gulp --prod" to trigger production/build mode from commandline
  */
 
-gulp.task('default', ['serve', 'styles', 'jsVendor', 'js', 'jsAngular'], function() {
+gulp.task('default', ['serve', 'styles', 'jsVendor', 'js', 'jsAngular','karma','protractor'], function() {
 	if (!isProduction) {
 		gulp.watch(path.css.src + '**/*.scss', ['styles']);
 		gulp.watch([path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'vendor.js'], ['jsVendor']);
 		gulp.watch([path.js.src + '**/*.js', '!' + path.js.src + 'scripts.js', '!' + path.js.src + 'vendor/*'], ['js']);
-		gulp.watch([path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js'], ['jsAngular']);
+		gulp.watch([path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + 'reStart-app.js', '!' + path.jsAngular.src + '**/*.spec.js'], ['jsAngular']);
+		gulp.watch([path.jsAngular.src + '**/*.spec.js','!'+ path.jsAngular.src+ 'reStart-app.spec.js'], ['tests','karma']);
+		gulp.watch([path.e2e.src + '**/*.spec.js'], ['e2e','protractor']);
 	}
 });

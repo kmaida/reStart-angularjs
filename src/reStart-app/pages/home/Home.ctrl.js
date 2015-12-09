@@ -87,5 +87,17 @@
 		function _exitMobile() {
 			home.viewformat = 'large';
 		}
+
+		function getView() {       //test code
+		    return home.viewformat; //test code
+		}                           //test code
+
+		return {                            //test code
+		    enterMobile: _enterMobile,      //test code
+		    exitMobile: _exitMobile,        //test code
+		    getJsonSucess: _getJsonSuccess, //test code
+		    activate: _activate,            //test code
+            getView: getView                //test code
+		}                                   //test code
 	}
 })();
