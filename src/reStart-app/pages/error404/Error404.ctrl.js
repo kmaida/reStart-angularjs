@@ -1,4 +1,4 @@
-(function() {
+(function () {
 	'use strict';
 
 	angular
@@ -29,7 +29,7 @@
 		}
 
 		return {        //test code
-		    init: _init //test code
-		}               //test code
+			init: _init //test code
+		};               //test code
 	}
 }());

@@ -14,7 +14,7 @@ var gulp = require('gulp'),
 	Server = require('karma').Server,
     fpath = require('path'),
     child_process = require('child_process');
-
+	eslint = require('gulp-eslint');
 /**
  * File paths
  *
@@ -62,8 +62,10 @@ var jsModuleFile = path.jsAngular.src + 'core/app-setup/app.module.js';
 
 var files = {};
 
+files.e2e = [path.e2e.src];
+files.specs= [path.jsAngular.src + '**/*.spec.js','!'+path.jsAngular.src+'reStart-app.spec.js'];
 files.scssSrc = [path.css.src + '**/*.scss'];
-files.jsUserSrcAngular = [path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + jsAngularScript];
+files.jsUserSrcAngular = [path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + jsAngularScript , '!'+path.jsAngular.src + '**/*.spec.js'];
 files.jsUserSrcAssets = [path.js.src + '**/*.js', '!' + path.js.src + jsUserScript, '!' + path.js.src + 'vendor/*'];
 files.jsUserSrcAll = files.jsUserSrcAngular.concat(files.jsUserSrcAssets);
 files.jsVendorSrc = [path.jsVendor.src + 'jquery.js', path.jsVendor.src + 'angular.js', path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'modernizr.min.js', '!' + path.jsVendor.src + 'vendor.js'];
@@ -202,7 +204,7 @@ function jsAngular() {
  * Save
  */
 function tests() {
-	return gulp.src([path.jsAngular.src + '**/*.spec.js','!'+path.jsAngular.src+'reStart-app.spec.js'])
+	return gulp.src(files.specs)
 		.pipe(sourcemaps.init())
 		.pipe(concat('reStart-app.spec.js'))
 		.pipe(sourcemaps.write())
@@ -218,7 +220,7 @@ function tests() {
  * Save
  */
 function e2e() {
-	return gulp.src([path.e2e.src + '**/*.spec.js'])
+	return gulp.src(files.e2e)
 		.pipe(sourcemaps.init())
 		.pipe(concat('e2e.js'))
 		.pipe(sourcemaps.write())
@@ -305,6 +307,12 @@ function defaultTask() {
 
 	// compile JS Angular files
 	gulp.watch(files.jsUserSrcAngular, ['jsAngular']);
+	
+	//compile jasmine unit tests
+	gulp.watch(files.specs, ['tests']);
+	
+	//compile protractor tests
+	gulp.watch(files.e2e, ['e2e']);
 }
 /**
  * Gulp tasks
@@ -319,7 +327,7 @@ gulp.task('tests', tests);
 gulp.task('e2e', e2e);
 gulp.task('serve', serve);
 //Start karma after files have been rebuilt and test compiled
-gulp.task('karma',['js','jsVendor','jsAngular','tests'],karma);
+gulp.task('karma',['jsUser','jsVendor','jsAngular','tests'],karma);
 //Start protractor after karma runs
 gulp.task('protractor',['e2e','serve'],e2eTests);
 
@@ -332,4 +340,4 @@ gulp.task('protractor',['e2e','serve'],e2eTests);
  */
 
 gulp.task('js',['jsVendor', 'jsValidate', 'jsUser', 'jsAngular']);
-gulp.task('default',['serve', 'styles', 'js', 'karma', 'protractor'], defaultTask);
+gulp.task('default',['serve', 'styles', 'js'], defaultTask);

@@ -1,4 +1,4 @@
-(function() {
+(function () {
 	'use strict';
 
 	angular
@@ -89,7 +89,6 @@
 			 * Toggle nav open/closed
 			 */
 			function toggleNav() {
-			    console.log("yo");
 				if (!_navOpen) {
 					_openNav();
 				} else {

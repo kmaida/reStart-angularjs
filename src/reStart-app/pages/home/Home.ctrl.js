@@ -1,4 +1,4 @@
-(function() {
+(function () {
 	'use strict';
 
 	angular
@@ -89,15 +89,14 @@
 		}
 
 		function getView() {       //test code
-		    return home.viewformat; //test code
+			return home.viewformat; //test code
 		}                           //test code
 
-		return {                            //test code
-		    enterMobile: _enterMobile,      //test code
-		    exitMobile: _exitMobile,        //test code
-		    getJsonSucess: _getJsonSuccess, //test code
-		    activate: _activate,            //test code
-            getView: getView                //test code
-		}                                   //test code
+		home.enterMobile = _enterMobile;      //test code
+		home.exitMobile = _exitMobile;        //test code
+		home.getJsonSucess = _getJsonSuccess; //test code
+		home.activate = _activate;            //test code
+		home.getView = getView;               //test code
+		return home;                          //test code
 	}
 }());
