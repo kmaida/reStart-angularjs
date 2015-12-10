@@ -13,7 +13,7 @@ var gulp = require('gulp'),
 	deleteLines = require('gulp-delete-lines'),
 	Server = require('karma').Server,
     fpath = require('path'),
-    child_process = require('child_process');
+    child_process = require('child_process'),
 	eslint = require('gulp-eslint');
 /**
  * File paths
