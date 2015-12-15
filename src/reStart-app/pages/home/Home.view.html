@@ -8,7 +8,7 @@
 			<button ng-click="home.alertGreeting(home.name)">Greet</button>
 		</p>
 
-		<h2>{{::home.global.greeting}}, {{home.name}}!</h2>
+		<h2 class="home-string">{{::home.global.greeting}}, {{home.name}}!</h2>
 		
 		<p ng-bind="::home.json.summary"></p>
 
@@ -19,7 +19,7 @@
 		<p>The following view is manipulated by the current media query. Resize your browser window to see the
 			display change.</p>
 
-		<p><strong>Display:</strong> {{home.viewformat === 'large' ? 'Table (large view)' : 'List (small view)'}}</p>
+		<p class="display"><strong>Display:</strong> {{home.viewformat === 'large' ? 'Table (large view)' : 'List (small view)'}}</p>
 
 		<div id="markupView-wrapper"
 			 class="markupView-wrapper"

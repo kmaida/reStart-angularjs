@@ -1,18 +1,20 @@
 /**
  * Dev dependencies
  */
-
-var gulp = require('gulp');
-var connect = require('gulp-connect');
-var gutil = require('gulp-util');
-var uglify = require('gulp-uglify');
-var eslint = require('gulp-eslint');
-var sass = require('gulp-sass');
-var sourcemaps = require('gulp-sourcemaps');
-var minifyCSS = require('gulp-minify-css');
-var autoprefixer = require('gulp-autoprefixer');
-var concat = require('gulp-concat');
-
+var gulp = require('gulp'),
+	connect = require('gulp-connect'),
+	gutil = require('gulp-util'),
+	uglify = require('gulp-uglify'),
+	sass = require('gulp-sass'),
+	sourcemaps = require('gulp-sourcemaps'),
+	minifyCSS = require('gulp-minify-css'),
+	autoprefixer = require('gulp-autoprefixer'),
+	concat = require('gulp-concat'),
+	deleteLines = require('gulp-delete-lines'),
+	Server = require('karma').Server,
+    fpath = require('path'),
+    child_process = require('child_process'),
+	eslint = require('gulp-eslint');
 /**
  * File paths
  *
@@ -44,6 +46,10 @@ var path = {
 	jsAngular: {
 		src: basePath.src + '/' + jsAngularDir + '/',
 		dest: basePath.dest + '/' + jsAngularDir + '/'
+	},
+	e2e:{
+		src:'./tests/integration/',
+		dest:'./tests'
 	}
 };
 var jsModuleFile = path.jsAngular.src + 'core/app-setup/app.module.js';
@@ -56,8 +62,10 @@ var jsModuleFile = path.jsAngular.src + 'core/app-setup/app.module.js';
 
 var files = {};
 
+files.e2e = [path.e2e.src];
+files.specs= [path.jsAngular.src + '**/*.spec.js','!'+path.jsAngular.src+'reStart-app.spec.js'];
 files.scssSrc = [path.css.src + '**/*.scss'];
-files.jsUserSrcAngular = [path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + jsAngularScript];
+files.jsUserSrcAngular = [path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + jsAngularScript , '!'+path.jsAngular.src + '**/*.spec.js'];
 files.jsUserSrcAssets = [path.js.src + '**/*.js', '!' + path.js.src + jsUserScript, '!' + path.js.src + 'vendor/*'];
 files.jsUserSrcAll = files.jsUserSrcAngular.concat(files.jsUserSrcAssets);
 files.jsVendorSrc = [path.jsVendor.src + 'jquery.js', path.jsVendor.src + 'angular.js', path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'modernizr.min.js', '!' + path.jsVendor.src + 'vendor.js'];
@@ -174,11 +182,49 @@ function jsVendor() {
  */
 function jsAngular() {
 	return gulp.src([jsModuleFile].concat(files.jsUserSrcAngular))
+		//remove lines marked with //test code if production
+		.pipe(isProduction ?deleteLines({
+			'filters': [
+				/test code/
+			]
+		}): gutil.noop())	
 		.pipe(sourcemaps.init())
 		.pipe(concat(jsAngularScript))
 		.pipe(sourcemaps.write())
 		.pipe(isProduction ? uglify() : gutil.noop() )
 		.pipe(gulp.dest(path.jsAngular.dest));
+}
+
+/**
+ * function tests()
+ *
+ * Init sourcemaps
+ * Concatenate .spec files
+ * Write sourcemaps
+ * Save
+ */
+function tests() {
+	return gulp.src(files.specs)
+		.pipe(sourcemaps.init())
+		.pipe(concat('reStart-app.spec.js'))
+		.pipe(sourcemaps.write())
+		.pipe(gulp.dest(path.jsAngular.dest));
+}
+
+/**
+ * function e2e()
+ *
+ * Init sourcemaps
+ * Concatenate .spec files
+ * Write sourcemaps
+ * Save
+ */
+function e2e() {
+	return gulp.src(files.e2e)
+		.pipe(sourcemaps.init())
+		.pipe(concat('e2e.js'))
+		.pipe(sourcemaps.write())
+		.pipe(gulp.dest(path.e2e.dest));
 }
 
 /**
@@ -200,6 +246,41 @@ function serve() {
 }
 
 /**
+ * function karma()
+ *
+ * Start karma test runner
+ * Use singleRun false for CI testing 
+ */
+ function karma(){
+	return gulp.task('karma', function (done) {
+		new Server({
+			configFile: __dirname + '/karma.conf.js',
+			singleRun: true
+		}, done).start();
+	});
+ }
+ 
+/**
+ * function e2eTests
+ * 
+ * Start protractor and runs e2e tests
+ */
+  function e2eTests(){
+	var argv = process.argv.slice(3); // forward args to protractor
+    return child_process.spawn(getProtractorBinary('protractor'), argv, {
+        stdio: 'inherit'
+    })//.once('close', done);
+  }
+ function getProtractorBinary(binaryName){
+    var winExt = /^win/.test(process.platform)? '.cmd' : '';
+    var pkgPath = require.resolve('protractor');
+    var protractorDir = fpath.resolve(fpath.join(fpath.dirname(pkgPath), '..', 'bin'));
+    return fpath.join(protractorDir, '/'+binaryName+winExt);
+}
+
+ 
+/**
+
  * Default build task
  *
  * If not production, watch for file changes and execute the appropriate task
@@ -226,8 +307,13 @@ function defaultTask() {
 
 	// compile JS Angular files
 	gulp.watch(files.jsUserSrcAngular, ['jsAngular']);
+	
+	//compile jasmine unit tests
+	gulp.watch(files.specs, ['tests']);
+	
+	//compile protractor tests
+	gulp.watch(files.e2e, ['e2e']);
 }
-
 /**
  * Gulp tasks
  */
@@ -237,6 +323,21 @@ gulp.task('jsValidate', jsValidate);
 gulp.task('jsUser', jsUser);
 gulp.task('jsVendor', jsVendor);
 gulp.task('jsAngular', jsAngular);
+gulp.task('tests', tests);
+gulp.task('e2e', e2e);
 gulp.task('serve', serve);
-gulp.task('js', ['jsVendor', 'jsValidate', 'jsUser', 'jsAngular']);
-gulp.task('default', ['serve', 'styles', 'js'], defaultTask);
+//Start karma after files have been rebuilt and test compiled
+gulp.task('karma',['jsUser','jsVendor','jsAngular','tests'],karma);
+//Start protractor after karma runs
+gulp.task('protractor',['e2e','serve'],e2eTests);
+
+/**
+ * Default build task
+ *
+ * If not production, watch for file changes and execute the appropriate task
+ *
+ * Use "gulp --prod" to trigger production/build mode from commandline
+ */
+
+gulp.task('js',['jsVendor', 'jsValidate', 'jsUser', 'jsAngular']);
+gulp.task('default',['serve', 'styles', 'js'], defaultTask);

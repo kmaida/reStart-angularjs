@@ -38228,6 +38228,2476 @@
 
 !window.angular.$$csp().noInlineStyle && window.angular.element(document.head).prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>');
 /**
+ * @license AngularJS v1.4.7
+ * (c) 2010-2015 Google, Inc. http://angularjs.org
+ * License: MIT
+ */
+(function (window, angular, undefined) {
+
+    'use strict';
+
+    /**
+     * @ngdoc object
+     * @name angular.mock
+     * @description
+     *
+     * Namespace from 'angular-mocks.js' which contains testing related code.
+     */
+    angular.mock = {};
+
+    /**
+     * ! This is a private undocumented service !
+     *
+     * @name $browser
+     *
+     * @description
+     * This service is a mock implementation of {@link ng.$browser}. It provides fake
+     * implementation for commonly used browser apis that are hard to test, e.g. setTimeout, xhr,
+     * cookies, etc...
+     *
+     * The api of this service is the same as that of the real {@link ng.$browser $browser}, except
+     * that there are several helper methods available which can be used in tests.
+     */
+    angular.mock.$BrowserProvider = function () {
+        this.$get = function () {
+            return new angular.mock.$Browser();
+        };
+    };
+
+    angular.mock.$Browser = function () {
+        var self = this;
+
+        this.isMock = true;
+        self.$$url = "http://server/";
+        self.$$lastUrl = self.$$url; // used by url polling fn
+        self.pollFns = [];
+
+        // TODO(vojta): remove this temporary api
+        self.$$completeOutstandingRequest = angular.noop;
+        self.$$incOutstandingRequestCount = angular.noop;
+
+
+        // register url polling fn
+
+        self.onUrlChange = function (listener) {
+            self.pollFns.push(
+              function () {
+                  if (self.$$lastUrl !== self.$$url || self.$$state !== self.$$lastState) {
+                      self.$$lastUrl = self.$$url;
+                      self.$$lastState = self.$$state;
+                      listener(self.$$url, self.$$state);
+                  }
+              }
+            );
+
+            return listener;
+        };
+
+        self.$$applicationDestroyed = angular.noop;
+        self.$$checkUrlChange = angular.noop;
+
+        self.deferredFns = [];
+        self.deferredNextId = 0;
+
+        self.defer = function (fn, delay) {
+            delay = delay || 0;
+            self.deferredFns.push({ time: (self.defer.now + delay), fn: fn, id: self.deferredNextId });
+            self.deferredFns.sort(function (a, b) { return a.time - b.time; });
+            return self.deferredNextId++;
+        };
+
+
+        /**
+         * @name $browser#defer.now
+         *
+         * @description
+         * Current milliseconds mock time.
+         */
+        self.defer.now = 0;
+
+
+        self.defer.cancel = function (deferId) {
+            var fnIndex;
+
+            angular.forEach(self.deferredFns, function (fn, index) {
+                if (fn.id === deferId) fnIndex = index;
+            });
+
+            if (angular.isDefined(fnIndex)) {
+                self.deferredFns.splice(fnIndex, 1);
+                return true;
+            }
+
+            return false;
+        };
+
+
+        /**
+         * @name $browser#defer.flush
+         *
+         * @description
+         * Flushes all pending requests and executes the defer callbacks.
+         *
+         * @param {number=} number of milliseconds to flush. See {@link #defer.now}
+         */
+        self.defer.flush = function (delay) {
+            if (angular.isDefined(delay)) {
+                self.defer.now += delay;
+            } else {
+                if (self.deferredFns.length) {
+                    self.defer.now = self.deferredFns[self.deferredFns.length - 1].time;
+                } else {
+                    throw new Error('No deferred tasks to be flushed');
+                }
+            }
+
+            while (self.deferredFns.length && self.deferredFns[0].time <= self.defer.now) {
+                self.deferredFns.shift().fn();
+            }
+        };
+
+        self.$$baseHref = '/';
+        self.baseHref = function () {
+            return this.$$baseHref;
+        };
+    };
+    angular.mock.$Browser.prototype = {
+
+        /**
+          * @name $browser#poll
+          *
+          * @description
+          * run all fns in pollFns
+          */
+        poll: function poll() {
+            angular.forEach(this.pollFns, function (pollFn) {
+                pollFn();
+            });
+        },
+
+        url: function (url, replace, state) {
+            if (angular.isUndefined(state)) {
+                state = null;
+            }
+            if (url) {
+                this.$$url = url;
+                // Native pushState serializes & copies the object; simulate it.
+                this.$$state = angular.copy(state);
+                return this;
+            }
+
+            return this.$$url;
+        },
+
+        state: function () {
+            return this.$$state;
+        },
+
+        notifyWhenNoOutstandingRequests: function (fn) {
+            fn();
+        }
+    };
+
+
+    /**
+     * @ngdoc provider
+     * @name $exceptionHandlerProvider
+     *
+     * @description
+     * Configures the mock implementation of {@link ng.$exceptionHandler} to rethrow or to log errors
+     * passed to the `$exceptionHandler`.
+     */
+
+    /**
+     * @ngdoc service
+     * @name $exceptionHandler
+     *
+     * @description
+     * Mock implementation of {@link ng.$exceptionHandler} that rethrows or logs errors passed
+     * to it. See {@link ngMock.$exceptionHandlerProvider $exceptionHandlerProvider} for configuration
+     * information.
+     *
+     *
+     * ```js
+     *   describe('$exceptionHandlerProvider', function() {
+     *
+     *     it('should capture log messages and exceptions', function() {
+     *
+     *       module(function($exceptionHandlerProvider) {
+     *         $exceptionHandlerProvider.mode('log');
+     *       });
+     *
+     *       inject(function($log, $exceptionHandler, $timeout) {
+     *         $timeout(function() { $log.log(1); });
+     *         $timeout(function() { $log.log(2); throw 'banana peel'; });
+     *         $timeout(function() { $log.log(3); });
+     *         expect($exceptionHandler.errors).toEqual([]);
+     *         expect($log.assertEmpty());
+     *         $timeout.flush();
+     *         expect($exceptionHandler.errors).toEqual(['banana peel']);
+     *         expect($log.log.logs).toEqual([[1], [2], [3]]);
+     *       });
+     *     });
+     *   });
+     * ```
+     */
+
+    angular.mock.$ExceptionHandlerProvider = function () {
+        var handler;
+
+        /**
+         * @ngdoc method
+         * @name $exceptionHandlerProvider#mode
+         *
+         * @description
+         * Sets the logging mode.
+         *
+         * @param {string} mode Mode of operation, defaults to `rethrow`.
+         *
+         *   - `log`: Sometimes it is desirable to test that an error is thrown, for this case the `log`
+         *            mode stores an array of errors in `$exceptionHandler.errors`, to allow later
+         *            assertion of them. See {@link ngMock.$log#assertEmpty assertEmpty()} and
+         *            {@link ngMock.$log#reset reset()}
+         *   - `rethrow`: If any errors are passed to the handler in tests, it typically means that there
+         *                is a bug in the application or test, so this mock will make these tests fail.
+         *                For any implementations that expect exceptions to be thrown, the `rethrow` mode
+         *                will also maintain a log of thrown errors.
+         */
+        this.mode = function (mode) {
+
+            switch (mode) {
+                case 'log':
+                case 'rethrow':
+                    var errors = [];
+                    handler = function (e) {
+                        if (arguments.length == 1) {
+                            errors.push(e);
+                        } else {
+                            errors.push([].slice.call(arguments, 0));
+                        }
+                        if (mode === "rethrow") {
+                            throw e;
+                        }
+                    };
+                    handler.errors = errors;
+                    break;
+                default:
+                    throw new Error("Unknown mode '" + mode + "', only 'log'/'rethrow' modes are allowed!");
+            }
+        };
+
+        this.$get = function () {
+            return handler;
+        };
+
+        this.mode('rethrow');
+    };
+
+
+    /**
+     * @ngdoc service
+     * @name $log
+     *
+     * @description
+     * Mock implementation of {@link ng.$log} that gathers all logged messages in arrays
+     * (one array per logging level). These arrays are exposed as `logs` property of each of the
+     * level-specific log function, e.g. for level `error` the array is exposed as `$log.error.logs`.
+     *
+     */
+    angular.mock.$LogProvider = function () {
+        var debug = true;
+
+        function concat(array1, array2, index) {
+            return array1.concat(Array.prototype.slice.call(array2, index));
+        }
+
+        this.debugEnabled = function (flag) {
+            if (angular.isDefined(flag)) {
+                debug = flag;
+                return this;
+            } else {
+                return debug;
+            }
+        };
+
+        this.$get = function () {
+            var $log = {
+                log: function () { $log.log.logs.push(concat([], arguments, 0)); },
+                warn: function () { $log.warn.logs.push(concat([], arguments, 0)); },
+                info: function () { $log.info.logs.push(concat([], arguments, 0)); },
+                error: function () { $log.error.logs.push(concat([], arguments, 0)); },
+                debug: function () {
+                    if (debug) {
+                        $log.debug.logs.push(concat([], arguments, 0));
+                    }
+                }
+            };
+
+            /**
+             * @ngdoc method
+             * @name $log#reset
+             *
+             * @description
+             * Reset all of the logging arrays to empty.
+             */
+            $log.reset = function () {
+                /**
+                 * @ngdoc property
+                 * @name $log#log.logs
+                 *
+                 * @description
+                 * Array of messages logged using {@link ng.$log#log `log()`}.
+                 *
+                 * @example
+                 * ```js
+                 * $log.log('Some Log');
+                 * var first = $log.log.logs.unshift();
+                 * ```
+                 */
+                $log.log.logs = [];
+                /**
+                 * @ngdoc property
+                 * @name $log#info.logs
+                 *
+                 * @description
+                 * Array of messages logged using {@link ng.$log#info `info()`}.
+                 *
+                 * @example
+                 * ```js
+                 * $log.info('Some Info');
+                 * var first = $log.info.logs.unshift();
+                 * ```
+                 */
+                $log.info.logs = [];
+                /**
+                 * @ngdoc property
+                 * @name $log#warn.logs
+                 *
+                 * @description
+                 * Array of messages logged using {@link ng.$log#warn `warn()`}.
+                 *
+                 * @example
+                 * ```js
+                 * $log.warn('Some Warning');
+                 * var first = $log.warn.logs.unshift();
+                 * ```
+                 */
+                $log.warn.logs = [];
+                /**
+                 * @ngdoc property
+                 * @name $log#error.logs
+                 *
+                 * @description
+                 * Array of messages logged using {@link ng.$log#error `error()`}.
+                 *
+                 * @example
+                 * ```js
+                 * $log.error('Some Error');
+                 * var first = $log.error.logs.unshift();
+                 * ```
+                 */
+                $log.error.logs = [];
+                /**
+               * @ngdoc property
+               * @name $log#debug.logs
+               *
+               * @description
+               * Array of messages logged using {@link ng.$log#debug `debug()`}.
+               *
+               * @example
+               * ```js
+               * $log.debug('Some Error');
+               * var first = $log.debug.logs.unshift();
+               * ```
+               */
+                $log.debug.logs = [];
+            };
+
+            /**
+             * @ngdoc method
+             * @name $log#assertEmpty
+             *
+             * @description
+             * Assert that all of the logging methods have no logged messages. If any messages are present,
+             * an exception is thrown.
+             */
+            $log.assertEmpty = function () {
+                var errors = [];
+                angular.forEach(['error', 'warn', 'info', 'log', 'debug'], function (logLevel) {
+                    angular.forEach($log[logLevel].logs, function (log) {
+                        angular.forEach(log, function (logItem) {
+                            errors.push('MOCK $log (' + logLevel + '): ' + String(logItem) + '\n' +
+                                        (logItem.stack || ''));
+                        });
+                    });
+                });
+                if (errors.length) {
+                    errors.unshift("Expected $log to be empty! Either a message was logged unexpectedly, or " +
+                      "an expected log message was not checked and removed:");
+                    errors.push('');
+                    throw new Error(errors.join('\n---------\n'));
+                }
+            };
+
+            $log.reset();
+            return $log;
+        };
+    };
+
+
+    /**
+     * @ngdoc service
+     * @name $interval
+     *
+     * @description
+     * Mock implementation of the $interval service.
+     *
+     * Use {@link ngMock.$interval#flush `$interval.flush(millis)`} to
+     * move forward by `millis` milliseconds and trigger any functions scheduled to run in that
+     * time.
+     *
+     * @param {function()} fn A function that should be called repeatedly.
+     * @param {number} delay Number of milliseconds between each function call.
+     * @param {number=} [count=0] Number of times to repeat. If not set, or 0, will repeat
+     *   indefinitely.
+     * @param {boolean=} [invokeApply=true] If set to `false` skips model dirty checking, otherwise
+     *   will invoke `fn` within the {@link ng.$rootScope.Scope#$apply $apply} block.
+     * @param {...*=} Pass additional parameters to the executed function.
+     * @returns {promise} A promise which will be notified on each iteration.
+     */
+    angular.mock.$IntervalProvider = function () {
+        this.$get = ['$browser', '$rootScope', '$q', '$$q',
+             function ($browser, $rootScope, $q, $$q) {
+                 var repeatFns = [],
+                     nextRepeatId = 0,
+                     now = 0;
+
+                 var $interval = function (fn, delay, count, invokeApply) {
+                     var hasParams = arguments.length > 4,
+                         args = hasParams ? Array.prototype.slice.call(arguments, 4) : [],
+                         iteration = 0,
+                         skipApply = (angular.isDefined(invokeApply) && !invokeApply),
+                         deferred = (skipApply ? $$q : $q).defer(),
+                         promise = deferred.promise;
+
+                     count = (angular.isDefined(count)) ? count : 0;
+                     promise.then(null, null, (!hasParams) ? fn : function () {
+                         fn.apply(null, args);
+                     });
+
+                     promise.$$intervalId = nextRepeatId;
+
+                     function tick() {
+                         deferred.notify(iteration++);
+
+                         if (count > 0 && iteration >= count) {
+                             var fnIndex;
+                             deferred.resolve(iteration);
+
+                             angular.forEach(repeatFns, function (fn, index) {
+                                 if (fn.id === promise.$$intervalId) fnIndex = index;
+                             });
+
+                             if (angular.isDefined(fnIndex)) {
+                                 repeatFns.splice(fnIndex, 1);
+                             }
+                         }
+
+                         if (skipApply) {
+                             $browser.defer.flush();
+                         } else {
+                             $rootScope.$apply();
+                         }
+                     }
+
+                     repeatFns.push({
+                         nextTime: (now + delay),
+                         delay: delay,
+                         fn: tick,
+                         id: nextRepeatId,
+                         deferred: deferred
+                     });
+                     repeatFns.sort(function (a, b) { return a.nextTime - b.nextTime; });
+
+                     nextRepeatId++;
+                     return promise;
+                 };
+                 /**
+                  * @ngdoc method
+                  * @name $interval#cancel
+                  *
+                  * @description
+                  * Cancels a task associated with the `promise`.
+                  *
+                  * @param {promise} promise A promise from calling the `$interval` function.
+                  * @returns {boolean} Returns `true` if the task was successfully cancelled.
+                  */
+                 $interval.cancel = function (promise) {
+                     if (!promise) return false;
+                     var fnIndex;
+
+                     angular.forEach(repeatFns, function (fn, index) {
+                         if (fn.id === promise.$$intervalId) fnIndex = index;
+                     });
+
+                     if (angular.isDefined(fnIndex)) {
+                         repeatFns[fnIndex].deferred.reject('canceled');
+                         repeatFns.splice(fnIndex, 1);
+                         return true;
+                     }
+
+                     return false;
+                 };
+
+                 /**
+                  * @ngdoc method
+                  * @name $interval#flush
+                  * @description
+                  *
+                  * Runs interval tasks scheduled to be run in the next `millis` milliseconds.
+                  *
+                  * @param {number=} millis maximum timeout amount to flush up until.
+                  *
+                  * @return {number} The amount of time moved forward.
+                  */
+                 $interval.flush = function (millis) {
+                     now += millis;
+                     while (repeatFns.length && repeatFns[0].nextTime <= now) {
+                         var task = repeatFns[0];
+                         task.fn();
+                         task.nextTime += task.delay;
+                         repeatFns.sort(function (a, b) { return a.nextTime - b.nextTime; });
+                     }
+                     return millis;
+                 };
+
+                 return $interval;
+             }];
+    };
+
+
+    /* jshint -W101 */
+    /* The R_ISO8061_STR regex is never going to fit into the 100 char limit!
+     * This directive should go inside the anonymous function but a bug in JSHint means that it would
+     * not be enacted early enough to prevent the warning.
+     */
+    var R_ISO8061_STR = /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?:\:?(\d\d)(?:\:?(\d\d)(?:\.(\d{3}))?)?)?(Z|([+-])(\d\d):?(\d\d)))?$/;
+
+    function jsonStringToDate(string) {
+        var match;
+        if (match = string.match(R_ISO8061_STR)) {
+            var date = new Date(0),
+                tzHour = 0,
+                tzMin = 0;
+            if (match[9]) {
+                tzHour = toInt(match[9] + match[10]);
+                tzMin = toInt(match[9] + match[11]);
+            }
+            date.setUTCFullYear(toInt(match[1]), toInt(match[2]) - 1, toInt(match[3]));
+            date.setUTCHours(toInt(match[4] || 0) - tzHour,
+                             toInt(match[5] || 0) - tzMin,
+                             toInt(match[6] || 0),
+                             toInt(match[7] || 0));
+            return date;
+        }
+        return string;
+    }
+
+    function toInt(str) {
+        return parseInt(str, 10);
+    }
+
+    function padNumber(num, digits, trim) {
+        var neg = '';
+        if (num < 0) {
+            neg = '-';
+            num = -num;
+        }
+        num = '' + num;
+        while (num.length < digits) num = '0' + num;
+        if (trim) {
+            num = num.substr(num.length - digits);
+        }
+        return neg + num;
+    }
+
+
+    /**
+     * @ngdoc type
+     * @name angular.mock.TzDate
+     * @description
+     *
+     * *NOTE*: this is not an injectable instance, just a globally available mock class of `Date`.
+     *
+     * Mock of the Date type which has its timezone specified via constructor arg.
+     *
+     * The main purpose is to create Date-like instances with timezone fixed to the specified timezone
+     * offset, so that we can test code that depends on local timezone settings without dependency on
+     * the time zone settings of the machine where the code is running.
+     *
+     * @param {number} offset Offset of the *desired* timezone in hours (fractions will be honored)
+     * @param {(number|string)} timestamp Timestamp representing the desired time in *UTC*
+     *
+     * @example
+     * !!!! WARNING !!!!!
+     * This is not a complete Date object so only methods that were implemented can be called safely.
+     * To make matters worse, TzDate instances inherit stuff from Date via a prototype.
+     *
+     * We do our best to intercept calls to "unimplemented" methods, but since the list of methods is
+     * incomplete we might be missing some non-standard methods. This can result in errors like:
+     * "Date.prototype.foo called on incompatible Object".
+     *
+     * ```js
+     * var newYearInBratislava = new TzDate(-1, '2009-12-31T23:00:00Z');
+     * newYearInBratislava.getTimezoneOffset() => -60;
+     * newYearInBratislava.getFullYear() => 2010;
+     * newYearInBratislava.getMonth() => 0;
+     * newYearInBratislava.getDate() => 1;
+     * newYearInBratislava.getHours() => 0;
+     * newYearInBratislava.getMinutes() => 0;
+     * newYearInBratislava.getSeconds() => 0;
+     * ```
+     *
+     */
+    angular.mock.TzDate = function (offset, timestamp) {
+        var self = new Date(0);
+        if (angular.isString(timestamp)) {
+            var tsStr = timestamp;
+
+            self.origDate = jsonStringToDate(timestamp);
+
+            timestamp = self.origDate.getTime();
+            if (isNaN(timestamp)) {
+                throw {
+                    name: "Illegal Argument",
+                    message: "Arg '" + tsStr + "' passed into TzDate constructor is not a valid date string"
+                };
+            }
+        } else {
+            self.origDate = new Date(timestamp);
+        }
+
+        var localOffset = new Date(timestamp).getTimezoneOffset();
+        self.offsetDiff = localOffset * 60 * 1000 - offset * 1000 * 60 * 60;
+        self.date = new Date(timestamp + self.offsetDiff);
+
+        self.getTime = function () {
+            return self.date.getTime() - self.offsetDiff;
+        };
+
+        self.toLocaleDateString = function () {
+            return self.date.toLocaleDateString();
+        };
+
+        self.getFullYear = function () {
+            return self.date.getFullYear();
+        };
+
+        self.getMonth = function () {
+            return self.date.getMonth();
+        };
+
+        self.getDate = function () {
+            return self.date.getDate();
+        };
+
+        self.getHours = function () {
+            return self.date.getHours();
+        };
+
+        self.getMinutes = function () {
+            return self.date.getMinutes();
+        };
+
+        self.getSeconds = function () {
+            return self.date.getSeconds();
+        };
+
+        self.getMilliseconds = function () {
+            return self.date.getMilliseconds();
+        };
+
+        self.getTimezoneOffset = function () {
+            return offset * 60;
+        };
+
+        self.getUTCFullYear = function () {
+            return self.origDate.getUTCFullYear();
+        };
+
+        self.getUTCMonth = function () {
+            return self.origDate.getUTCMonth();
+        };
+
+        self.getUTCDate = function () {
+            return self.origDate.getUTCDate();
+        };
+
+        self.getUTCHours = function () {
+            return self.origDate.getUTCHours();
+        };
+
+        self.getUTCMinutes = function () {
+            return self.origDate.getUTCMinutes();
+        };
+
+        self.getUTCSeconds = function () {
+            return self.origDate.getUTCSeconds();
+        };
+
+        self.getUTCMilliseconds = function () {
+            return self.origDate.getUTCMilliseconds();
+        };
+
+        self.getDay = function () {
+            return self.date.getDay();
+        };
+
+        // provide this method only on browsers that already have it
+        if (self.toISOString) {
+            self.toISOString = function () {
+                return padNumber(self.origDate.getUTCFullYear(), 4) + '-' +
+                      padNumber(self.origDate.getUTCMonth() + 1, 2) + '-' +
+                      padNumber(self.origDate.getUTCDate(), 2) + 'T' +
+                      padNumber(self.origDate.getUTCHours(), 2) + ':' +
+                      padNumber(self.origDate.getUTCMinutes(), 2) + ':' +
+                      padNumber(self.origDate.getUTCSeconds(), 2) + '.' +
+                      padNumber(self.origDate.getUTCMilliseconds(), 3) + 'Z';
+            };
+        }
+
+        //hide all methods not implemented in this mock that the Date prototype exposes
+        var unimplementedMethods = ['getUTCDay',
+            'getYear', 'setDate', 'setFullYear', 'setHours', 'setMilliseconds',
+            'setMinutes', 'setMonth', 'setSeconds', 'setTime', 'setUTCDate', 'setUTCFullYear',
+            'setUTCHours', 'setUTCMilliseconds', 'setUTCMinutes', 'setUTCMonth', 'setUTCSeconds',
+            'setYear', 'toDateString', 'toGMTString', 'toJSON', 'toLocaleFormat', 'toLocaleString',
+            'toLocaleTimeString', 'toSource', 'toString', 'toTimeString', 'toUTCString', 'valueOf'];
+
+        angular.forEach(unimplementedMethods, function (methodName) {
+            self[methodName] = function () {
+                throw new Error("Method '" + methodName + "' is not implemented in the TzDate mock");
+            };
+        });
+
+        return self;
+    };
+
+    //make "tzDateInstance instanceof Date" return true
+    angular.mock.TzDate.prototype = Date.prototype;
+    /* jshint +W101 */
+
+    angular.mock.animate = angular.module('ngAnimateMock', ['ng'])
+
+      .config(['$provide', function ($provide) {
+
+          $provide.factory('$$forceReflow', function () {
+              function reflowFn() {
+                  reflowFn.totalReflows++;
+              }
+              reflowFn.totalReflows = 0;
+              return reflowFn;
+          });
+
+          $provide.factory('$$animateAsyncRun', function () {
+              var queue = [];
+              var queueFn = function () {
+                  return function (fn) {
+                      queue.push(fn);
+                  };
+              };
+              queueFn.flush = function () {
+                  if (queue.length === 0) return false;
+
+                  for (var i = 0; i < queue.length; i++) {
+                      queue[i]();
+                  }
+                  queue = [];
+
+                  return true;
+              };
+              return queueFn;
+          });
+
+          $provide.decorator('$animate', ['$delegate', '$timeout', '$browser', '$$rAF',
+                                          '$$forceReflow', '$$animateAsyncRun', '$rootScope',
+                                  function ($delegate, $timeout, $browser, $$rAF,
+                                           $$forceReflow, $$animateAsyncRun, $rootScope) {
+                                      var animate = {
+                                          queue: [],
+                                          cancel: $delegate.cancel,
+                                          on: $delegate.on,
+                                          off: $delegate.off,
+                                          pin: $delegate.pin,
+                                          get reflows() {
+                                              return $$forceReflow.totalReflows;
+                                          },
+                                          enabled: $delegate.enabled,
+                                          flush: function () {
+                                              $rootScope.$digest();
+
+                                              var doNextRun, somethingFlushed = false;
+                                              do {
+                                                  doNextRun = false;
+
+                                                  if ($$rAF.queue.length) {
+                                                      $$rAF.flush();
+                                                      doNextRun = somethingFlushed = true;
+                                                  }
+
+                                                  if ($$animateAsyncRun.flush()) {
+                                                      doNextRun = somethingFlushed = true;
+                                                  }
+                                              } while (doNextRun);
+
+                                              if (!somethingFlushed) {
+                                                  throw new Error('No pending animations ready to be closed or flushed');
+                                              }
+
+                                              $rootScope.$digest();
+                                          }
+                                      };
+
+                                      angular.forEach(
+                                        ['animate', 'enter', 'leave', 'move', 'addClass', 'removeClass', 'setClass'], function (method) {
+                                            animate[method] = function () {
+                                                animate.queue.push({
+                                                    event: method,
+                                                    element: arguments[0],
+                                                    options: arguments[arguments.length - 1],
+                                                    args: arguments
+                                                });
+                                                return $delegate[method].apply($delegate, arguments);
+                                            };
+                                        });
+
+                                      return animate;
+                                  }]);
+
+      }]);
+
+
+    /**
+     * @ngdoc function
+     * @name angular.mock.dump
+     * @description
+     *
+     * *NOTE*: this is not an injectable instance, just a globally available function.
+     *
+     * Method for serializing common angular objects (scope, elements, etc..) into strings, useful for
+     * debugging.
+     *
+     * This method is also available on window, where it can be used to display objects on debug
+     * console.
+     *
+     * @param {*} object - any object to turn into string.
+     * @return {string} a serialized string of the argument
+     */
+    angular.mock.dump = function (object) {
+        return serialize(object);
+
+        function serialize(object) {
+            var out;
+
+            if (angular.isElement(object)) {
+                object = angular.element(object);
+                out = angular.element('<div></div>');
+                angular.forEach(object, function (element) {
+                    out.append(angular.element(element).clone());
+                });
+                out = out.html();
+            } else if (angular.isArray(object)) {
+                out = [];
+                angular.forEach(object, function (o) {
+                    out.push(serialize(o));
+                });
+                out = '[ ' + out.join(', ') + ' ]';
+            } else if (angular.isObject(object)) {
+                if (angular.isFunction(object.$eval) && angular.isFunction(object.$apply)) {
+                    out = serializeScope(object);
+                } else if (object instanceof Error) {
+                    out = object.stack || ('' + object.name + ': ' + object.message);
+                } else {
+                    // TODO(i): this prevents methods being logged,
+                    // we should have a better way to serialize objects
+                    out = angular.toJson(object, true);
+                }
+            } else {
+                out = String(object);
+            }
+
+            return out;
+        }
+
+        function serializeScope(scope, offset) {
+            offset = offset || '  ';
+            var log = [offset + 'Scope(' + scope.$id + '): {'];
+            for (var key in scope) {
+                if (Object.prototype.hasOwnProperty.call(scope, key) && !key.match(/^(\$|this)/)) {
+                    log.push('  ' + key + ': ' + angular.toJson(scope[key]));
+                }
+            }
+            var child = scope.$$childHead;
+            while (child) {
+                log.push(serializeScope(child, offset + '  '));
+                child = child.$$nextSibling;
+            }
+            log.push('}');
+            return log.join('\n' + offset);
+        }
+    };
+
+    /**
+     * @ngdoc service
+     * @name $httpBackend
+     * @description
+     * Fake HTTP backend implementation suitable for unit testing applications that use the
+     * {@link ng.$http $http service}.
+     *
+     * *Note*: For fake HTTP backend implementation suitable for end-to-end testing or backend-less
+     * development please see {@link ngMockE2E.$httpBackend e2e $httpBackend mock}.
+     *
+     * During unit testing, we want our unit tests to run quickly and have no external dependencies so
+     * we donâ€™t want to send [XHR](https://developer.mozilla.org/en/xmlhttprequest) or
+     * [JSONP](http://en.wikipedia.org/wiki/JSONP) requests to a real server. All we really need is
+     * to verify whether a certain request has been sent or not, or alternatively just let the
+     * application make requests, respond with pre-trained responses and assert that the end result is
+     * what we expect it to be.
+     *
+     * This mock implementation can be used to respond with static or dynamic responses via the
+     * `expect` and `when` apis and their shortcuts (`expectGET`, `whenPOST`, etc).
+     *
+     * When an Angular application needs some data from a server, it calls the $http service, which
+     * sends the request to a real server using $httpBackend service. With dependency injection, it is
+     * easy to inject $httpBackend mock (which has the same API as $httpBackend) and use it to verify
+     * the requests and respond with some testing data without sending a request to a real server.
+     *
+     * There are two ways to specify what test data should be returned as http responses by the mock
+     * backend when the code under test makes http requests:
+     *
+     * - `$httpBackend.expect` - specifies a request expectation
+     * - `$httpBackend.when` - specifies a backend definition
+     *
+     *
+     * # Request Expectations vs Backend Definitions
+     *
+     * Request expectations provide a way to make assertions about requests made by the application and
+     * to define responses for those requests. The test will fail if the expected requests are not made
+     * or they are made in the wrong order.
+     *
+     * Backend definitions allow you to define a fake backend for your application which doesn't assert
+     * if a particular request was made or not, it just returns a trained response if a request is made.
+     * The test will pass whether or not the request gets made during testing.
+     *
+     *
+     * <table class="table">
+     *   <tr><th width="220px"></th><th>Request expectations</th><th>Backend definitions</th></tr>
+     *   <tr>
+     *     <th>Syntax</th>
+     *     <td>.expect(...).respond(...)</td>
+     *     <td>.when(...).respond(...)</td>
+     *   </tr>
+     *   <tr>
+     *     <th>Typical usage</th>
+     *     <td>strict unit tests</td>
+     *     <td>loose (black-box) unit testing</td>
+     *   </tr>
+     *   <tr>
+     *     <th>Fulfills multiple requests</th>
+     *     <td>NO</td>
+     *     <td>YES</td>
+     *   </tr>
+     *   <tr>
+     *     <th>Order of requests matters</th>
+     *     <td>YES</td>
+     *     <td>NO</td>
+     *   </tr>
+     *   <tr>
+     *     <th>Request required</th>
+     *     <td>YES</td>
+     *     <td>NO</td>
+     *   </tr>
+     *   <tr>
+     *     <th>Response required</th>
+     *     <td>optional (see below)</td>
+     *     <td>YES</td>
+     *   </tr>
+     * </table>
+     *
+     * In cases where both backend definitions and request expectations are specified during unit
+     * testing, the request expectations are evaluated first.
+     *
+     * If a request expectation has no response specified, the algorithm will search your backend
+     * definitions for an appropriate response.
+     *
+     * If a request didn't match any expectation or if the expectation doesn't have the response
+     * defined, the backend definitions are evaluated in sequential order to see if any of them match
+     * the request. The response from the first matched definition is returned.
+     *
+     *
+     * # Flushing HTTP requests
+     *
+     * The $httpBackend used in production always responds to requests asynchronously. If we preserved
+     * this behavior in unit testing, we'd have to create async unit tests, which are hard to write,
+     * to follow and to maintain. But neither can the testing mock respond synchronously; that would
+     * change the execution of the code under test. For this reason, the mock $httpBackend has a
+     * `flush()` method, which allows the test to explicitly flush pending requests. This preserves
+     * the async api of the backend, while allowing the test to execute synchronously.
+     *
+     *
+     * # Unit testing with mock $httpBackend
+     * The following code shows how to setup and use the mock backend when unit testing a controller.
+     * First we create the controller under test:
+     *
+      ```js
+      // The module code
+      angular
+        .module('MyApp', [])
+        .controller('MyController', MyController);
+    
+      // The controller code
+      function MyController($scope, $http) {
+        var authToken;
+    
+        $http.get('/auth.py').success(function(data, status, headers) {
+          authToken = headers('A-Token');
+          $scope.user = data;
+        });
+    
+        $scope.saveMessage = function(message) {
+          var headers = { 'Authorization': authToken };
+          $scope.status = 'Saving...';
+    
+          $http.post('/add-msg.py', message, { headers: headers } ).success(function(response) {
+            $scope.status = '';
+          }).error(function() {
+            $scope.status = 'Failed...';
+          });
+        };
+      }
+      ```
+     *
+     * Now we setup the mock backend and create the test specs:
+     *
+      ```js
+        // testing controller
+        describe('MyController', function() {
+           var $httpBackend, $rootScope, createController, authRequestHandler;
+    
+           // Set up the module
+           beforeEach(module('MyApp'));
+    
+           beforeEach(inject(function($injector) {
+             // Set up the mock http service responses
+             $httpBackend = $injector.get('$httpBackend');
+             // backend definition common for all tests
+             authRequestHandler = $httpBackend.when('GET', '/auth.py')
+                                    .respond({userId: 'userX'}, {'A-Token': 'xxx'});
+    
+             // Get hold of a scope (i.e. the root scope)
+             $rootScope = $injector.get('$rootScope');
+             // The $controller service is used to create instances of controllers
+             var $controller = $injector.get('$controller');
+    
+             createController = function() {
+               return $controller('MyController', {'$scope' : $rootScope });
+             };
+           }));
+    
+    
+           afterEach(function() {
+             $httpBackend.verifyNoOutstandingExpectation();
+             $httpBackend.verifyNoOutstandingRequest();
+           });
+    
+    
+           it('should fetch authentication token', function() {
+             $httpBackend.expectGET('/auth.py');
+             var controller = createController();
+             $httpBackend.flush();
+           });
+    
+    
+           it('should fail authentication', function() {
+    
+             // Notice how you can change the response even after it was set
+             authRequestHandler.respond(401, '');
+    
+             $httpBackend.expectGET('/auth.py');
+             var controller = createController();
+             $httpBackend.flush();
+             expect($rootScope.status).toBe('Failed...');
+           });
+    
+    
+           it('should send msg to server', function() {
+             var controller = createController();
+             $httpBackend.flush();
+    
+             // now you donâ€™t care about the authentication, but
+             // the controller will still send the request and
+             // $httpBackend will respond without you having to
+             // specify the expectation and response for this request
+    
+             $httpBackend.expectPOST('/add-msg.py', 'message content').respond(201, '');
+             $rootScope.saveMessage('message content');
+             expect($rootScope.status).toBe('Saving...');
+             $httpBackend.flush();
+             expect($rootScope.status).toBe('');
+           });
+    
+    
+           it('should send auth header', function() {
+             var controller = createController();
+             $httpBackend.flush();
+    
+             $httpBackend.expectPOST('/add-msg.py', undefined, function(headers) {
+               // check if the header was sent, if it wasn't the expectation won't
+               // match the request and the test will fail
+               return headers['Authorization'] == 'xxx';
+             }).respond(201, '');
+    
+             $rootScope.saveMessage('whatever');
+             $httpBackend.flush();
+           });
+        });
+       ```
+     */
+    angular.mock.$HttpBackendProvider = function () {
+        this.$get = ['$rootScope', '$timeout', createHttpBackendMock];
+    };
+
+    /**
+     * General factory function for $httpBackend mock.
+     * Returns instance for unit testing (when no arguments specified):
+     *   - passing through is disabled
+     *   - auto flushing is disabled
+     *
+     * Returns instance for e2e testing (when `$delegate` and `$browser` specified):
+     *   - passing through (delegating request to real backend) is enabled
+     *   - auto flushing is enabled
+     *
+     * @param {Object=} $delegate Real $httpBackend instance (allow passing through if specified)
+     * @param {Object=} $browser Auto-flushing enabled if specified
+     * @return {Object} Instance of $httpBackend mock
+     */
+    function createHttpBackendMock($rootScope, $timeout, $delegate, $browser) {
+        var definitions = [],
+            expectations = [],
+            responses = [],
+            responsesPush = angular.bind(responses, responses.push),
+            copy = angular.copy;
+
+        function createResponse(status, data, headers, statusText) {
+            if (angular.isFunction(status)) return status;
+
+            return function () {
+                return angular.isNumber(status)
+                    ? [status, data, headers, statusText]
+                    : [200, status, data, headers];
+            };
+        }
+
+        // TODO(vojta): change params to: method, url, data, headers, callback
+        function $httpBackend(method, url, data, callback, headers, timeout, withCredentials) {
+            var xhr = new MockXhr(),
+                expectation = expectations[0],
+                wasExpected = false;
+
+            function prettyPrint(data) {
+                return (angular.isString(data) || angular.isFunction(data) || data instanceof RegExp)
+                    ? data
+                    : angular.toJson(data);
+            }
+
+            function wrapResponse(wrapped) {
+                if (!$browser && timeout) {
+                    timeout.then ? timeout.then(handleTimeout) : $timeout(handleTimeout, timeout);
+                }
+
+                return handleResponse;
+
+                function handleResponse() {
+                    var response = wrapped.response(method, url, data, headers);
+                    xhr.$$respHeaders = response[2];
+                    callback(copy(response[0]), copy(response[1]), xhr.getAllResponseHeaders(),
+                             copy(response[3] || ''));
+                }
+
+                function handleTimeout() {
+                    for (var i = 0, ii = responses.length; i < ii; i++) {
+                        if (responses[i] === handleResponse) {
+                            responses.splice(i, 1);
+                            callback(-1, undefined, '');
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (expectation && expectation.match(method, url)) {
+                if (!expectation.matchData(data)) {
+                    throw new Error('Expected ' + expectation + ' with different data\n' +
+                        'EXPECTED: ' + prettyPrint(expectation.data) + '\nGOT:      ' + data);
+                }
+
+                if (!expectation.matchHeaders(headers)) {
+                    throw new Error('Expected ' + expectation + ' with different headers\n' +
+                                    'EXPECTED: ' + prettyPrint(expectation.headers) + '\nGOT:      ' +
+                                    prettyPrint(headers));
+                }
+
+                expectations.shift();
+
+                if (expectation.response) {
+                    responses.push(wrapResponse(expectation));
+                    return;
+                }
+                wasExpected = true;
+            }
+
+            var i = -1, definition;
+            while ((definition = definitions[++i])) {
+                if (definition.match(method, url, data, headers || {})) {
+                    if (definition.response) {
+                        // if $browser specified, we do auto flush all requests
+                        ($browser ? $browser.defer : responsesPush)(wrapResponse(definition));
+                    } else if (definition.passThrough) {
+                        $delegate(method, url, data, callback, headers, timeout, withCredentials);
+                    } else throw new Error('No response defined !');
+                    return;
+                }
+            }
+            throw wasExpected ?
+                new Error('No response defined !') :
+                new Error('Unexpected request: ' + method + ' ' + url + '\n' +
+                          (expectation ? 'Expected ' + expectation : 'No more request expected'));
+        }
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#when
+         * @description
+         * Creates a new backend definition.
+         *
+         * @param {string} method HTTP method.
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {(string|RegExp|function(string))=} data HTTP request body or function that receives
+         *   data string and returns true if the data is as expected.
+         * @param {(Object|function(Object))=} headers HTTP headers or function that receives http header
+         *   object and returns true if the headers match the current definition.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         *   request is handled. You can save this object for later use and invoke `respond` again in
+         *   order to change how a matched request is handled.
+         *
+         *  - respond â€“
+         *      `{function([status,] data[, headers, statusText])
+         *      | function(function(method, url, data, headers)}`
+         *    â€“ The respond method takes a set of static data to be returned or a function that can
+         *    return an array containing response status (number), response data (string), response
+         *    headers (Object), and the text for the status (string). The respond method returns the
+         *    `requestHandler` object for possible overrides.
+         */
+        $httpBackend.when = function (method, url, data, headers) {
+            var definition = new MockHttpExpectation(method, url, data, headers),
+                chain = {
+                    respond: function (status, data, headers, statusText) {
+                        definition.passThrough = undefined;
+                        definition.response = createResponse(status, data, headers, statusText);
+                        return chain;
+                    }
+                };
+
+            if ($browser) {
+                chain.passThrough = function () {
+                    definition.response = undefined;
+                    definition.passThrough = true;
+                    return chain;
+                };
+            }
+
+            definitions.push(definition);
+            return chain;
+        };
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#whenGET
+         * @description
+         * Creates a new backend definition for GET requests. For more info see `when()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {(Object|function(Object))=} headers HTTP headers.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         * request is handled. You can save this object for later use and invoke `respond` again in
+         * order to change how a matched request is handled.
+         */
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#whenHEAD
+         * @description
+         * Creates a new backend definition for HEAD requests. For more info see `when()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {(Object|function(Object))=} headers HTTP headers.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         * request is handled. You can save this object for later use and invoke `respond` again in
+         * order to change how a matched request is handled.
+         */
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#whenDELETE
+         * @description
+         * Creates a new backend definition for DELETE requests. For more info see `when()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {(Object|function(Object))=} headers HTTP headers.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         * request is handled. You can save this object for later use and invoke `respond` again in
+         * order to change how a matched request is handled.
+         */
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#whenPOST
+         * @description
+         * Creates a new backend definition for POST requests. For more info see `when()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {(string|RegExp|function(string))=} data HTTP request body or function that receives
+         *   data string and returns true if the data is as expected.
+         * @param {(Object|function(Object))=} headers HTTP headers.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         * request is handled. You can save this object for later use and invoke `respond` again in
+         * order to change how a matched request is handled.
+         */
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#whenPUT
+         * @description
+         * Creates a new backend definition for PUT requests.  For more info see `when()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {(string|RegExp|function(string))=} data HTTP request body or function that receives
+         *   data string and returns true if the data is as expected.
+         * @param {(Object|function(Object))=} headers HTTP headers.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         * request is handled. You can save this object for later use and invoke `respond` again in
+         * order to change how a matched request is handled.
+         */
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#whenJSONP
+         * @description
+         * Creates a new backend definition for JSONP requests. For more info see `when()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         * request is handled. You can save this object for later use and invoke `respond` again in
+         * order to change how a matched request is handled.
+         */
+        createShortMethods('when');
+
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#expect
+         * @description
+         * Creates a new request expectation.
+         *
+         * @param {string} method HTTP method.
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {(string|RegExp|function(string)|Object)=} data HTTP request body or function that
+         *  receives data string and returns true if the data is as expected, or Object if request body
+         *  is in JSON format.
+         * @param {(Object|function(Object))=} headers HTTP headers or function that receives http header
+         *   object and returns true if the headers match the current expectation.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         *  request is handled. You can save this object for later use and invoke `respond` again in
+         *  order to change how a matched request is handled.
+         *
+         *  - respond â€“
+         *    `{function([status,] data[, headers, statusText])
+         *    | function(function(method, url, data, headers)}`
+         *    â€“ The respond method takes a set of static data to be returned or a function that can
+         *    return an array containing response status (number), response data (string), response
+         *    headers (Object), and the text for the status (string). The respond method returns the
+         *    `requestHandler` object for possible overrides.
+         */
+        $httpBackend.expect = function (method, url, data, headers) {
+            var expectation = new MockHttpExpectation(method, url, data, headers),
+                chain = {
+                    respond: function (status, data, headers, statusText) {
+                        expectation.response = createResponse(status, data, headers, statusText);
+                        return chain;
+                    }
+                };
+
+            expectations.push(expectation);
+            return chain;
+        };
+
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#expectGET
+         * @description
+         * Creates a new request expectation for GET requests. For more info see `expect()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {Object=} headers HTTP headers.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         * request is handled. You can save this object for later use and invoke `respond` again in
+         * order to change how a matched request is handled. See #expect for more info.
+         */
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#expectHEAD
+         * @description
+         * Creates a new request expectation for HEAD requests. For more info see `expect()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {Object=} headers HTTP headers.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         *   request is handled. You can save this object for later use and invoke `respond` again in
+         *   order to change how a matched request is handled.
+         */
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#expectDELETE
+         * @description
+         * Creates a new request expectation for DELETE requests. For more info see `expect()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {Object=} headers HTTP headers.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         *   request is handled. You can save this object for later use and invoke `respond` again in
+         *   order to change how a matched request is handled.
+         */
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#expectPOST
+         * @description
+         * Creates a new request expectation for POST requests. For more info see `expect()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {(string|RegExp|function(string)|Object)=} data HTTP request body or function that
+         *  receives data string and returns true if the data is as expected, or Object if request body
+         *  is in JSON format.
+         * @param {Object=} headers HTTP headers.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         *   request is handled. You can save this object for later use and invoke `respond` again in
+         *   order to change how a matched request is handled.
+         */
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#expectPUT
+         * @description
+         * Creates a new request expectation for PUT requests. For more info see `expect()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {(string|RegExp|function(string)|Object)=} data HTTP request body or function that
+         *  receives data string and returns true if the data is as expected, or Object if request body
+         *  is in JSON format.
+         * @param {Object=} headers HTTP headers.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         *   request is handled. You can save this object for later use and invoke `respond` again in
+         *   order to change how a matched request is handled.
+         */
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#expectPATCH
+         * @description
+         * Creates a new request expectation for PATCH requests. For more info see `expect()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+         *   and returns true if the url matches the current definition.
+         * @param {(string|RegExp|function(string)|Object)=} data HTTP request body or function that
+         *  receives data string and returns true if the data is as expected, or Object if request body
+         *  is in JSON format.
+         * @param {Object=} headers HTTP headers.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         *   request is handled. You can save this object for later use and invoke `respond` again in
+         *   order to change how a matched request is handled.
+         */
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#expectJSONP
+         * @description
+         * Creates a new request expectation for JSONP requests. For more info see `expect()`.
+         *
+         * @param {string|RegExp|function(string)} url HTTP url or function that receives an url
+         *   and returns true if the url matches the current definition.
+         * @returns {requestHandler} Returns an object with `respond` method that controls how a matched
+         *   request is handled. You can save this object for later use and invoke `respond` again in
+         *   order to change how a matched request is handled.
+         */
+        createShortMethods('expect');
+
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#flush
+         * @description
+         * Flushes all pending requests using the trained responses.
+         *
+         * @param {number=} count Number of responses to flush (in the order they arrived). If undefined,
+         *   all pending requests will be flushed. If there are no pending requests when the flush method
+         *   is called an exception is thrown (as this typically a sign of programming error).
+         */
+        $httpBackend.flush = function (count, digest) {
+            if (digest !== false) $rootScope.$digest();
+            if (!responses.length) throw new Error('No pending request to flush !');
+
+            if (angular.isDefined(count) && count !== null) {
+                while (count--) {
+                    if (!responses.length) throw new Error('No more pending request to flush !');
+                    responses.shift()();
+                }
+            } else {
+                while (responses.length) {
+                    responses.shift()();
+                }
+            }
+            $httpBackend.verifyNoOutstandingExpectation(digest);
+        };
+
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#verifyNoOutstandingExpectation
+         * @description
+         * Verifies that all of the requests defined via the `expect` api were made. If any of the
+         * requests were not made, verifyNoOutstandingExpectation throws an exception.
+         *
+         * Typically, you would call this method following each test case that asserts requests using an
+         * "afterEach" clause.
+         *
+         * ```js
+         *   afterEach($httpBackend.verifyNoOutstandingExpectation);
+         * ```
+         */
+        $httpBackend.verifyNoOutstandingExpectation = function (digest) {
+            if (digest !== false) $rootScope.$digest();
+            if (expectations.length) {
+                throw new Error('Unsatisfied requests: ' + expectations.join(', '));
+            }
+        };
+
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#verifyNoOutstandingRequest
+         * @description
+         * Verifies that there are no outstanding requests that need to be flushed.
+         *
+         * Typically, you would call this method following each test case that asserts requests using an
+         * "afterEach" clause.
+         *
+         * ```js
+         *   afterEach($httpBackend.verifyNoOutstandingRequest);
+         * ```
+         */
+        $httpBackend.verifyNoOutstandingRequest = function () {
+            if (responses.length) {
+                throw new Error('Unflushed requests: ' + responses.length);
+            }
+        };
+
+
+        /**
+         * @ngdoc method
+         * @name $httpBackend#resetExpectations
+         * @description
+         * Resets all request expectations, but preserves all backend definitions. Typically, you would
+         * call resetExpectations during a multiple-phase test when you want to reuse the same instance of
+         * $httpBackend mock.
+         */
+        $httpBackend.resetExpectations = function () {
+            expectations.length = 0;
+            responses.length = 0;
+        };
+
+        return $httpBackend;
+
+
+        function createShortMethods(prefix) {
+            angular.forEach(['GET', 'DELETE', 'JSONP', 'HEAD'], function (method) {
+                $httpBackend[prefix + method] = function (url, headers) {
+                    return $httpBackend[prefix](method, url, undefined, headers);
+                };
+            });
+
+            angular.forEach(['PUT', 'POST', 'PATCH'], function (method) {
+                $httpBackend[prefix + method] = function (url, data, headers) {
+                    return $httpBackend[prefix](method, url, data, headers);
+                };
+            });
+        }
+    }
+
+    function MockHttpExpectation(method, url, data, headers) {
+
+        this.data = data;
+        this.headers = headers;
+
+        this.match = function (m, u, d, h) {
+            if (method != m) return false;
+            if (!this.matchUrl(u)) return false;
+            if (angular.isDefined(d) && !this.matchData(d)) return false;
+            if (angular.isDefined(h) && !this.matchHeaders(h)) return false;
+            return true;
+        };
+
+        this.matchUrl = function (u) {
+            if (!url) return true;
+            if (angular.isFunction(url.test)) return url.test(u);
+            if (angular.isFunction(url)) return url(u);
+            return url == u;
+        };
+
+        this.matchHeaders = function (h) {
+            if (angular.isUndefined(headers)) return true;
+            if (angular.isFunction(headers)) return headers(h);
+            return angular.equals(headers, h);
+        };
+
+        this.matchData = function (d) {
+            if (angular.isUndefined(data)) return true;
+            if (data && angular.isFunction(data.test)) return data.test(d);
+            if (data && angular.isFunction(data)) return data(d);
+            if (data && !angular.isString(data)) {
+                return angular.equals(angular.fromJson(angular.toJson(data)), angular.fromJson(d));
+            }
+            return data == d;
+        };
+
+        this.toString = function () {
+            return method + ' ' + url;
+        };
+    }
+
+    function createMockXhr() {
+        return new MockXhr();
+    }
+
+    function MockXhr() {
+
+        // hack for testing $http, $httpBackend
+        MockXhr.$$lastInstance = this;
+
+        this.open = function (method, url, async) {
+            this.$$method = method;
+            this.$$url = url;
+            this.$$async = async;
+            this.$$reqHeaders = {};
+            this.$$respHeaders = {};
+        };
+
+        this.send = function (data) {
+            this.$$data = data;
+        };
+
+        this.setRequestHeader = function (key, value) {
+            this.$$reqHeaders[key] = value;
+        };
+
+        this.getResponseHeader = function (name) {
+            // the lookup must be case insensitive,
+            // that's why we try two quick lookups first and full scan last
+            var header = this.$$respHeaders[name];
+            if (header) return header;
+
+            name = angular.lowercase(name);
+            header = this.$$respHeaders[name];
+            if (header) return header;
+
+            header = undefined;
+            angular.forEach(this.$$respHeaders, function (headerVal, headerName) {
+                if (!header && angular.lowercase(headerName) == name) header = headerVal;
+            });
+            return header;
+        };
+
+        this.getAllResponseHeaders = function () {
+            var lines = [];
+
+            angular.forEach(this.$$respHeaders, function (value, key) {
+                lines.push(key + ': ' + value);
+            });
+            return lines.join('\n');
+        };
+
+        this.abort = angular.noop;
+    }
+
+
+    /**
+     * @ngdoc service
+     * @name $timeout
+     * @description
+     *
+     * This service is just a simple decorator for {@link ng.$timeout $timeout} service
+     * that adds a "flush" and "verifyNoPendingTasks" methods.
+     */
+
+    angular.mock.$TimeoutDecorator = ['$delegate', '$browser', function ($delegate, $browser) {
+
+        /**
+         * @ngdoc method
+         * @name $timeout#flush
+         * @description
+         *
+         * Flushes the queue of pending tasks.
+         *
+         * @param {number=} delay maximum timeout amount to flush up until
+         */
+        $delegate.flush = function (delay) {
+            $browser.defer.flush(delay);
+        };
+
+        /**
+         * @ngdoc method
+         * @name $timeout#verifyNoPendingTasks
+         * @description
+         *
+         * Verifies that there are no pending tasks that need to be flushed.
+         */
+        $delegate.verifyNoPendingTasks = function () {
+            if ($browser.deferredFns.length) {
+                throw new Error('Deferred tasks to flush (' + $browser.deferredFns.length + '): ' +
+                    formatPendingTasksAsString($browser.deferredFns));
+            }
+        };
+
+        function formatPendingTasksAsString(tasks) {
+            var result = [];
+            angular.forEach(tasks, function (task) {
+                result.push('{id: ' + task.id + ', ' + 'time: ' + task.time + '}');
+            });
+
+            return result.join(', ');
+        }
+
+        return $delegate;
+    }];
+
+    angular.mock.$RAFDecorator = ['$delegate', function ($delegate) {
+        var rafFn = function (fn) {
+            var index = rafFn.queue.length;
+            rafFn.queue.push(fn);
+            return function () {
+                rafFn.queue.splice(index, 1);
+            };
+        };
+
+        rafFn.queue = [];
+        rafFn.supported = $delegate.supported;
+
+        rafFn.flush = function () {
+            if (rafFn.queue.length === 0) {
+                throw new Error('No rAF callbacks present');
+            }
+
+            var length = rafFn.queue.length;
+            for (var i = 0; i < length; i++) {
+                rafFn.queue[i]();
+            }
+
+            rafFn.queue = rafFn.queue.slice(i);
+        };
+
+        return rafFn;
+    }];
+
+    /**
+     *
+     */
+    angular.mock.$RootElementProvider = function () {
+        this.$get = function () {
+            return angular.element('<div ng-app></div>');
+        };
+    };
+
+    /**
+     * @ngdoc service
+     * @name $controller
+     * @description
+     * A decorator for {@link ng.$controller} with additional `bindings` parameter, useful when testing
+     * controllers of directives that use {@link $compile#-bindtocontroller- `bindToController`}.
+     *
+     *
+     * ## Example
+     *
+     * ```js
+     *
+     * // Directive definition ...
+     *
+     * myMod.directive('myDirective', {
+     *   controller: 'MyDirectiveController',
+     *   bindToController: {
+     *     name: '@'
+     *   }
+     * });
+     *
+     *
+     * // Controller definition ...
+     *
+     * myMod.controller('MyDirectiveController', ['log', function($log) {
+     *   $log.info(this.name);
+     * })];
+     *
+     *
+     * // In a test ...
+     *
+     * describe('myDirectiveController', function() {
+     *   it('should write the bound name to the log', inject(function($controller, $log) {
+     *     var ctrl = $controller('MyDirectiveController', { /* no locals &#42;/ }, { name: 'Clark Kent' });
+     *     expect(ctrl.name).toEqual('Clark Kent');
+     *     expect($log.info.logs).toEqual(['Clark Kent']);
+     *   });
+     * });
+     *
+     * ```
+     *
+     * @param {Function|string} constructor If called with a function then it's considered to be the
+     *    controller constructor function. Otherwise it's considered to be a string which is used
+     *    to retrieve the controller constructor using the following steps:
+     *
+     *    * check if a controller with given name is registered via `$controllerProvider`
+     *    * check if evaluating the string on the current scope returns a constructor
+     *    * if $controllerProvider#allowGlobals, check `window[constructor]` on the global
+     *      `window` object (not recommended)
+     *
+     *    The string can use the `controller as property` syntax, where the controller instance is published
+     *    as the specified property on the `scope`; the `scope` must be injected into `locals` param for this
+     *    to work correctly.
+     *
+     * @param {Object} locals Injection locals for Controller.
+     * @param {Object=} bindings Properties to add to the controller before invoking the constructor. This is used
+     *                           to simulate the `bindToController` feature and simplify certain kinds of tests.
+     * @return {Object} Instance of given controller.
+     */
+    angular.mock.$ControllerDecorator = ['$delegate', function ($delegate) {
+        return function (expression, locals, later, ident) {
+            if (later && typeof later === 'object') {
+                var create = $delegate(expression, locals, true, ident);
+                angular.extend(create.instance, later);
+                return create();
+            }
+            return $delegate(expression, locals, later, ident);
+        };
+    }];
+
+
+    /**
+     * @ngdoc module
+     * @name ngMock
+     * @packageName angular-mocks
+     * @description
+     *
+     * # ngMock
+     *
+     * The `ngMock` module provides support to inject and mock Angular services into unit tests.
+     * In addition, ngMock also extends various core ng services such that they can be
+     * inspected and controlled in a synchronous manner within test code.
+     *
+     *
+     * <div doc-module-components="ngMock"></div>
+     *
+     */
+    angular.module('ngMock', ['ng']).provider({
+        $browser: angular.mock.$BrowserProvider,
+        $exceptionHandler: angular.mock.$ExceptionHandlerProvider,
+        $log: angular.mock.$LogProvider,
+        $interval: angular.mock.$IntervalProvider,
+        $httpBackend: angular.mock.$HttpBackendProvider,
+        $rootElement: angular.mock.$RootElementProvider
+    }).config(['$provide', function ($provide) {
+        $provide.decorator('$timeout', angular.mock.$TimeoutDecorator);
+        $provide.decorator('$$rAF', angular.mock.$RAFDecorator);
+        $provide.decorator('$rootScope', angular.mock.$RootScopeDecorator);
+        $provide.decorator('$controller', angular.mock.$ControllerDecorator);
+    }]);
+
+    /**
+     * @ngdoc module
+     * @name ngMockE2E
+     * @module ngMockE2E
+     * @packageName angular-mocks
+     * @description
+     *
+     * The `ngMockE2E` is an angular module which contains mocks suitable for end-to-end testing.
+     * Currently there is only one mock present in this module -
+     * the {@link ngMockE2E.$httpBackend e2e $httpBackend} mock.
+     */
+    angular.module('ngMockE2E', ['ng']).config(['$provide', function ($provide) {
+        $provide.decorator('$httpBackend', angular.mock.e2e.$httpBackendDecorator);
+    }]);
+
+    /**
+     * @ngdoc service
+     * @name $httpBackend
+     * @module ngMockE2E
+     * @description
+     * Fake HTTP backend implementation suitable for end-to-end testing or backend-less development of
+     * applications that use the {@link ng.$http $http service}.
+     *
+     * *Note*: For fake http backend implementation suitable for unit testing please see
+     * {@link ngMock.$httpBackend unit-testing $httpBackend mock}.
+     *
+     * This implementation can be used to respond with static or dynamic responses via the `when` api
+     * and its shortcuts (`whenGET`, `whenPOST`, etc) and optionally pass through requests to the
+     * real $httpBackend for specific requests (e.g. to interact with certain remote apis or to fetch
+     * templates from a webserver).
+     *
+     * As opposed to unit-testing, in an end-to-end testing scenario or in scenario when an application
+     * is being developed with the real backend api replaced with a mock, it is often desirable for
+     * certain category of requests to bypass the mock and issue a real http request (e.g. to fetch
+     * templates or static files from the webserver). To configure the backend with this behavior
+     * use the `passThrough` request handler of `when` instead of `respond`.
+     *
+     * Additionally, we don't want to manually have to flush mocked out requests like we do during unit
+     * testing. For this reason the e2e $httpBackend flushes mocked out requests
+     * automatically, closely simulating the behavior of the XMLHttpRequest object.
+     *
+     * To setup the application to run with this http backend, you have to create a module that depends
+     * on the `ngMockE2E` and your application modules and defines the fake backend:
+     *
+     * ```js
+     *   myAppDev = angular.module('myAppDev', ['myApp', 'ngMockE2E']);
+     *   myAppDev.run(function($httpBackend) {
+     *     phones = [{name: 'phone1'}, {name: 'phone2'}];
+     *
+     *     // returns the current list of phones
+     *     $httpBackend.whenGET('/phones').respond(phones);
+     *
+     *     // adds a new phone to the phones array
+     *     $httpBackend.whenPOST('/phones').respond(function(method, url, data) {
+     *       var phone = angular.fromJson(data);
+     *       phones.push(phone);
+     *       return [200, phone, {}];
+     *     });
+     *     $httpBackend.whenGET(/^\/templates\//).passThrough();
+     *     //...
+     *   });
+     * ```
+     *
+     * Afterwards, bootstrap your app with this new module.
+     */
+
+    /**
+     * @ngdoc method
+     * @name $httpBackend#when
+     * @module ngMockE2E
+     * @description
+     * Creates a new backend definition.
+     *
+     * @param {string} method HTTP method.
+     * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+     *   and returns true if the url matches the current definition.
+     * @param {(string|RegExp)=} data HTTP request body.
+     * @param {(Object|function(Object))=} headers HTTP headers or function that receives http header
+     *   object and returns true if the headers match the current definition.
+     * @returns {requestHandler} Returns an object with `respond` and `passThrough` methods that
+     *   control how a matched request is handled. You can save this object for later use and invoke
+     *   `respond` or `passThrough` again in order to change how a matched request is handled.
+     *
+     *  - respond â€“
+     *    `{function([status,] data[, headers, statusText])
+     *    | function(function(method, url, data, headers)}`
+     *    â€“ The respond method takes a set of static data to be returned or a function that can return
+     *    an array containing response status (number), response data (string), response headers
+     *    (Object), and the text for the status (string).
+     *  - passThrough â€“ `{function()}` â€“ Any request matching a backend definition with
+     *    `passThrough` handler will be passed through to the real backend (an XHR request will be made
+     *    to the server.)
+     *  - Both methods return the `requestHandler` object for possible overrides.
+     */
+
+    /**
+     * @ngdoc method
+     * @name $httpBackend#whenGET
+     * @module ngMockE2E
+     * @description
+     * Creates a new backend definition for GET requests. For more info see `when()`.
+     *
+     * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+     *   and returns true if the url matches the current definition.
+     * @param {(Object|function(Object))=} headers HTTP headers.
+     * @returns {requestHandler} Returns an object with `respond` and `passThrough` methods that
+     *   control how a matched request is handled. You can save this object for later use and invoke
+     *   `respond` or `passThrough` again in order to change how a matched request is handled.
+     */
+
+    /**
+     * @ngdoc method
+     * @name $httpBackend#whenHEAD
+     * @module ngMockE2E
+     * @description
+     * Creates a new backend definition for HEAD requests. For more info see `when()`.
+     *
+     * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+     *   and returns true if the url matches the current definition.
+     * @param {(Object|function(Object))=} headers HTTP headers.
+     * @returns {requestHandler} Returns an object with `respond` and `passThrough` methods that
+     *   control how a matched request is handled. You can save this object for later use and invoke
+     *   `respond` or `passThrough` again in order to change how a matched request is handled.
+     */
+
+    /**
+     * @ngdoc method
+     * @name $httpBackend#whenDELETE
+     * @module ngMockE2E
+     * @description
+     * Creates a new backend definition for DELETE requests. For more info see `when()`.
+     *
+     * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+     *   and returns true if the url matches the current definition.
+     * @param {(Object|function(Object))=} headers HTTP headers.
+     * @returns {requestHandler} Returns an object with `respond` and `passThrough` methods that
+     *   control how a matched request is handled. You can save this object for later use and invoke
+     *   `respond` or `passThrough` again in order to change how a matched request is handled.
+     */
+
+    /**
+     * @ngdoc method
+     * @name $httpBackend#whenPOST
+     * @module ngMockE2E
+     * @description
+     * Creates a new backend definition for POST requests. For more info see `when()`.
+     *
+     * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+     *   and returns true if the url matches the current definition.
+     * @param {(string|RegExp)=} data HTTP request body.
+     * @param {(Object|function(Object))=} headers HTTP headers.
+     * @returns {requestHandler} Returns an object with `respond` and `passThrough` methods that
+     *   control how a matched request is handled. You can save this object for later use and invoke
+     *   `respond` or `passThrough` again in order to change how a matched request is handled.
+     */
+
+    /**
+     * @ngdoc method
+     * @name $httpBackend#whenPUT
+     * @module ngMockE2E
+     * @description
+     * Creates a new backend definition for PUT requests.  For more info see `when()`.
+     *
+     * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+     *   and returns true if the url matches the current definition.
+     * @param {(string|RegExp)=} data HTTP request body.
+     * @param {(Object|function(Object))=} headers HTTP headers.
+     * @returns {requestHandler} Returns an object with `respond` and `passThrough` methods that
+     *   control how a matched request is handled. You can save this object for later use and invoke
+     *   `respond` or `passThrough` again in order to change how a matched request is handled.
+     */
+
+    /**
+     * @ngdoc method
+     * @name $httpBackend#whenPATCH
+     * @module ngMockE2E
+     * @description
+     * Creates a new backend definition for PATCH requests.  For more info see `when()`.
+     *
+     * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+     *   and returns true if the url matches the current definition.
+     * @param {(string|RegExp)=} data HTTP request body.
+     * @param {(Object|function(Object))=} headers HTTP headers.
+     * @returns {requestHandler} Returns an object with `respond` and `passThrough` methods that
+     *   control how a matched request is handled. You can save this object for later use and invoke
+     *   `respond` or `passThrough` again in order to change how a matched request is handled.
+     */
+
+    /**
+     * @ngdoc method
+     * @name $httpBackend#whenJSONP
+     * @module ngMockE2E
+     * @description
+     * Creates a new backend definition for JSONP requests. For more info see `when()`.
+     *
+     * @param {string|RegExp|function(string)} url HTTP url or function that receives a url
+     *   and returns true if the url matches the current definition.
+     * @returns {requestHandler} Returns an object with `respond` and `passThrough` methods that
+     *   control how a matched request is handled. You can save this object for later use and invoke
+     *   `respond` or `passThrough` again in order to change how a matched request is handled.
+     */
+    angular.mock.e2e = {};
+    angular.mock.e2e.$httpBackendDecorator =
+      ['$rootScope', '$timeout', '$delegate', '$browser', createHttpBackendMock];
+
+
+    /**
+     * @ngdoc type
+     * @name $rootScope.Scope
+     * @module ngMock
+     * @description
+     * {@link ng.$rootScope.Scope Scope} type decorated with helper methods useful for testing. These
+     * methods are automatically available on any {@link ng.$rootScope.Scope Scope} instance when
+     * `ngMock` module is loaded.
+     *
+     * In addition to all the regular `Scope` methods, the following helper methods are available:
+     */
+    angular.mock.$RootScopeDecorator = ['$delegate', function ($delegate) {
+
+        var $rootScopePrototype = Object.getPrototypeOf($delegate);
+
+        $rootScopePrototype.$countChildScopes = countChildScopes;
+        $rootScopePrototype.$countWatchers = countWatchers;
+
+        return $delegate;
+
+        // ------------------------------------------------------------------------------------------ //
+
+        /**
+         * @ngdoc method
+         * @name $rootScope.Scope#$countChildScopes
+         * @module ngMock
+         * @description
+         * Counts all the direct and indirect child scopes of the current scope.
+         *
+         * The current scope is excluded from the count. The count includes all isolate child scopes.
+         *
+         * @returns {number} Total number of child scopes.
+         */
+        function countChildScopes() {
+            // jshint validthis: true
+            var count = 0; // exclude the current scope
+            var pendingChildHeads = [this.$$childHead];
+            var currentScope;
+
+            while (pendingChildHeads.length) {
+                currentScope = pendingChildHeads.shift();
+
+                while (currentScope) {
+                    count += 1;
+                    pendingChildHeads.push(currentScope.$$childHead);
+                    currentScope = currentScope.$$nextSibling;
+                }
+            }
+
+            return count;
+        }
+
+
+        /**
+         * @ngdoc method
+         * @name $rootScope.Scope#$countWatchers
+         * @module ngMock
+         * @description
+         * Counts all the watchers of direct and indirect child scopes of the current scope.
+         *
+         * The watchers of the current scope are included in the count and so are all the watchers of
+         * isolate child scopes.
+         *
+         * @returns {number} Total number of watchers.
+         */
+        function countWatchers() {
+            // jshint validthis: true
+            var count = this.$$watchers ? this.$$watchers.length : 0; // include the current scope
+            var pendingChildHeads = [this.$$childHead];
+            var currentScope;
+
+            while (pendingChildHeads.length) {
+                currentScope = pendingChildHeads.shift();
+
+                while (currentScope) {
+                    count += currentScope.$$watchers ? currentScope.$$watchers.length : 0;
+                    pendingChildHeads.push(currentScope.$$childHead);
+                    currentScope = currentScope.$$nextSibling;
+                }
+            }
+
+            return count;
+        }
+    }];
+
+
+    if (window.jasmine || window.mocha) {
+
+        var currentSpec = null,
+            annotatedFunctions = [],
+            isSpecRunning = function () {
+                return !!currentSpec;
+            };
+
+        angular.mock.$$annotate = angular.injector.$$annotate;
+        angular.injector.$$annotate = function (fn) {
+            if (typeof fn === 'function' && !fn.$inject) {
+                annotatedFunctions.push(fn);
+            }
+            return angular.mock.$$annotate.apply(this, arguments);
+        };
+
+
+        (window.beforeEach || window.setup)(function () {
+            annotatedFunctions = [];
+            currentSpec = this;
+        });
+
+        (window.afterEach || window.teardown)(function () {
+            var injector = currentSpec.$injector;
+
+            annotatedFunctions.forEach(function (fn) {
+                delete fn.$inject;
+            });
+
+            angular.forEach(currentSpec.$modules, function (module) {
+                if (module && module.$$hashKey) {
+                    module.$$hashKey = undefined;
+                }
+            });
+
+            currentSpec.$injector = null;
+            currentSpec.$modules = null;
+            currentSpec = null;
+
+            if (injector) {
+                injector.get('$rootElement').off();
+            }
+
+            // clean up jquery's fragment cache
+            angular.forEach(angular.element.fragments, function (val, key) {
+                delete angular.element.fragments[key];
+            });
+
+            MockXhr.$$lastInstance = null;
+
+            angular.forEach(angular.callbacks, function (val, key) {
+                delete angular.callbacks[key];
+            });
+            angular.callbacks.counter = 0;
+        });
+
+        /**
+         * @ngdoc function
+         * @name angular.mock.module
+         * @description
+         *
+         * *NOTE*: This function is also published on window for easy access.<br>
+         * *NOTE*: This function is declared ONLY WHEN running tests with jasmine or mocha
+         *
+         * This function registers a module configuration code. It collects the configuration information
+         * which will be used when the injector is created by {@link angular.mock.inject inject}.
+         *
+         * See {@link angular.mock.inject inject} for usage example
+         *
+         * @param {...(string|Function|Object)} fns any number of modules which are represented as string
+         *        aliases or as anonymous module initialization functions. The modules are used to
+         *        configure the injector. The 'ng' and 'ngMock' modules are automatically loaded. If an
+         *        object literal is passed they will be registered as values in the module, the key being
+         *        the module name and the value being what is returned.
+         */
+        window.module = angular.mock.module = function () {
+            var moduleFns = Array.prototype.slice.call(arguments, 0);
+            return isSpecRunning() ? workFn() : workFn;
+            /////////////////////
+            function workFn() {
+                if (currentSpec.$injector) {
+                    throw new Error('Injector already created, can not register a module!');
+                } else {
+                    var modules = currentSpec.$modules || (currentSpec.$modules = []);
+                    angular.forEach(moduleFns, function (module) {
+                        if (angular.isObject(module) && !angular.isArray(module)) {
+                            modules.push(function ($provide) {
+                                angular.forEach(module, function (value, key) {
+                                    $provide.value(key, value);
+                                });
+                            });
+                        } else {
+                            modules.push(module);
+                        }
+                    });
+                }
+            }
+        };
+
+        /**
+         * @ngdoc function
+         * @name angular.mock.inject
+         * @description
+         *
+         * *NOTE*: This function is also published on window for easy access.<br>
+         * *NOTE*: This function is declared ONLY WHEN running tests with jasmine or mocha
+         *
+         * The inject function wraps a function into an injectable function. The inject() creates new
+         * instance of {@link auto.$injector $injector} per test, which is then used for
+         * resolving references.
+         *
+         *
+         * ## Resolving References (Underscore Wrapping)
+         * Often, we would like to inject a reference once, in a `beforeEach()` block and reuse this
+         * in multiple `it()` clauses. To be able to do this we must assign the reference to a variable
+         * that is declared in the scope of the `describe()` block. Since we would, most likely, want
+         * the variable to have the same name of the reference we have a problem, since the parameter
+         * to the `inject()` function would hide the outer variable.
+         *
+         * To help with this, the injected parameters can, optionally, be enclosed with underscores.
+         * These are ignored by the injector when the reference name is resolved.
+         *
+         * For example, the parameter `_myService_` would be resolved as the reference `myService`.
+         * Since it is available in the function body as _myService_, we can then assign it to a variable
+         * defined in an outer scope.
+         *
+         * ```
+         * // Defined out reference variable outside
+         * var myService;
+         *
+         * // Wrap the parameter in underscores
+         * beforeEach( inject( function(_myService_){
+         *   myService = _myService_;
+         * }));
+         *
+         * // Use myService in a series of tests.
+         * it('makes use of myService', function() {
+         *   myService.doStuff();
+         * });
+         *
+         * ```
+         *
+         * See also {@link angular.mock.module angular.mock.module}
+         *
+         * ## Example
+         * Example of what a typical jasmine tests looks like with the inject method.
+         * ```js
+         *
+         *   angular.module('myApplicationModule', [])
+         *       .value('mode', 'app')
+         *       .value('version', 'v1.0.1');
+         *
+         *
+         *   describe('MyApp', function() {
+         *
+         *     // You need to load modules that you want to test,
+         *     // it loads only the "ng" module by default.
+         *     beforeEach(module('myApplicationModule'));
+         *
+         *
+         *     // inject() is used to inject arguments of all given functions
+         *     it('should provide a version', inject(function(mode, version) {
+         *       expect(version).toEqual('v1.0.1');
+         *       expect(mode).toEqual('app');
+         *     }));
+         *
+         *
+         *     // The inject and module method can also be used inside of the it or beforeEach
+         *     it('should override a version and test the new version is injected', function() {
+         *       // module() takes functions or strings (module aliases)
+         *       module(function($provide) {
+         *         $provide.value('version', 'overridden'); // override version here
+         *       });
+         *
+         *       inject(function(version) {
+         *         expect(version).toEqual('overridden');
+         *       });
+         *     });
+         *   });
+         *
+         * ```
+         *
+         * @param {...Function} fns any number of functions which will be injected using the injector.
+         */
+
+
+
+        var ErrorAddingDeclarationLocationStack = function (e, errorForStack) {
+            this.message = e.message;
+            this.name = e.name;
+            if (e.line) this.line = e.line;
+            if (e.sourceId) this.sourceId = e.sourceId;
+            if (e.stack && errorForStack)
+                this.stack = e.stack + '\n' + errorForStack.stack;
+            if (e.stackArray) this.stackArray = e.stackArray;
+        };
+        ErrorAddingDeclarationLocationStack.prototype.toString = Error.prototype.toString;
+
+        window.inject = angular.mock.inject = function () {
+            var blockFns = Array.prototype.slice.call(arguments, 0);
+            var errorForStack = new Error('Declaration Location');
+            return isSpecRunning() ? workFn.call(currentSpec) : workFn;
+            /////////////////////
+            function workFn() {
+                var modules = currentSpec.$modules || [];
+                var strictDi = !!currentSpec.$injectorStrict;
+                modules.unshift('ngMock');
+                modules.unshift('ng');
+                var injector = currentSpec.$injector;
+                if (!injector) {
+                    if (strictDi) {
+                        // If strictDi is enabled, annotate the providerInjector blocks
+                        angular.forEach(modules, function (moduleFn) {
+                            if (typeof moduleFn === "function") {
+                                angular.injector.$$annotate(moduleFn);
+                            }
+                        });
+                    }
+                    injector = currentSpec.$injector = angular.injector(modules, strictDi);
+                    currentSpec.$injectorStrict = strictDi;
+                }
+                for (var i = 0, ii = blockFns.length; i < ii; i++) {
+                    if (currentSpec.$injectorStrict) {
+                        // If the injector is strict / strictDi, and the spec wants to inject using automatic
+                        // annotation, then annotate the function here.
+                        injector.annotate(blockFns[i]);
+                    }
+                    try {
+                        /* jshint -W040 *//* Jasmine explicitly provides a `this` object when calling functions */
+                        injector.invoke(blockFns[i] || angular.noop, this);
+                        /* jshint +W040 */
+                    } catch (e) {
+                        if (e.stack && errorForStack) {
+                            throw new ErrorAddingDeclarationLocationStack(e, errorForStack);
+                        }
+                        throw e;
+                    } finally {
+                        errorForStack = null;
+                    }
+                }
+            }
+        };
+
+
+        angular.mock.inject.strictDi = function (value) {
+            value = arguments.length ? !!value : true;
+            return isSpecRunning() ? workFn() : workFn;
+
+            function workFn() {
+                if (value !== currentSpec.$injectorStrict) {
+                    if (currentSpec.$injector) {
+                        throw new Error('Injector already created, can not modify strict annotations');
+                    } else {
+                        currentSpec.$injectorStrict = value;
+                    }
+                }
+            }
+        };
+    }
+
+
+})(window, window.angular);
+/**
  * @license AngularJS v1.4.8
  * (c) 2010-2015 Google, Inc. http://angularjs.org
  * License: MIT
@@ -40587,6 +43057,3305 @@
 
 
 })(window, window.angular);
+
+/*
+Copyright (c) 2008-2015 Pivotal Labs
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+var getJasmineRequireObj = (function (jasmineGlobal) {
+  var jasmineRequire;
+
+  if (typeof module !== 'undefined' && module.exports) {
+    jasmineGlobal = global;
+    jasmineRequire = exports;
+  } else {
+    if (typeof window !== 'undefined' && typeof window.toString === 'function' && window.toString() === '[object GjsGlobal]') {
+      jasmineGlobal = window;
+    }
+    jasmineRequire = jasmineGlobal.jasmineRequire = jasmineGlobal.jasmineRequire || {};
+  }
+
+  function getJasmineRequire() {
+    return jasmineRequire;
+  }
+
+  getJasmineRequire().core = function(jRequire) {
+    var j$ = {};
+
+    jRequire.base(j$, jasmineGlobal);
+    j$.util = jRequire.util();
+    j$.errors = jRequire.errors();
+    j$.Any = jRequire.Any(j$);
+    j$.Anything = jRequire.Anything(j$);
+    j$.CallTracker = jRequire.CallTracker();
+    j$.MockDate = jRequire.MockDate();
+    j$.Clock = jRequire.Clock();
+    j$.DelayedFunctionScheduler = jRequire.DelayedFunctionScheduler();
+    j$.Env = jRequire.Env(j$);
+    j$.ExceptionFormatter = jRequire.ExceptionFormatter();
+    j$.Expectation = jRequire.Expectation();
+    j$.buildExpectationResult = jRequire.buildExpectationResult();
+    j$.JsApiReporter = jRequire.JsApiReporter();
+    j$.matchersUtil = jRequire.matchersUtil(j$);
+    j$.ObjectContaining = jRequire.ObjectContaining(j$);
+    j$.ArrayContaining = jRequire.ArrayContaining(j$);
+    j$.pp = jRequire.pp(j$);
+    j$.QueueRunner = jRequire.QueueRunner(j$);
+    j$.ReportDispatcher = jRequire.ReportDispatcher();
+    j$.Spec = jRequire.Spec(j$);
+    j$.SpyRegistry = jRequire.SpyRegistry(j$);
+    j$.SpyStrategy = jRequire.SpyStrategy();
+    j$.StringMatching = jRequire.StringMatching(j$);
+    j$.Suite = jRequire.Suite(j$);
+    j$.Timer = jRequire.Timer();
+    j$.TreeProcessor = jRequire.TreeProcessor();
+    j$.version = jRequire.version();
+
+    j$.matchers = jRequire.requireMatchers(jRequire, j$);
+
+    return j$;
+  };
+
+  return getJasmineRequire;
+})(this);
+
+getJasmineRequireObj().requireMatchers = function(jRequire, j$) {
+  var availableMatchers = [
+      'toBe',
+      'toBeCloseTo',
+      'toBeDefined',
+      'toBeFalsy',
+      'toBeGreaterThan',
+      'toBeLessThan',
+      'toBeNaN',
+      'toBeNull',
+      'toBeTruthy',
+      'toBeUndefined',
+      'toContain',
+      'toEqual',
+      'toHaveBeenCalled',
+      'toHaveBeenCalledWith',
+      'toMatch',
+      'toThrow',
+      'toThrowError'
+    ],
+    matchers = {};
+
+  for (var i = 0; i < availableMatchers.length; i++) {
+    var name = availableMatchers[i];
+    matchers[name] = jRequire[name](j$);
+  }
+
+  return matchers;
+};
+
+getJasmineRequireObj().base = function(j$, jasmineGlobal) {
+  j$.unimplementedMethod_ = function() {
+    throw new Error('unimplemented method');
+  };
+
+  j$.MAX_PRETTY_PRINT_DEPTH = 40;
+  j$.MAX_PRETTY_PRINT_ARRAY_LENGTH = 100;
+  j$.DEFAULT_TIMEOUT_INTERVAL = 5000;
+
+  j$.getGlobal = function() {
+    return jasmineGlobal;
+  };
+
+  j$.getEnv = function(options) {
+    var env = j$.currentEnv_ = j$.currentEnv_ || new j$.Env(options);
+    //jasmine. singletons in here (setTimeout blah blah).
+    return env;
+  };
+
+  j$.isArray_ = function(value) {
+    return j$.isA_('Array', value);
+  };
+
+  j$.isString_ = function(value) {
+    return j$.isA_('String', value);
+  };
+
+  j$.isNumber_ = function(value) {
+    return j$.isA_('Number', value);
+  };
+
+  j$.isA_ = function(typeName, value) {
+    return Object.prototype.toString.apply(value) === '[object ' + typeName + ']';
+  };
+
+  j$.isDomNode = function(obj) {
+    return obj.nodeType > 0;
+  };
+
+  j$.fnNameFor = function(func) {
+    return func.name || func.toString().match(/^\s*function\s*(\w*)\s*\(/)[1];
+  };
+
+  j$.any = function(clazz) {
+    return new j$.Any(clazz);
+  };
+
+  j$.anything = function() {
+    return new j$.Anything();
+  };
+
+  j$.objectContaining = function(sample) {
+    return new j$.ObjectContaining(sample);
+  };
+
+  j$.stringMatching = function(expected) {
+    return new j$.StringMatching(expected);
+  };
+
+  j$.arrayContaining = function(sample) {
+    return new j$.ArrayContaining(sample);
+  };
+
+  j$.createSpy = function(name, originalFn) {
+
+    var spyStrategy = new j$.SpyStrategy({
+        name: name,
+        fn: originalFn,
+        getSpy: function() { return spy; }
+      }),
+      callTracker = new j$.CallTracker(),
+      spy = function() {
+        var callData = {
+          object: this,
+          args: Array.prototype.slice.apply(arguments)
+        };
+
+        callTracker.track(callData);
+        var returnValue = spyStrategy.exec.apply(this, arguments);
+        callData.returnValue = returnValue;
+
+        return returnValue;
+      };
+
+    for (var prop in originalFn) {
+      if (prop === 'and' || prop === 'calls') {
+        throw new Error('Jasmine spies would overwrite the \'and\' and \'calls\' properties on the object being spied upon');
+      }
+
+      spy[prop] = originalFn[prop];
+    }
+
+    spy.and = spyStrategy;
+    spy.calls = callTracker;
+
+    return spy;
+  };
+
+  j$.isSpy = function(putativeSpy) {
+    if (!putativeSpy) {
+      return false;
+    }
+    return putativeSpy.and instanceof j$.SpyStrategy &&
+      putativeSpy.calls instanceof j$.CallTracker;
+  };
+
+  j$.createSpyObj = function(baseName, methodNames) {
+    if (j$.isArray_(baseName) && j$.util.isUndefined(methodNames)) {
+      methodNames = baseName;
+      baseName = 'unknown';
+    }
+
+    if (!j$.isArray_(methodNames) || methodNames.length === 0) {
+      throw 'createSpyObj requires a non-empty array of method names to create spies for';
+    }
+    var obj = {};
+    for (var i = 0; i < methodNames.length; i++) {
+      obj[methodNames[i]] = j$.createSpy(baseName + '.' + methodNames[i]);
+    }
+    return obj;
+  };
+};
+
+getJasmineRequireObj().util = function() {
+
+  var util = {};
+
+  util.inherit = function(childClass, parentClass) {
+    var Subclass = function() {
+    };
+    Subclass.prototype = parentClass.prototype;
+    childClass.prototype = new Subclass();
+  };
+
+  util.htmlEscape = function(str) {
+    if (!str) {
+      return str;
+    }
+    return str.replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  };
+
+  util.argsToArray = function(args) {
+    var arrayOfArgs = [];
+    for (var i = 0; i < args.length; i++) {
+      arrayOfArgs.push(args[i]);
+    }
+    return arrayOfArgs;
+  };
+
+  util.isUndefined = function(obj) {
+    return obj === void 0;
+  };
+
+  util.arrayContains = function(array, search) {
+    var i = array.length;
+    while (i--) {
+      if (array[i] === search) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  util.clone = function(obj) {
+    if (Object.prototype.toString.apply(obj) === '[object Array]') {
+      return obj.slice();
+    }
+
+    var cloned = {};
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        cloned[prop] = obj[prop];
+      }
+    }
+
+    return cloned;
+  };
+
+  return util;
+};
+
+getJasmineRequireObj().Spec = function(j$) {
+  function Spec(attrs) {
+    this.expectationFactory = attrs.expectationFactory;
+    this.resultCallback = attrs.resultCallback || function() {};
+    this.id = attrs.id;
+    this.description = attrs.description || '';
+    this.queueableFn = attrs.queueableFn;
+    this.beforeAndAfterFns = attrs.beforeAndAfterFns || function() { return {befores: [], afters: []}; };
+    this.userContext = attrs.userContext || function() { return {}; };
+    this.onStart = attrs.onStart || function() {};
+    this.getSpecName = attrs.getSpecName || function() { return ''; };
+    this.expectationResultFactory = attrs.expectationResultFactory || function() { };
+    this.queueRunnerFactory = attrs.queueRunnerFactory || function() {};
+    this.catchingExceptions = attrs.catchingExceptions || function() { return true; };
+    this.throwOnExpectationFailure = !!attrs.throwOnExpectationFailure;
+
+    if (!this.queueableFn.fn) {
+      this.pend();
+    }
+
+    this.result = {
+      id: this.id,
+      description: this.description,
+      fullName: this.getFullName(),
+      failedExpectations: [],
+      passedExpectations: [],
+      pendingReason: ''
+    };
+  }
+
+  Spec.prototype.addExpectationResult = function(passed, data, isError) {
+    var expectationResult = this.expectationResultFactory(data);
+    if (passed) {
+      this.result.passedExpectations.push(expectationResult);
+    } else {
+      this.result.failedExpectations.push(expectationResult);
+
+      if (this.throwOnExpectationFailure && !isError) {
+        throw new j$.errors.ExpectationFailed();
+      }
+    }
+  };
+
+  Spec.prototype.expect = function(actual) {
+    return this.expectationFactory(actual, this);
+  };
+
+  Spec.prototype.execute = function(onComplete, enabled) {
+    var self = this;
+
+    this.onStart(this);
+
+    if (!this.isExecutable() || this.markedPending || enabled === false) {
+      complete(enabled);
+      return;
+    }
+
+    var fns = this.beforeAndAfterFns();
+    var allFns = fns.befores.concat(this.queueableFn).concat(fns.afters);
+
+    this.queueRunnerFactory({
+      queueableFns: allFns,
+      onException: function() { self.onException.apply(self, arguments); },
+      onComplete: complete,
+      userContext: this.userContext()
+    });
+
+    function complete(enabledAgain) {
+      self.result.status = self.status(enabledAgain);
+      self.resultCallback(self.result);
+
+      if (onComplete) {
+        onComplete();
+      }
+    }
+  };
+
+  Spec.prototype.onException = function onException(e) {
+    if (Spec.isPendingSpecException(e)) {
+      this.pend(extractCustomPendingMessage(e));
+      return;
+    }
+
+    if (e instanceof j$.errors.ExpectationFailed) {
+      return;
+    }
+
+    this.addExpectationResult(false, {
+      matcherName: '',
+      passed: false,
+      expected: '',
+      actual: '',
+      error: e
+    }, true);
+  };
+
+  Spec.prototype.disable = function() {
+    this.disabled = true;
+  };
+
+  Spec.prototype.pend = function(message) {
+    this.markedPending = true;
+    if (message) {
+      this.result.pendingReason = message;
+    }
+  };
+
+  Spec.prototype.getResult = function() {
+    this.result.status = this.status();
+    return this.result;
+  };
+
+  Spec.prototype.status = function(enabled) {
+    if (this.disabled || enabled === false) {
+      return 'disabled';
+    }
+
+    if (this.markedPending) {
+      return 'pending';
+    }
+
+    if (this.result.failedExpectations.length > 0) {
+      return 'failed';
+    } else {
+      return 'passed';
+    }
+  };
+
+  Spec.prototype.isExecutable = function() {
+    return !this.disabled;
+  };
+
+  Spec.prototype.getFullName = function() {
+    return this.getSpecName(this);
+  };
+
+  var extractCustomPendingMessage = function(e) {
+    var fullMessage = e.toString(),
+        boilerplateStart = fullMessage.indexOf(Spec.pendingSpecExceptionMessage),
+        boilerplateEnd = boilerplateStart + Spec.pendingSpecExceptionMessage.length;
+
+    return fullMessage.substr(boilerplateEnd);
+  };
+
+  Spec.pendingSpecExceptionMessage = '=> marked Pending';
+
+  Spec.isPendingSpecException = function(e) {
+    return !!(e && e.toString && e.toString().indexOf(Spec.pendingSpecExceptionMessage) !== -1);
+  };
+
+  return Spec;
+};
+
+if (typeof window == void 0 && typeof exports == 'object') {
+  exports.Spec = jasmineRequire.Spec;
+}
+
+getJasmineRequireObj().Env = function(j$) {
+  function Env(options) {
+    options = options || {};
+
+    var self = this;
+    var global = options.global || j$.getGlobal();
+
+    var totalSpecsDefined = 0;
+
+    var catchExceptions = true;
+
+    var realSetTimeout = j$.getGlobal().setTimeout;
+    var realClearTimeout = j$.getGlobal().clearTimeout;
+    this.clock = new j$.Clock(global, function () { return new j$.DelayedFunctionScheduler(); }, new j$.MockDate(global));
+
+    var runnableLookupTable = {};
+    var runnableResources = {};
+
+    var currentSpec = null;
+    var currentlyExecutingSuites = [];
+    var currentDeclarationSuite = null;
+    var throwOnExpectationFailure = false;
+
+    var currentSuite = function() {
+      return currentlyExecutingSuites[currentlyExecutingSuites.length - 1];
+    };
+
+    var currentRunnable = function() {
+      return currentSpec || currentSuite();
+    };
+
+    var reporter = new j$.ReportDispatcher([
+      'jasmineStarted',
+      'jasmineDone',
+      'suiteStarted',
+      'suiteDone',
+      'specStarted',
+      'specDone'
+    ]);
+
+    this.specFilter = function() {
+      return true;
+    };
+
+    this.addCustomEqualityTester = function(tester) {
+      if(!currentRunnable()) {
+        throw new Error('Custom Equalities must be added in a before function or a spec');
+      }
+      runnableResources[currentRunnable().id].customEqualityTesters.push(tester);
+    };
+
+    this.addMatchers = function(matchersToAdd) {
+      if(!currentRunnable()) {
+        throw new Error('Matchers must be added in a before function or a spec');
+      }
+      var customMatchers = runnableResources[currentRunnable().id].customMatchers;
+      for (var matcherName in matchersToAdd) {
+        customMatchers[matcherName] = matchersToAdd[matcherName];
+      }
+    };
+
+    j$.Expectation.addCoreMatchers(j$.matchers);
+
+    var nextSpecId = 0;
+    var getNextSpecId = function() {
+      return 'spec' + nextSpecId++;
+    };
+
+    var nextSuiteId = 0;
+    var getNextSuiteId = function() {
+      return 'suite' + nextSuiteId++;
+    };
+
+    var expectationFactory = function(actual, spec) {
+      return j$.Expectation.Factory({
+        util: j$.matchersUtil,
+        customEqualityTesters: runnableResources[spec.id].customEqualityTesters,
+        customMatchers: runnableResources[spec.id].customMatchers,
+        actual: actual,
+        addExpectationResult: addExpectationResult
+      });
+
+      function addExpectationResult(passed, result) {
+        return spec.addExpectationResult(passed, result);
+      }
+    };
+
+    var defaultResourcesForRunnable = function(id, parentRunnableId) {
+      var resources = {spies: [], customEqualityTesters: [], customMatchers: {}};
+
+      if(runnableResources[parentRunnableId]){
+        resources.customEqualityTesters = j$.util.clone(runnableResources[parentRunnableId].customEqualityTesters);
+        resources.customMatchers = j$.util.clone(runnableResources[parentRunnableId].customMatchers);
+      }
+
+      runnableResources[id] = resources;
+    };
+
+    var clearResourcesForRunnable = function(id) {
+        spyRegistry.clearSpies();
+        delete runnableResources[id];
+    };
+
+    var beforeAndAfterFns = function(suite) {
+      return function() {
+        var befores = [],
+          afters = [];
+
+        while(suite) {
+          befores = befores.concat(suite.beforeFns);
+          afters = afters.concat(suite.afterFns);
+
+          suite = suite.parentSuite;
+        }
+
+        return {
+          befores: befores.reverse(),
+          afters: afters
+        };
+      };
+    };
+
+    var getSpecName = function(spec, suite) {
+      return suite.getFullName() + ' ' + spec.description;
+    };
+
+    // TODO: we may just be able to pass in the fn instead of wrapping here
+    var buildExpectationResult = j$.buildExpectationResult,
+        exceptionFormatter = new j$.ExceptionFormatter(),
+        expectationResultFactory = function(attrs) {
+          attrs.messageFormatter = exceptionFormatter.message;
+          attrs.stackFormatter = exceptionFormatter.stack;
+
+          return buildExpectationResult(attrs);
+        };
+
+    // TODO: fix this naming, and here's where the value comes in
+    this.catchExceptions = function(value) {
+      catchExceptions = !!value;
+      return catchExceptions;
+    };
+
+    this.catchingExceptions = function() {
+      return catchExceptions;
+    };
+
+    var maximumSpecCallbackDepth = 20;
+    var currentSpecCallbackDepth = 0;
+
+    function clearStack(fn) {
+      currentSpecCallbackDepth++;
+      if (currentSpecCallbackDepth >= maximumSpecCallbackDepth) {
+        currentSpecCallbackDepth = 0;
+        realSetTimeout(fn, 0);
+      } else {
+        fn();
+      }
+    }
+
+    var catchException = function(e) {
+      return j$.Spec.isPendingSpecException(e) || catchExceptions;
+    };
+
+    this.throwOnExpectationFailure = function(value) {
+      throwOnExpectationFailure = !!value;
+    };
+
+    this.throwingExpectationFailures = function() {
+      return throwOnExpectationFailure;
+    };
+
+    var queueRunnerFactory = function(options) {
+      options.catchException = catchException;
+      options.clearStack = options.clearStack || clearStack;
+      options.timeout = {setTimeout: realSetTimeout, clearTimeout: realClearTimeout};
+      options.fail = self.fail;
+
+      new j$.QueueRunner(options).execute();
+    };
+
+    var topSuite = new j$.Suite({
+      env: this,
+      id: getNextSuiteId(),
+      description: 'Jasmine__TopLevel__Suite',
+      queueRunner: queueRunnerFactory
+    });
+    runnableLookupTable[topSuite.id] = topSuite;
+    defaultResourcesForRunnable(topSuite.id);
+    currentDeclarationSuite = topSuite;
+
+    this.topSuite = function() {
+      return topSuite;
+    };
+
+    this.execute = function(runnablesToRun) {
+      if(!runnablesToRun) {
+        if (focusedRunnables.length) {
+          runnablesToRun = focusedRunnables;
+        } else {
+          runnablesToRun = [topSuite.id];
+        }
+      }
+      var processor = new j$.TreeProcessor({
+        tree: topSuite,
+        runnableIds: runnablesToRun,
+        queueRunnerFactory: queueRunnerFactory,
+        nodeStart: function(suite) {
+          currentlyExecutingSuites.push(suite);
+          defaultResourcesForRunnable(suite.id, suite.parentSuite.id);
+          reporter.suiteStarted(suite.result);
+        },
+        nodeComplete: function(suite, result) {
+          if (!suite.disabled) {
+            clearResourcesForRunnable(suite.id);
+          }
+          currentlyExecutingSuites.pop();
+          reporter.suiteDone(result);
+        }
+      });
+
+      if(!processor.processTree().valid) {
+        throw new Error('Invalid order: would cause a beforeAll or afterAll to be run multiple times');
+      }
+
+      reporter.jasmineStarted({
+        totalSpecsDefined: totalSpecsDefined
+      });
+
+      processor.execute(reporter.jasmineDone);
+    };
+
+    this.addReporter = function(reporterToAdd) {
+      reporter.addReporter(reporterToAdd);
+    };
+
+    var spyRegistry = new j$.SpyRegistry({currentSpies: function() {
+      if(!currentRunnable()) {
+        throw new Error('Spies must be created in a before function or a spec');
+      }
+      return runnableResources[currentRunnable().id].spies;
+    }});
+
+    this.spyOn = function() {
+      return spyRegistry.spyOn.apply(spyRegistry, arguments);
+    };
+
+    var suiteFactory = function(description) {
+      var suite = new j$.Suite({
+        env: self,
+        id: getNextSuiteId(),
+        description: description,
+        parentSuite: currentDeclarationSuite,
+        expectationFactory: expectationFactory,
+        expectationResultFactory: expectationResultFactory,
+        throwOnExpectationFailure: throwOnExpectationFailure
+      });
+
+      runnableLookupTable[suite.id] = suite;
+      return suite;
+    };
+
+    this.describe = function(description, specDefinitions) {
+      var suite = suiteFactory(description);
+      addSpecsToSuite(suite, specDefinitions);
+      return suite;
+    };
+
+    this.xdescribe = function(description, specDefinitions) {
+      var suite = this.describe(description, specDefinitions);
+      suite.disable();
+      return suite;
+    };
+
+    var focusedRunnables = [];
+
+    this.fdescribe = function(description, specDefinitions) {
+      var suite = suiteFactory(description);
+      suite.isFocused = true;
+
+      focusedRunnables.push(suite.id);
+      unfocusAncestor();
+      addSpecsToSuite(suite, specDefinitions);
+
+      return suite;
+    };
+
+    function addSpecsToSuite(suite, specDefinitions) {
+      var parentSuite = currentDeclarationSuite;
+      parentSuite.addChild(suite);
+      currentDeclarationSuite = suite;
+
+      var declarationError = null;
+      try {
+        specDefinitions.call(suite);
+      } catch (e) {
+        declarationError = e;
+      }
+
+      if (declarationError) {
+        self.it('encountered a declaration exception', function() {
+          throw declarationError;
+        });
+      }
+
+      currentDeclarationSuite = parentSuite;
+    }
+
+    function findFocusedAncestor(suite) {
+      while (suite) {
+        if (suite.isFocused) {
+          return suite.id;
+        }
+        suite = suite.parentSuite;
+      }
+
+      return null;
+    }
+
+    function unfocusAncestor() {
+      var focusedAncestor = findFocusedAncestor(currentDeclarationSuite);
+      if (focusedAncestor) {
+        for (var i = 0; i < focusedRunnables.length; i++) {
+          if (focusedRunnables[i] === focusedAncestor) {
+            focusedRunnables.splice(i, 1);
+            break;
+          }
+        }
+      }
+    }
+
+    var specFactory = function(description, fn, suite, timeout) {
+      totalSpecsDefined++;
+      var spec = new j$.Spec({
+        id: getNextSpecId(),
+        beforeAndAfterFns: beforeAndAfterFns(suite),
+        expectationFactory: expectationFactory,
+        resultCallback: specResultCallback,
+        getSpecName: function(spec) {
+          return getSpecName(spec, suite);
+        },
+        onStart: specStarted,
+        description: description,
+        expectationResultFactory: expectationResultFactory,
+        queueRunnerFactory: queueRunnerFactory,
+        userContext: function() { return suite.clonedSharedUserContext(); },
+        queueableFn: {
+          fn: fn,
+          timeout: function() { return timeout || j$.DEFAULT_TIMEOUT_INTERVAL; }
+        },
+        throwOnExpectationFailure: throwOnExpectationFailure
+      });
+
+      runnableLookupTable[spec.id] = spec;
+
+      if (!self.specFilter(spec)) {
+        spec.disable();
+      }
+
+      return spec;
+
+      function specResultCallback(result) {
+        clearResourcesForRunnable(spec.id);
+        currentSpec = null;
+        reporter.specDone(result);
+      }
+
+      function specStarted(spec) {
+        currentSpec = spec;
+        defaultResourcesForRunnable(spec.id, suite.id);
+        reporter.specStarted(spec.result);
+      }
+    };
+
+    this.it = function(description, fn, timeout) {
+      var spec = specFactory(description, fn, currentDeclarationSuite, timeout);
+      currentDeclarationSuite.addChild(spec);
+      return spec;
+    };
+
+    this.xit = function() {
+      var spec = this.it.apply(this, arguments);
+      spec.pend();
+      return spec;
+    };
+
+    this.fit = function(){
+      var spec = this.it.apply(this, arguments);
+
+      focusedRunnables.push(spec.id);
+      unfocusAncestor();
+      return spec;
+    };
+
+    this.expect = function(actual) {
+      if (!currentRunnable()) {
+        throw new Error('\'expect\' was used when there was no current spec, this could be because an asynchronous test timed out');
+      }
+
+      return currentRunnable().expect(actual);
+    };
+
+    this.beforeEach = function(beforeEachFunction, timeout) {
+      currentDeclarationSuite.beforeEach({
+        fn: beforeEachFunction,
+        timeout: function() { return timeout || j$.DEFAULT_TIMEOUT_INTERVAL; }
+      });
+    };
+
+    this.beforeAll = function(beforeAllFunction, timeout) {
+      currentDeclarationSuite.beforeAll({
+        fn: beforeAllFunction,
+        timeout: function() { return timeout || j$.DEFAULT_TIMEOUT_INTERVAL; }
+      });
+    };
+
+    this.afterEach = function(afterEachFunction, timeout) {
+      currentDeclarationSuite.afterEach({
+        fn: afterEachFunction,
+        timeout: function() { return timeout || j$.DEFAULT_TIMEOUT_INTERVAL; }
+      });
+    };
+
+    this.afterAll = function(afterAllFunction, timeout) {
+      currentDeclarationSuite.afterAll({
+        fn: afterAllFunction,
+        timeout: function() { return timeout || j$.DEFAULT_TIMEOUT_INTERVAL; }
+      });
+    };
+
+    this.pending = function(message) {
+      var fullMessage = j$.Spec.pendingSpecExceptionMessage;
+      if(message) {
+        fullMessage += message;
+      }
+      throw fullMessage;
+    };
+
+    this.fail = function(error) {
+      var message = 'Failed';
+      if (error) {
+        message += ': ';
+        message += error.message || error;
+      }
+
+      currentRunnable().addExpectationResult(false, {
+        matcherName: '',
+        passed: false,
+        expected: '',
+        actual: '',
+        message: message,
+        error: error && error.message ? error : null
+      });
+    };
+  }
+
+  return Env;
+};
+
+getJasmineRequireObj().JsApiReporter = function() {
+
+  var noopTimer = {
+    start: function(){},
+    elapsed: function(){ return 0; }
+  };
+
+  function JsApiReporter(options) {
+    var timer = options.timer || noopTimer,
+        status = 'loaded';
+
+    this.started = false;
+    this.finished = false;
+
+    this.jasmineStarted = function() {
+      this.started = true;
+      status = 'started';
+      timer.start();
+    };
+
+    var executionTime;
+
+    this.jasmineDone = function() {
+      this.finished = true;
+      executionTime = timer.elapsed();
+      status = 'done';
+    };
+
+    this.status = function() {
+      return status;
+    };
+
+    var suites = [],
+      suites_hash = {};
+
+    this.suiteStarted = function(result) {
+      suites_hash[result.id] = result;
+    };
+
+    this.suiteDone = function(result) {
+      storeSuite(result);
+    };
+
+    this.suiteResults = function(index, length) {
+      return suites.slice(index, index + length);
+    };
+
+    function storeSuite(result) {
+      suites.push(result);
+      suites_hash[result.id] = result;
+    }
+
+    this.suites = function() {
+      return suites_hash;
+    };
+
+    var specs = [];
+
+    this.specDone = function(result) {
+      specs.push(result);
+    };
+
+    this.specResults = function(index, length) {
+      return specs.slice(index, index + length);
+    };
+
+    this.specs = function() {
+      return specs;
+    };
+
+    this.executionTime = function() {
+      return executionTime;
+    };
+
+  }
+
+  return JsApiReporter;
+};
+
+getJasmineRequireObj().CallTracker = function() {
+
+  function CallTracker() {
+    var calls = [];
+
+    this.track = function(context) {
+      calls.push(context);
+    };
+
+    this.any = function() {
+      return !!calls.length;
+    };
+
+    this.count = function() {
+      return calls.length;
+    };
+
+    this.argsFor = function(index) {
+      var call = calls[index];
+      return call ? call.args : [];
+    };
+
+    this.all = function() {
+      return calls;
+    };
+
+    this.allArgs = function() {
+      var callArgs = [];
+      for(var i = 0; i < calls.length; i++){
+        callArgs.push(calls[i].args);
+      }
+
+      return callArgs;
+    };
+
+    this.first = function() {
+      return calls[0];
+    };
+
+    this.mostRecent = function() {
+      return calls[calls.length - 1];
+    };
+
+    this.reset = function() {
+      calls = [];
+    };
+  }
+
+  return CallTracker;
+};
+
+getJasmineRequireObj().Clock = function() {
+  function Clock(global, delayedFunctionSchedulerFactory, mockDate) {
+    var self = this,
+      realTimingFunctions = {
+        setTimeout: global.setTimeout,
+        clearTimeout: global.clearTimeout,
+        setInterval: global.setInterval,
+        clearInterval: global.clearInterval
+      },
+      fakeTimingFunctions = {
+        setTimeout: setTimeout,
+        clearTimeout: clearTimeout,
+        setInterval: setInterval,
+        clearInterval: clearInterval
+      },
+      installed = false,
+      delayedFunctionScheduler,
+      timer;
+
+
+    self.install = function() {
+      if(!originalTimingFunctionsIntact()) {
+        throw new Error('Jasmine Clock was unable to install over custom global timer functions. Is the clock already installed?');
+      }
+      replace(global, fakeTimingFunctions);
+      timer = fakeTimingFunctions;
+      delayedFunctionScheduler = delayedFunctionSchedulerFactory();
+      installed = true;
+
+      return self;
+    };
+
+    self.uninstall = function() {
+      delayedFunctionScheduler = null;
+      mockDate.uninstall();
+      replace(global, realTimingFunctions);
+
+      timer = realTimingFunctions;
+      installed = false;
+    };
+
+    self.withMock = function(closure) {
+      this.install();
+      try {
+        closure();
+      } finally {
+        this.uninstall();
+      }
+    };
+
+    self.mockDate = function(initialDate) {
+      mockDate.install(initialDate);
+    };
+
+    self.setTimeout = function(fn, delay, params) {
+      if (legacyIE()) {
+        if (arguments.length > 2) {
+          throw new Error('IE < 9 cannot support extra params to setTimeout without a polyfill');
+        }
+        return timer.setTimeout(fn, delay);
+      }
+      return Function.prototype.apply.apply(timer.setTimeout, [global, arguments]);
+    };
+
+    self.setInterval = function(fn, delay, params) {
+      if (legacyIE()) {
+        if (arguments.length > 2) {
+          throw new Error('IE < 9 cannot support extra params to setInterval without a polyfill');
+        }
+        return timer.setInterval(fn, delay);
+      }
+      return Function.prototype.apply.apply(timer.setInterval, [global, arguments]);
+    };
+
+    self.clearTimeout = function(id) {
+      return Function.prototype.call.apply(timer.clearTimeout, [global, id]);
+    };
+
+    self.clearInterval = function(id) {
+      return Function.prototype.call.apply(timer.clearInterval, [global, id]);
+    };
+
+    self.tick = function(millis) {
+      if (installed) {
+        mockDate.tick(millis);
+        delayedFunctionScheduler.tick(millis);
+      } else {
+        throw new Error('Mock clock is not installed, use jasmine.clock().install()');
+      }
+    };
+
+    return self;
+
+    function originalTimingFunctionsIntact() {
+      return global.setTimeout === realTimingFunctions.setTimeout &&
+        global.clearTimeout === realTimingFunctions.clearTimeout &&
+        global.setInterval === realTimingFunctions.setInterval &&
+        global.clearInterval === realTimingFunctions.clearInterval;
+    }
+
+    function legacyIE() {
+      //if these methods are polyfilled, apply will be present
+      return !(realTimingFunctions.setTimeout || realTimingFunctions.setInterval).apply;
+    }
+
+    function replace(dest, source) {
+      for (var prop in source) {
+        dest[prop] = source[prop];
+      }
+    }
+
+    function setTimeout(fn, delay) {
+      return delayedFunctionScheduler.scheduleFunction(fn, delay, argSlice(arguments, 2));
+    }
+
+    function clearTimeout(id) {
+      return delayedFunctionScheduler.removeFunctionWithId(id);
+    }
+
+    function setInterval(fn, interval) {
+      return delayedFunctionScheduler.scheduleFunction(fn, interval, argSlice(arguments, 2), true);
+    }
+
+    function clearInterval(id) {
+      return delayedFunctionScheduler.removeFunctionWithId(id);
+    }
+
+    function argSlice(argsObj, n) {
+      return Array.prototype.slice.call(argsObj, n);
+    }
+  }
+
+  return Clock;
+};
+
+getJasmineRequireObj().DelayedFunctionScheduler = function() {
+  function DelayedFunctionScheduler() {
+    var self = this;
+    var scheduledLookup = [];
+    var scheduledFunctions = {};
+    var currentTime = 0;
+    var delayedFnCount = 0;
+
+    self.tick = function(millis) {
+      millis = millis || 0;
+      var endTime = currentTime + millis;
+
+      runScheduledFunctions(endTime);
+      currentTime = endTime;
+    };
+
+    self.scheduleFunction = function(funcToCall, millis, params, recurring, timeoutKey, runAtMillis) {
+      var f;
+      if (typeof(funcToCall) === 'string') {
+        /* jshint evil: true */
+        f = function() { return eval(funcToCall); };
+        /* jshint evil: false */
+      } else {
+        f = funcToCall;
+      }
+
+      millis = millis || 0;
+      timeoutKey = timeoutKey || ++delayedFnCount;
+      runAtMillis = runAtMillis || (currentTime + millis);
+
+      var funcToSchedule = {
+        runAtMillis: runAtMillis,
+        funcToCall: f,
+        recurring: recurring,
+        params: params,
+        timeoutKey: timeoutKey,
+        millis: millis
+      };
+
+      if (runAtMillis in scheduledFunctions) {
+        scheduledFunctions[runAtMillis].push(funcToSchedule);
+      } else {
+        scheduledFunctions[runAtMillis] = [funcToSchedule];
+        scheduledLookup.push(runAtMillis);
+        scheduledLookup.sort(function (a, b) {
+          return a - b;
+        });
+      }
+
+      return timeoutKey;
+    };
+
+    self.removeFunctionWithId = function(timeoutKey) {
+      for (var runAtMillis in scheduledFunctions) {
+        var funcs = scheduledFunctions[runAtMillis];
+        var i = indexOfFirstToPass(funcs, function (func) {
+          return func.timeoutKey === timeoutKey;
+        });
+
+        if (i > -1) {
+          if (funcs.length === 1) {
+            delete scheduledFunctions[runAtMillis];
+            deleteFromLookup(runAtMillis);
+          } else {
+            funcs.splice(i, 1);
+          }
+
+          // intervals get rescheduled when executed, so there's never more
+          // than a single scheduled function with a given timeoutKey
+          break;
+        }
+      }
+    };
+
+    return self;
+
+    function indexOfFirstToPass(array, testFn) {
+      var index = -1;
+
+      for (var i = 0; i < array.length; ++i) {
+        if (testFn(array[i])) {
+          index = i;
+          break;
+        }
+      }
+
+      return index;
+    }
+
+    function deleteFromLookup(key) {
+      var value = Number(key);
+      var i = indexOfFirstToPass(scheduledLookup, function (millis) {
+        return millis === value;
+      });
+
+      if (i > -1) {
+        scheduledLookup.splice(i, 1);
+      }
+    }
+
+    function reschedule(scheduledFn) {
+      self.scheduleFunction(scheduledFn.funcToCall,
+        scheduledFn.millis,
+        scheduledFn.params,
+        true,
+        scheduledFn.timeoutKey,
+        scheduledFn.runAtMillis + scheduledFn.millis);
+    }
+
+    function forEachFunction(funcsToRun, callback) {
+      for (var i = 0; i < funcsToRun.length; ++i) {
+        callback(funcsToRun[i]);
+      }
+    }
+
+    function runScheduledFunctions(endTime) {
+      if (scheduledLookup.length === 0 || scheduledLookup[0] > endTime) {
+        return;
+      }
+
+      do {
+        currentTime = scheduledLookup.shift();
+
+        var funcsToRun = scheduledFunctions[currentTime];
+        delete scheduledFunctions[currentTime];
+
+        forEachFunction(funcsToRun, function(funcToRun) {
+          if (funcToRun.recurring) {
+            reschedule(funcToRun);
+          }
+        });
+
+        forEachFunction(funcsToRun, function(funcToRun) {
+          funcToRun.funcToCall.apply(null, funcToRun.params || []);
+        });
+      } while (scheduledLookup.length > 0 &&
+              // checking first if we're out of time prevents setTimeout(0)
+              // scheduled in a funcToRun from forcing an extra iteration
+                 currentTime !== endTime  &&
+                 scheduledLookup[0] <= endTime);
+    }
+  }
+
+  return DelayedFunctionScheduler;
+};
+
+getJasmineRequireObj().ExceptionFormatter = function() {
+  function ExceptionFormatter() {
+    this.message = function(error) {
+      var message = '';
+
+      if (error.name && error.message) {
+        message += error.name + ': ' + error.message;
+      } else {
+        message += error.toString() + ' thrown';
+      }
+
+      if (error.fileName || error.sourceURL) {
+        message += ' in ' + (error.fileName || error.sourceURL);
+      }
+
+      if (error.line || error.lineNumber) {
+        message += ' (line ' + (error.line || error.lineNumber) + ')';
+      }
+
+      return message;
+    };
+
+    this.stack = function(error) {
+      return error ? error.stack : null;
+    };
+  }
+
+  return ExceptionFormatter;
+};
+
+getJasmineRequireObj().Expectation = function() {
+
+  function Expectation(options) {
+    this.util = options.util || { buildFailureMessage: function() {} };
+    this.customEqualityTesters = options.customEqualityTesters || [];
+    this.actual = options.actual;
+    this.addExpectationResult = options.addExpectationResult || function(){};
+    this.isNot = options.isNot;
+
+    var customMatchers = options.customMatchers || {};
+    for (var matcherName in customMatchers) {
+      this[matcherName] = Expectation.prototype.wrapCompare(matcherName, customMatchers[matcherName]);
+    }
+  }
+
+  Expectation.prototype.wrapCompare = function(name, matcherFactory) {
+    return function() {
+      var args = Array.prototype.slice.call(arguments, 0),
+        expected = args.slice(0),
+        message = '';
+
+      args.unshift(this.actual);
+
+      var matcher = matcherFactory(this.util, this.customEqualityTesters),
+          matcherCompare = matcher.compare;
+
+      function defaultNegativeCompare() {
+        var result = matcher.compare.apply(null, args);
+        result.pass = !result.pass;
+        return result;
+      }
+
+      if (this.isNot) {
+        matcherCompare = matcher.negativeCompare || defaultNegativeCompare;
+      }
+
+      var result = matcherCompare.apply(null, args);
+
+      if (!result.pass) {
+        if (!result.message) {
+          args.unshift(this.isNot);
+          args.unshift(name);
+          message = this.util.buildFailureMessage.apply(null, args);
+        } else {
+          if (Object.prototype.toString.apply(result.message) === '[object Function]') {
+            message = result.message();
+          } else {
+            message = result.message;
+          }
+        }
+      }
+
+      if (expected.length == 1) {
+        expected = expected[0];
+      }
+
+      // TODO: how many of these params are needed?
+      this.addExpectationResult(
+        result.pass,
+        {
+          matcherName: name,
+          passed: result.pass,
+          message: message,
+          actual: this.actual,
+          expected: expected // TODO: this may need to be arrayified/sliced
+        }
+      );
+    };
+  };
+
+  Expectation.addCoreMatchers = function(matchers) {
+    var prototype = Expectation.prototype;
+    for (var matcherName in matchers) {
+      var matcher = matchers[matcherName];
+      prototype[matcherName] = prototype.wrapCompare(matcherName, matcher);
+    }
+  };
+
+  Expectation.Factory = function(options) {
+    options = options || {};
+
+    var expect = new Expectation(options);
+
+    // TODO: this would be nice as its own Object - NegativeExpectation
+    // TODO: copy instead of mutate options
+    options.isNot = true;
+    expect.not = new Expectation(options);
+
+    return expect;
+  };
+
+  return Expectation;
+};
+
+//TODO: expectation result may make more sense as a presentation of an expectation.
+getJasmineRequireObj().buildExpectationResult = function() {
+  function buildExpectationResult(options) {
+    var messageFormatter = options.messageFormatter || function() {},
+      stackFormatter = options.stackFormatter || function() {};
+
+    var result = {
+      matcherName: options.matcherName,
+      message: message(),
+      stack: stack(),
+      passed: options.passed
+    };
+
+    if(!result.passed) {
+      result.expected = options.expected;
+      result.actual = options.actual;
+    }
+
+    return result;
+
+    function message() {
+      if (options.passed) {
+        return 'Passed.';
+      } else if (options.message) {
+        return options.message;
+      } else if (options.error) {
+        return messageFormatter(options.error);
+      }
+      return '';
+    }
+
+    function stack() {
+      if (options.passed) {
+        return '';
+      }
+
+      var error = options.error;
+      if (!error) {
+        try {
+          throw new Error(message());
+        } catch (e) {
+          error = e;
+        }
+      }
+      return stackFormatter(error);
+    }
+  }
+
+  return buildExpectationResult;
+};
+
+getJasmineRequireObj().MockDate = function() {
+  function MockDate(global) {
+    var self = this;
+    var currentTime = 0;
+
+    if (!global || !global.Date) {
+      self.install = function() {};
+      self.tick = function() {};
+      self.uninstall = function() {};
+      return self;
+    }
+
+    var GlobalDate = global.Date;
+
+    self.install = function(mockDate) {
+      if (mockDate instanceof GlobalDate) {
+        currentTime = mockDate.getTime();
+      } else {
+        currentTime = new GlobalDate().getTime();
+      }
+
+      global.Date = FakeDate;
+    };
+
+    self.tick = function(millis) {
+      millis = millis || 0;
+      currentTime = currentTime + millis;
+    };
+
+    self.uninstall = function() {
+      currentTime = 0;
+      global.Date = GlobalDate;
+    };
+
+    createDateProperties();
+
+    return self;
+
+    function FakeDate() {
+      switch(arguments.length) {
+        case 0:
+          return new GlobalDate(currentTime);
+        case 1:
+          return new GlobalDate(arguments[0]);
+        case 2:
+          return new GlobalDate(arguments[0], arguments[1]);
+        case 3:
+          return new GlobalDate(arguments[0], arguments[1], arguments[2]);
+        case 4:
+          return new GlobalDate(arguments[0], arguments[1], arguments[2], arguments[3]);
+        case 5:
+          return new GlobalDate(arguments[0], arguments[1], arguments[2], arguments[3],
+                                arguments[4]);
+        case 6:
+          return new GlobalDate(arguments[0], arguments[1], arguments[2], arguments[3],
+                                arguments[4], arguments[5]);
+        default:
+          return new GlobalDate(arguments[0], arguments[1], arguments[2], arguments[3],
+                                arguments[4], arguments[5], arguments[6]);
+      }
+    }
+
+    function createDateProperties() {
+      FakeDate.prototype = GlobalDate.prototype;
+
+      FakeDate.now = function() {
+        if (GlobalDate.now) {
+          return currentTime;
+        } else {
+          throw new Error('Browser does not support Date.now()');
+        }
+      };
+
+      FakeDate.toSource = GlobalDate.toSource;
+      FakeDate.toString = GlobalDate.toString;
+      FakeDate.parse = GlobalDate.parse;
+      FakeDate.UTC = GlobalDate.UTC;
+    }
+	}
+
+  return MockDate;
+};
+
+getJasmineRequireObj().pp = function(j$) {
+
+  function PrettyPrinter() {
+    this.ppNestLevel_ = 0;
+    this.seen = [];
+  }
+
+  PrettyPrinter.prototype.format = function(value) {
+    this.ppNestLevel_++;
+    try {
+      if (j$.util.isUndefined(value)) {
+        this.emitScalar('undefined');
+      } else if (value === null) {
+        this.emitScalar('null');
+      } else if (value === 0 && 1/value === -Infinity) {
+        this.emitScalar('-0');
+      } else if (value === j$.getGlobal()) {
+        this.emitScalar('<global>');
+      } else if (value.jasmineToString) {
+        this.emitScalar(value.jasmineToString());
+      } else if (typeof value === 'string') {
+        this.emitString(value);
+      } else if (j$.isSpy(value)) {
+        this.emitScalar('spy on ' + value.and.identity());
+      } else if (value instanceof RegExp) {
+        this.emitScalar(value.toString());
+      } else if (typeof value === 'function') {
+        this.emitScalar('Function');
+      } else if (typeof value.nodeType === 'number') {
+        this.emitScalar('HTMLNode');
+      } else if (value instanceof Date) {
+        this.emitScalar('Date(' + value + ')');
+      } else if (j$.util.arrayContains(this.seen, value)) {
+        this.emitScalar('<circular reference: ' + (j$.isArray_(value) ? 'Array' : 'Object') + '>');
+      } else if (j$.isArray_(value) || j$.isA_('Object', value)) {
+        this.seen.push(value);
+        if (j$.isArray_(value)) {
+          this.emitArray(value);
+        } else {
+          this.emitObject(value);
+        }
+        this.seen.pop();
+      } else {
+        this.emitScalar(value.toString());
+      }
+    } finally {
+      this.ppNestLevel_--;
+    }
+  };
+
+  PrettyPrinter.prototype.iterateObject = function(obj, fn) {
+    for (var property in obj) {
+      if (!Object.prototype.hasOwnProperty.call(obj, property)) { continue; }
+      fn(property, obj.__lookupGetter__ ? (!j$.util.isUndefined(obj.__lookupGetter__(property)) &&
+          obj.__lookupGetter__(property) !== null) : false);
+    }
+  };
+
+  PrettyPrinter.prototype.emitArray = j$.unimplementedMethod_;
+  PrettyPrinter.prototype.emitObject = j$.unimplementedMethod_;
+  PrettyPrinter.prototype.emitScalar = j$.unimplementedMethod_;
+  PrettyPrinter.prototype.emitString = j$.unimplementedMethod_;
+
+  function StringPrettyPrinter() {
+    PrettyPrinter.call(this);
+
+    this.string = '';
+  }
+
+  j$.util.inherit(StringPrettyPrinter, PrettyPrinter);
+
+  StringPrettyPrinter.prototype.emitScalar = function(value) {
+    this.append(value);
+  };
+
+  StringPrettyPrinter.prototype.emitString = function(value) {
+    this.append('\'' + value + '\'');
+  };
+
+  StringPrettyPrinter.prototype.emitArray = function(array) {
+    if (this.ppNestLevel_ > j$.MAX_PRETTY_PRINT_DEPTH) {
+      this.append('Array');
+      return;
+    }
+    var length = Math.min(array.length, j$.MAX_PRETTY_PRINT_ARRAY_LENGTH);
+    this.append('[ ');
+    for (var i = 0; i < length; i++) {
+      if (i > 0) {
+        this.append(', ');
+      }
+      this.format(array[i]);
+    }
+    if(array.length > length){
+      this.append(', ...');
+    }
+
+    var self = this;
+    var first = array.length === 0;
+    this.iterateObject(array, function(property, isGetter) {
+      if (property.match(/^\d+$/)) {
+        return;
+      }
+
+      if (first) {
+        first = false;
+      } else {
+        self.append(', ');
+      }
+
+      self.formatProperty(array, property, isGetter);
+    });
+
+    this.append(' ]');
+  };
+
+  StringPrettyPrinter.prototype.emitObject = function(obj) {
+    var constructorName = obj.constructor ? j$.fnNameFor(obj.constructor) : 'null';
+    this.append(constructorName);
+
+    if (this.ppNestLevel_ > j$.MAX_PRETTY_PRINT_DEPTH) {
+      return;
+    }
+
+    var self = this;
+    this.append('({ ');
+    var first = true;
+
+    this.iterateObject(obj, function(property, isGetter) {
+      if (first) {
+        first = false;
+      } else {
+        self.append(', ');
+      }
+
+      self.formatProperty(obj, property, isGetter);
+    });
+
+    this.append(' })');
+  };
+
+  StringPrettyPrinter.prototype.formatProperty = function(obj, property, isGetter) {
+      this.append(property);
+      this.append(': ');
+      if (isGetter) {
+        this.append('<getter>');
+      } else {
+        this.format(obj[property]);
+      }
+  };
+
+  StringPrettyPrinter.prototype.append = function(value) {
+    this.string += value;
+  };
+
+  return function(value) {
+    var stringPrettyPrinter = new StringPrettyPrinter();
+    stringPrettyPrinter.format(value);
+    return stringPrettyPrinter.string;
+  };
+};
+
+getJasmineRequireObj().QueueRunner = function(j$) {
+
+  function once(fn) {
+    var called = false;
+    return function() {
+      if (!called) {
+        called = true;
+        fn();
+      }
+    };
+  }
+
+  function QueueRunner(attrs) {
+    this.queueableFns = attrs.queueableFns || [];
+    this.onComplete = attrs.onComplete || function() {};
+    this.clearStack = attrs.clearStack || function(fn) {fn();};
+    this.onException = attrs.onException || function() {};
+    this.catchException = attrs.catchException || function() { return true; };
+    this.userContext = attrs.userContext || {};
+    this.timeout = attrs.timeout || {setTimeout: setTimeout, clearTimeout: clearTimeout};
+    this.fail = attrs.fail || function() {};
+  }
+
+  QueueRunner.prototype.execute = function() {
+    this.run(this.queueableFns, 0);
+  };
+
+  QueueRunner.prototype.run = function(queueableFns, recursiveIndex) {
+    var length = queueableFns.length,
+      self = this,
+      iterativeIndex;
+
+
+    for(iterativeIndex = recursiveIndex; iterativeIndex < length; iterativeIndex++) {
+      var queueableFn = queueableFns[iterativeIndex];
+      if (queueableFn.fn.length > 0) {
+        attemptAsync(queueableFn);
+        return;
+      } else {
+        attemptSync(queueableFn);
+      }
+    }
+
+    var runnerDone = iterativeIndex >= length;
+
+    if (runnerDone) {
+      this.clearStack(this.onComplete);
+    }
+
+    function attemptSync(queueableFn) {
+      try {
+        queueableFn.fn.call(self.userContext);
+      } catch (e) {
+        handleException(e, queueableFn);
+      }
+    }
+
+    function attemptAsync(queueableFn) {
+      var clearTimeout = function () {
+          Function.prototype.apply.apply(self.timeout.clearTimeout, [j$.getGlobal(), [timeoutId]]);
+        },
+        next = once(function () {
+          clearTimeout(timeoutId);
+          self.run(queueableFns, iterativeIndex + 1);
+        }),
+        timeoutId;
+
+      next.fail = function() {
+        self.fail.apply(null, arguments);
+        next();
+      };
+
+      if (queueableFn.timeout) {
+        timeoutId = Function.prototype.apply.apply(self.timeout.setTimeout, [j$.getGlobal(), [function() {
+          var error = new Error('Timeout - Async callback was not invoked within timeout specified by jasmine.DEFAULT_TIMEOUT_INTERVAL.');
+          onException(error, queueableFn);
+          next();
+        }, queueableFn.timeout()]]);
+      }
+
+      try {
+        queueableFn.fn.call(self.userContext, next);
+      } catch (e) {
+        handleException(e, queueableFn);
+        next();
+      }
+    }
+
+    function onException(e, queueableFn) {
+      self.onException(e);
+    }
+
+    function handleException(e, queueableFn) {
+      onException(e, queueableFn);
+      if (!self.catchException(e)) {
+        //TODO: set a var when we catch an exception and
+        //use a finally block to close the loop in a nice way..
+        throw e;
+      }
+    }
+  };
+
+  return QueueRunner;
+};
+
+getJasmineRequireObj().ReportDispatcher = function() {
+  function ReportDispatcher(methods) {
+
+    var dispatchedMethods = methods || [];
+
+    for (var i = 0; i < dispatchedMethods.length; i++) {
+      var method = dispatchedMethods[i];
+      this[method] = (function(m) {
+        return function() {
+          dispatch(m, arguments);
+        };
+      }(method));
+    }
+
+    var reporters = [];
+
+    this.addReporter = function(reporter) {
+      reporters.push(reporter);
+    };
+
+    return this;
+
+    function dispatch(method, args) {
+      for (var i = 0; i < reporters.length; i++) {
+        var reporter = reporters[i];
+        if (reporter[method]) {
+          reporter[method].apply(reporter, args);
+        }
+      }
+    }
+  }
+
+  return ReportDispatcher;
+};
+
+
+getJasmineRequireObj().SpyRegistry = function(j$) {
+
+  function SpyRegistry(options) {
+    options = options || {};
+    var currentSpies = options.currentSpies || function() { return []; };
+
+    this.spyOn = function(obj, methodName) {
+      if (j$.util.isUndefined(obj)) {
+        throw new Error('spyOn could not find an object to spy upon for ' + methodName + '()');
+      }
+
+      if (j$.util.isUndefined(methodName)) {
+        throw new Error('No method name supplied');
+      }
+
+      if (j$.util.isUndefined(obj[methodName])) {
+        throw new Error(methodName + '() method does not exist');
+      }
+
+      if (obj[methodName] && j$.isSpy(obj[methodName])) {
+        //TODO?: should this return the current spy? Downside: may cause user confusion about spy state
+        throw new Error(methodName + ' has already been spied upon');
+      }
+
+      var spy = j$.createSpy(methodName, obj[methodName]);
+
+      currentSpies().push({
+        spy: spy,
+        baseObj: obj,
+        methodName: methodName,
+        originalValue: obj[methodName]
+      });
+
+      obj[methodName] = spy;
+
+      return spy;
+    };
+
+    this.clearSpies = function() {
+      var spies = currentSpies();
+      for (var i = 0; i < spies.length; i++) {
+        var spyEntry = spies[i];
+        spyEntry.baseObj[spyEntry.methodName] = spyEntry.originalValue;
+      }
+    };
+  }
+
+  return SpyRegistry;
+};
+
+getJasmineRequireObj().SpyStrategy = function() {
+
+  function SpyStrategy(options) {
+    options = options || {};
+
+    var identity = options.name || 'unknown',
+        originalFn = options.fn || function() {},
+        getSpy = options.getSpy || function() {},
+        plan = function() {};
+
+    this.identity = function() {
+      return identity;
+    };
+
+    this.exec = function() {
+      return plan.apply(this, arguments);
+    };
+
+    this.callThrough = function() {
+      plan = originalFn;
+      return getSpy();
+    };
+
+    this.returnValue = function(value) {
+      plan = function() {
+        return value;
+      };
+      return getSpy();
+    };
+
+    this.returnValues = function() {
+      var values = Array.prototype.slice.call(arguments);
+      plan = function () {
+        return values.shift();
+      };
+      return getSpy();
+    };
+
+    this.throwError = function(something) {
+      var error = (something instanceof Error) ? something : new Error(something);
+      plan = function() {
+        throw error;
+      };
+      return getSpy();
+    };
+
+    this.callFake = function(fn) {
+      plan = fn;
+      return getSpy();
+    };
+
+    this.stub = function(fn) {
+      plan = function() {};
+      return getSpy();
+    };
+  }
+
+  return SpyStrategy;
+};
+
+getJasmineRequireObj().Suite = function(j$) {
+  function Suite(attrs) {
+    this.env = attrs.env;
+    this.id = attrs.id;
+    this.parentSuite = attrs.parentSuite;
+    this.description = attrs.description;
+    this.expectationFactory = attrs.expectationFactory;
+    this.expectationResultFactory = attrs.expectationResultFactory;
+    this.throwOnExpectationFailure = !!attrs.throwOnExpectationFailure;
+
+    this.beforeFns = [];
+    this.afterFns = [];
+    this.beforeAllFns = [];
+    this.afterAllFns = [];
+    this.disabled = false;
+
+    this.children = [];
+
+    this.result = {
+      id: this.id,
+      description: this.description,
+      fullName: this.getFullName(),
+      failedExpectations: []
+    };
+  }
+
+  Suite.prototype.expect = function(actual) {
+    return this.expectationFactory(actual, this);
+  };
+
+  Suite.prototype.getFullName = function() {
+    var fullName = this.description;
+    for (var parentSuite = this.parentSuite; parentSuite; parentSuite = parentSuite.parentSuite) {
+      if (parentSuite.parentSuite) {
+        fullName = parentSuite.description + ' ' + fullName;
+      }
+    }
+    return fullName;
+  };
+
+  Suite.prototype.disable = function() {
+    this.disabled = true;
+  };
+
+  Suite.prototype.beforeEach = function(fn) {
+    this.beforeFns.unshift(fn);
+  };
+
+  Suite.prototype.beforeAll = function(fn) {
+    this.beforeAllFns.push(fn);
+  };
+
+  Suite.prototype.afterEach = function(fn) {
+    this.afterFns.unshift(fn);
+  };
+
+  Suite.prototype.afterAll = function(fn) {
+    this.afterAllFns.push(fn);
+  };
+
+  Suite.prototype.addChild = function(child) {
+    this.children.push(child);
+  };
+
+  Suite.prototype.status = function() {
+    if (this.disabled) {
+      return 'disabled';
+    }
+
+    if (this.result.failedExpectations.length > 0) {
+      return 'failed';
+    } else {
+      return 'finished';
+    }
+  };
+
+  Suite.prototype.isExecutable = function() {
+    return !this.disabled;
+  };
+
+  Suite.prototype.canBeReentered = function() {
+    return this.beforeAllFns.length === 0 && this.afterAllFns.length === 0;
+  };
+
+  Suite.prototype.getResult = function() {
+    this.result.status = this.status();
+    return this.result;
+  };
+
+  Suite.prototype.sharedUserContext = function() {
+    if (!this.sharedContext) {
+      this.sharedContext = this.parentSuite ? clone(this.parentSuite.sharedUserContext()) : {};
+    }
+
+    return this.sharedContext;
+  };
+
+  Suite.prototype.clonedSharedUserContext = function() {
+    return clone(this.sharedUserContext());
+  };
+
+  Suite.prototype.onException = function() {
+    if (arguments[0] instanceof j$.errors.ExpectationFailed) {
+      return;
+    }
+
+    if(isAfterAll(this.children)) {
+      var data = {
+        matcherName: '',
+        passed: false,
+        expected: '',
+        actual: '',
+        error: arguments[0]
+      };
+      this.result.failedExpectations.push(this.expectationResultFactory(data));
+    } else {
+      for (var i = 0; i < this.children.length; i++) {
+        var child = this.children[i];
+        child.onException.apply(child, arguments);
+      }
+    }
+  };
+
+  Suite.prototype.addExpectationResult = function () {
+    if(isAfterAll(this.children) && isFailure(arguments)){
+      var data = arguments[1];
+      this.result.failedExpectations.push(this.expectationResultFactory(data));
+      if(this.throwOnExpectationFailure) {
+        throw new j$.errors.ExpectationFailed();
+      }
+    } else {
+      for (var i = 0; i < this.children.length; i++) {
+        var child = this.children[i];
+        try {
+          child.addExpectationResult.apply(child, arguments);
+        } catch(e) {
+          // keep going
+        }
+      }
+    }
+  };
+
+  function isAfterAll(children) {
+    return children && children[0].result.status;
+  }
+
+  function isFailure(args) {
+    return !args[0];
+  }
+
+  function clone(obj) {
+    var clonedObj = {};
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        clonedObj[prop] = obj[prop];
+      }
+    }
+
+    return clonedObj;
+  }
+
+  return Suite;
+};
+
+if (typeof window == void 0 && typeof exports == 'object') {
+  exports.Suite = jasmineRequire.Suite;
+}
+
+getJasmineRequireObj().Timer = function() {
+  var defaultNow = (function(Date) {
+    return function() { return new Date().getTime(); };
+  })(Date);
+
+  function Timer(options) {
+    options = options || {};
+
+    var now = options.now || defaultNow,
+      startTime;
+
+    this.start = function() {
+      startTime = now();
+    };
+
+    this.elapsed = function() {
+      return now() - startTime;
+    };
+  }
+
+  return Timer;
+};
+
+getJasmineRequireObj().TreeProcessor = function() {
+  function TreeProcessor(attrs) {
+    var tree = attrs.tree,
+        runnableIds = attrs.runnableIds,
+        queueRunnerFactory = attrs.queueRunnerFactory,
+        nodeStart = attrs.nodeStart || function() {},
+        nodeComplete = attrs.nodeComplete || function() {},
+        stats = { valid: true },
+        processed = false,
+        defaultMin = Infinity,
+        defaultMax = 1 - Infinity;
+
+    this.processTree = function() {
+      processNode(tree, false);
+      processed = true;
+      return stats;
+    };
+
+    this.execute = function(done) {
+      if (!processed) {
+        this.processTree();
+      }
+
+      if (!stats.valid) {
+        throw 'invalid order';
+      }
+
+      var childFns = wrapChildren(tree, 0);
+
+      queueRunnerFactory({
+        queueableFns: childFns,
+        userContext: tree.sharedUserContext(),
+        onException: function() {
+          tree.onException.apply(tree, arguments);
+        },
+        onComplete: done
+      });
+    };
+
+    function runnableIndex(id) {
+      for (var i = 0; i < runnableIds.length; i++) {
+        if (runnableIds[i] === id) {
+          return i;
+        }
+      }
+    }
+
+    function processNode(node, parentEnabled) {
+      var executableIndex = runnableIndex(node.id);
+
+      if (executableIndex !== undefined) {
+        parentEnabled = true;
+      }
+
+      parentEnabled = parentEnabled && node.isExecutable();
+
+      if (!node.children) {
+        stats[node.id] = {
+          executable: parentEnabled && node.isExecutable(),
+          segments: [{
+            index: 0,
+            owner: node,
+            nodes: [node],
+            min: startingMin(executableIndex),
+            max: startingMax(executableIndex)
+          }]
+        };
+      } else {
+        var hasExecutableChild = false;
+
+        for (var i = 0; i < node.children.length; i++) {
+          var child = node.children[i];
+
+          processNode(child, parentEnabled);
+
+          if (!stats.valid) {
+            return;
+          }
+
+          var childStats = stats[child.id];
+
+          hasExecutableChild = hasExecutableChild || childStats.executable;
+        }
+
+        stats[node.id] = {
+          executable: hasExecutableChild
+        };
+
+        segmentChildren(node, stats[node.id], executableIndex);
+
+        if (!node.canBeReentered() && stats[node.id].segments.length > 1) {
+          stats = { valid: false };
+        }
+      }
+    }
+
+    function startingMin(executableIndex) {
+      return executableIndex === undefined ? defaultMin : executableIndex;
+    }
+
+    function startingMax(executableIndex) {
+      return executableIndex === undefined ? defaultMax : executableIndex;
+    }
+
+    function segmentChildren(node, nodeStats, executableIndex) {
+      var currentSegment = { index: 0, owner: node, nodes: [], min: startingMin(executableIndex), max: startingMax(executableIndex) },
+          result = [currentSegment],
+          lastMax = defaultMax,
+          orderedChildSegments = orderChildSegments(node.children);
+
+      function isSegmentBoundary(minIndex) {
+        return lastMax !== defaultMax && minIndex !== defaultMin && lastMax < minIndex - 1;
+      }
+
+      for (var i = 0; i < orderedChildSegments.length; i++) {
+        var childSegment = orderedChildSegments[i],
+          maxIndex = childSegment.max,
+          minIndex = childSegment.min;
+
+        if (isSegmentBoundary(minIndex)) {
+          currentSegment = {index: result.length, owner: node, nodes: [], min: defaultMin, max: defaultMax};
+          result.push(currentSegment);
+        }
+
+        currentSegment.nodes.push(childSegment);
+        currentSegment.min = Math.min(currentSegment.min, minIndex);
+        currentSegment.max = Math.max(currentSegment.max, maxIndex);
+        lastMax = maxIndex;
+      }
+
+      nodeStats.segments = result;
+    }
+
+    function orderChildSegments(children) {
+      var specifiedOrder = [],
+          unspecifiedOrder = [];
+
+      for (var i = 0; i < children.length; i++) {
+        var child = children[i],
+            segments = stats[child.id].segments;
+
+        for (var j = 0; j < segments.length; j++) {
+          var seg = segments[j];
+
+          if (seg.min === defaultMin) {
+            unspecifiedOrder.push(seg);
+          } else {
+            specifiedOrder.push(seg);
+          }
+        }
+      }
+
+      specifiedOrder.sort(function(a, b) {
+        return a.min - b.min;
+      });
+
+      return specifiedOrder.concat(unspecifiedOrder);
+    }
+
+    function executeNode(node, segmentNumber) {
+      if (node.children) {
+        return {
+          fn: function(done) {
+            nodeStart(node);
+
+            queueRunnerFactory({
+              onComplete: function() {
+                nodeComplete(node, node.getResult());
+                done();
+              },
+              queueableFns: wrapChildren(node, segmentNumber),
+              userContext: node.sharedUserContext(),
+              onException: function() {
+                node.onException.apply(node, arguments);
+              }
+            });
+          }
+        };
+      } else {
+        return {
+          fn: function(done) { node.execute(done, stats[node.id].executable); }
+        };
+      }
+    }
+
+    function wrapChildren(node, segmentNumber) {
+      var result = [],
+          segmentChildren = stats[node.id].segments[segmentNumber].nodes;
+
+      for (var i = 0; i < segmentChildren.length; i++) {
+        result.push(executeNode(segmentChildren[i].owner, segmentChildren[i].index));
+      }
+
+      if (!stats[node.id].executable) {
+        return result;
+      }
+
+      return node.beforeAllFns.concat(result).concat(node.afterAllFns);
+    }
+  }
+
+  return TreeProcessor;
+};
+
+getJasmineRequireObj().Any = function(j$) {
+
+  function Any(expectedObject) {
+    this.expectedObject = expectedObject;
+  }
+
+  Any.prototype.asymmetricMatch = function(other) {
+    if (this.expectedObject == String) {
+      return typeof other == 'string' || other instanceof String;
+    }
+
+    if (this.expectedObject == Number) {
+      return typeof other == 'number' || other instanceof Number;
+    }
+
+    if (this.expectedObject == Function) {
+      return typeof other == 'function' || other instanceof Function;
+    }
+
+    if (this.expectedObject == Object) {
+      return typeof other == 'object';
+    }
+
+    if (this.expectedObject == Boolean) {
+      return typeof other == 'boolean';
+    }
+
+    return other instanceof this.expectedObject;
+  };
+
+  Any.prototype.jasmineToString = function() {
+    return '<jasmine.any(' + j$.fnNameFor(this.expectedObject) + ')>';
+  };
+
+  return Any;
+};
+
+getJasmineRequireObj().Anything = function(j$) {
+
+  function Anything() {}
+
+  Anything.prototype.asymmetricMatch = function(other) {
+    return !j$.util.isUndefined(other) && other !== null;
+  };
+
+  Anything.prototype.jasmineToString = function() {
+    return '<jasmine.anything>';
+  };
+
+  return Anything;
+};
+
+getJasmineRequireObj().ArrayContaining = function(j$) {
+  function ArrayContaining(sample) {
+    this.sample = sample;
+  }
+
+  ArrayContaining.prototype.asymmetricMatch = function(other) {
+    var className = Object.prototype.toString.call(this.sample);
+    if (className !== '[object Array]') { throw new Error('You must provide an array to arrayContaining, not \'' + this.sample + '\'.'); }
+
+    for (var i = 0; i < this.sample.length; i++) {
+      var item = this.sample[i];
+      if (!j$.matchersUtil.contains(other, item)) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  ArrayContaining.prototype.jasmineToString = function () {
+    return '<jasmine.arrayContaining(' + jasmine.pp(this.sample) +')>';
+  };
+
+  return ArrayContaining;
+};
+
+getJasmineRequireObj().ObjectContaining = function(j$) {
+
+  function ObjectContaining(sample) {
+    this.sample = sample;
+  }
+
+  function getPrototype(obj) {
+    if (Object.getPrototypeOf) {
+      return Object.getPrototypeOf(obj);
+    }
+
+    if (obj.constructor.prototype == obj) {
+      return null;
+    }
+
+    return obj.constructor.prototype;
+  }
+
+  function hasProperty(obj, property) {
+    if (!obj) {
+      return false;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(obj, property)) {
+      return true;
+    }
+
+    return hasProperty(getPrototype(obj), property);
+  }
+
+  ObjectContaining.prototype.asymmetricMatch = function(other) {
+    if (typeof(this.sample) !== 'object') { throw new Error('You must provide an object to objectContaining, not \''+this.sample+'\'.'); }
+
+    for (var property in this.sample) {
+      if (!hasProperty(other, property) ||
+          !j$.matchersUtil.equals(this.sample[property], other[property])) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  ObjectContaining.prototype.jasmineToString = function() {
+    return '<jasmine.objectContaining(' + j$.pp(this.sample) + ')>';
+  };
+
+  return ObjectContaining;
+};
+
+getJasmineRequireObj().StringMatching = function(j$) {
+
+  function StringMatching(expected) {
+    if (!j$.isString_(expected) && !j$.isA_('RegExp', expected)) {
+      throw new Error('Expected is not a String or a RegExp');
+    }
+
+    this.regexp = new RegExp(expected);
+  }
+
+  StringMatching.prototype.asymmetricMatch = function(other) {
+    return this.regexp.test(other);
+  };
+
+  StringMatching.prototype.jasmineToString = function() {
+    return '<jasmine.stringMatching(' + this.regexp + ')>';
+  };
+
+  return StringMatching;
+};
+
+getJasmineRequireObj().errors = function() {
+  function ExpectationFailed() {}
+
+  ExpectationFailed.prototype = new Error();
+  ExpectationFailed.prototype.constructor = ExpectationFailed;
+
+  return {
+    ExpectationFailed: ExpectationFailed
+  };
+};
+getJasmineRequireObj().matchersUtil = function(j$) {
+  // TODO: what to do about jasmine.pp not being inject? move to JSON.stringify? gut PrettyPrinter?
+
+  return {
+    equals: function(a, b, customTesters) {
+      customTesters = customTesters || [];
+
+      return eq(a, b, [], [], customTesters);
+    },
+
+    contains: function(haystack, needle, customTesters) {
+      customTesters = customTesters || [];
+
+      if ((Object.prototype.toString.apply(haystack) === '[object Array]') ||
+        (!!haystack && !haystack.indexOf))
+      {
+        for (var i = 0; i < haystack.length; i++) {
+          if (eq(haystack[i], needle, [], [], customTesters)) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      return !!haystack && haystack.indexOf(needle) >= 0;
+    },
+
+    buildFailureMessage: function() {
+      var args = Array.prototype.slice.call(arguments, 0),
+        matcherName = args[0],
+        isNot = args[1],
+        actual = args[2],
+        expected = args.slice(3),
+        englishyPredicate = matcherName.replace(/[A-Z]/g, function(s) { return ' ' + s.toLowerCase(); });
+
+      var message = 'Expected ' +
+        j$.pp(actual) +
+        (isNot ? ' not ' : ' ') +
+        englishyPredicate;
+
+      if (expected.length > 0) {
+        for (var i = 0; i < expected.length; i++) {
+          if (i > 0) {
+            message += ',';
+          }
+          message += ' ' + j$.pp(expected[i]);
+        }
+      }
+
+      return message + '.';
+    }
+  };
+
+  function isAsymmetric(obj) {
+    return obj && j$.isA_('Function', obj.asymmetricMatch);
+  }
+
+  function asymmetricMatch(a, b) {
+    var asymmetricA = isAsymmetric(a),
+        asymmetricB = isAsymmetric(b);
+
+    if (asymmetricA && asymmetricB) {
+      return undefined;
+    }
+
+    if (asymmetricA) {
+      return a.asymmetricMatch(b);
+    }
+
+    if (asymmetricB) {
+      return b.asymmetricMatch(a);
+    }
+  }
+
+  // Equality function lovingly adapted from isEqual in
+  //   [Underscore](http://underscorejs.org)
+  function eq(a, b, aStack, bStack, customTesters) {
+    var result = true;
+
+    var asymmetricResult = asymmetricMatch(a, b);
+    if (!j$.util.isUndefined(asymmetricResult)) {
+      return asymmetricResult;
+    }
+
+    for (var i = 0; i < customTesters.length; i++) {
+      var customTesterResult = customTesters[i](a, b);
+      if (!j$.util.isUndefined(customTesterResult)) {
+        return customTesterResult;
+      }
+    }
+
+    if (a instanceof Error && b instanceof Error) {
+      return a.message == b.message;
+    }
+
+    // Identical objects are equal. `0 === -0`, but they aren't identical.
+    // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
+    if (a === b) { return a !== 0 || 1 / a == 1 / b; }
+    // A strict comparison is necessary because `null == undefined`.
+    if (a === null || b === null) { return a === b; }
+    var className = Object.prototype.toString.call(a);
+    if (className != Object.prototype.toString.call(b)) { return false; }
+    switch (className) {
+      // Strings, numbers, dates, and booleans are compared by value.
+      case '[object String]':
+        // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+        // equivalent to `new String("5")`.
+        return a == String(b);
+      case '[object Number]':
+        // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
+        // other numeric values.
+        return a != +a ? b != +b : (a === 0 ? 1 / a == 1 / b : a == +b);
+      case '[object Date]':
+      case '[object Boolean]':
+        // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+        // millisecond representations. Note that invalid dates with millisecond representations
+        // of `NaN` are not equivalent.
+        return +a == +b;
+      // RegExps are compared by their source patterns and flags.
+      case '[object RegExp]':
+        return a.source == b.source &&
+          a.global == b.global &&
+          a.multiline == b.multiline &&
+          a.ignoreCase == b.ignoreCase;
+    }
+    if (typeof a != 'object' || typeof b != 'object') { return false; }
+
+    var aIsDomNode = j$.isDomNode(a);
+    var bIsDomNode = j$.isDomNode(b);
+    if (aIsDomNode && bIsDomNode) {
+      // At first try to use DOM3 method isEqualNode
+      if (a.isEqualNode) {
+        return a.isEqualNode(b);
+      }
+      // IE8 doesn't support isEqualNode, try to use outerHTML && innerText
+      var aIsElement = a instanceof Element;
+      var bIsElement = b instanceof Element;
+      if (aIsElement && bIsElement) {
+        return a.outerHTML == b.outerHTML;
+      }
+      if (aIsElement || bIsElement) {
+        return false;
+      }
+      return a.innerText == b.innerText && a.textContent == b.textContent;
+    }
+    if (aIsDomNode || bIsDomNode) {
+      return false;
+    }
+
+    // Assume equality for cyclic structures. The algorithm for detecting cyclic
+    // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+    var length = aStack.length;
+    while (length--) {
+      // Linear search. Performance is inversely proportional to the number of
+      // unique nested structures.
+      if (aStack[length] == a) { return bStack[length] == b; }
+    }
+    // Add the first object to the stack of traversed objects.
+    aStack.push(a);
+    bStack.push(b);
+    var size = 0;
+    // Recursively compare objects and arrays.
+    // Compare array lengths to determine if a deep comparison is necessary.
+    if (className == '[object Array]' && a.length !== b.length) {
+      result = false;
+    }
+
+    if (result) {
+      // Objects with different constructors are not equivalent, but `Object`s
+      // or `Array`s from different frames are.
+      if (className !== '[object Array]') {
+        var aCtor = a.constructor, bCtor = b.constructor;
+        if (aCtor !== bCtor && !(isFunction(aCtor) && aCtor instanceof aCtor &&
+               isFunction(bCtor) && bCtor instanceof bCtor)) {
+          return false;
+        }
+      }
+      // Deep compare objects.
+      for (var key in a) {
+        if (has(a, key)) {
+          // Count the expected number of properties.
+          size++;
+          // Deep compare each member.
+          if (!(result = has(b, key) && eq(a[key], b[key], aStack, bStack, customTesters))) { break; }
+        }
+      }
+      // Ensure that both objects contain the same number of properties.
+      if (result) {
+        for (key in b) {
+          if (has(b, key) && !(size--)) { break; }
+        }
+        result = !size;
+      }
+    }
+    // Remove the first object from the stack of traversed objects.
+    aStack.pop();
+    bStack.pop();
+
+    return result;
+
+    function has(obj, key) {
+      return Object.prototype.hasOwnProperty.call(obj, key);
+    }
+
+    function isFunction(obj) {
+      return typeof obj === 'function';
+    }
+  }
+};
+
+getJasmineRequireObj().toBe = function() {
+  function toBe() {
+    return {
+      compare: function(actual, expected) {
+        return {
+          pass: actual === expected
+        };
+      }
+    };
+  }
+
+  return toBe;
+};
+
+getJasmineRequireObj().toBeCloseTo = function() {
+
+  function toBeCloseTo() {
+    return {
+      compare: function(actual, expected, precision) {
+        if (precision !== 0) {
+          precision = precision || 2;
+        }
+
+        return {
+          pass: Math.abs(expected - actual) < (Math.pow(10, -precision) / 2)
+        };
+      }
+    };
+  }
+
+  return toBeCloseTo;
+};
+
+getJasmineRequireObj().toBeDefined = function() {
+  function toBeDefined() {
+    return {
+      compare: function(actual) {
+        return {
+          pass: (void 0 !== actual)
+        };
+      }
+    };
+  }
+
+  return toBeDefined;
+};
+
+getJasmineRequireObj().toBeFalsy = function() {
+  function toBeFalsy() {
+    return {
+      compare: function(actual) {
+        return {
+          pass: !!!actual
+        };
+      }
+    };
+  }
+
+  return toBeFalsy;
+};
+
+getJasmineRequireObj().toBeGreaterThan = function() {
+
+  function toBeGreaterThan() {
+    return {
+      compare: function(actual, expected) {
+        return {
+          pass: actual > expected
+        };
+      }
+    };
+  }
+
+  return toBeGreaterThan;
+};
+
+
+getJasmineRequireObj().toBeLessThan = function() {
+  function toBeLessThan() {
+    return {
+
+      compare: function(actual, expected) {
+        return {
+          pass: actual < expected
+        };
+      }
+    };
+  }
+
+  return toBeLessThan;
+};
+getJasmineRequireObj().toBeNaN = function(j$) {
+
+  function toBeNaN() {
+    return {
+      compare: function(actual) {
+        var result = {
+          pass: (actual !== actual)
+        };
+
+        if (result.pass) {
+          result.message = 'Expected actual not to be NaN.';
+        } else {
+          result.message = function() { return 'Expected ' + j$.pp(actual) + ' to be NaN.'; };
+        }
+
+        return result;
+      }
+    };
+  }
+
+  return toBeNaN;
+};
+
+getJasmineRequireObj().toBeNull = function() {
+
+  function toBeNull() {
+    return {
+      compare: function(actual) {
+        return {
+          pass: actual === null
+        };
+      }
+    };
+  }
+
+  return toBeNull;
+};
+
+getJasmineRequireObj().toBeTruthy = function() {
+
+  function toBeTruthy() {
+    return {
+      compare: function(actual) {
+        return {
+          pass: !!actual
+        };
+      }
+    };
+  }
+
+  return toBeTruthy;
+};
+
+getJasmineRequireObj().toBeUndefined = function() {
+
+  function toBeUndefined() {
+    return {
+      compare: function(actual) {
+        return {
+          pass: void 0 === actual
+        };
+      }
+    };
+  }
+
+  return toBeUndefined;
+};
+
+getJasmineRequireObj().toContain = function() {
+  function toContain(util, customEqualityTesters) {
+    customEqualityTesters = customEqualityTesters || [];
+
+    return {
+      compare: function(actual, expected) {
+
+        return {
+          pass: util.contains(actual, expected, customEqualityTesters)
+        };
+      }
+    };
+  }
+
+  return toContain;
+};
+
+getJasmineRequireObj().toEqual = function() {
+
+  function toEqual(util, customEqualityTesters) {
+    customEqualityTesters = customEqualityTesters || [];
+
+    return {
+      compare: function(actual, expected) {
+        var result = {
+          pass: false
+        };
+
+        result.pass = util.equals(actual, expected, customEqualityTesters);
+
+        return result;
+      }
+    };
+  }
+
+  return toEqual;
+};
+
+getJasmineRequireObj().toHaveBeenCalled = function(j$) {
+
+  function toHaveBeenCalled() {
+    return {
+      compare: function(actual) {
+        var result = {};
+
+        if (!j$.isSpy(actual)) {
+          throw new Error('Expected a spy, but got ' + j$.pp(actual) + '.');
+        }
+
+        if (arguments.length > 1) {
+          throw new Error('toHaveBeenCalled does not take arguments, use toHaveBeenCalledWith');
+        }
+
+        result.pass = actual.calls.any();
+
+        result.message = result.pass ?
+          'Expected spy ' + actual.and.identity() + ' not to have been called.' :
+          'Expected spy ' + actual.and.identity() + ' to have been called.';
+
+        return result;
+      }
+    };
+  }
+
+  return toHaveBeenCalled;
+};
+
+getJasmineRequireObj().toHaveBeenCalledWith = function(j$) {
+
+  function toHaveBeenCalledWith(util, customEqualityTesters) {
+    return {
+      compare: function() {
+        var args = Array.prototype.slice.call(arguments, 0),
+          actual = args[0],
+          expectedArgs = args.slice(1),
+          result = { pass: false };
+
+        if (!j$.isSpy(actual)) {
+          throw new Error('Expected a spy, but got ' + j$.pp(actual) + '.');
+        }
+
+        if (!actual.calls.any()) {
+          result.message = function() { return 'Expected spy ' + actual.and.identity() + ' to have been called with ' + j$.pp(expectedArgs) + ' but it was never called.'; };
+          return result;
+        }
+
+        if (util.contains(actual.calls.allArgs(), expectedArgs, customEqualityTesters)) {
+          result.pass = true;
+          result.message = function() { return 'Expected spy ' + actual.and.identity() + ' not to have been called with ' + j$.pp(expectedArgs) + ' but it was.'; };
+        } else {
+          result.message = function() { return 'Expected spy ' + actual.and.identity() + ' to have been called with ' + j$.pp(expectedArgs) + ' but actual calls were ' + j$.pp(actual.calls.allArgs()).replace(/^\[ | \]$/g, '') + '.'; };
+        }
+
+        return result;
+      }
+    };
+  }
+
+  return toHaveBeenCalledWith;
+};
+
+getJasmineRequireObj().toMatch = function(j$) {
+
+  function toMatch() {
+    return {
+      compare: function(actual, expected) {
+        if (!j$.isString_(expected) && !j$.isA_('RegExp', expected)) {
+          throw new Error('Expected is not a String or a RegExp');
+        }
+
+        var regexp = new RegExp(expected);
+
+        return {
+          pass: regexp.test(actual)
+        };
+      }
+    };
+  }
+
+  return toMatch;
+};
+
+getJasmineRequireObj().toThrow = function(j$) {
+
+  function toThrow(util) {
+    return {
+      compare: function(actual, expected) {
+        var result = { pass: false },
+          threw = false,
+          thrown;
+
+        if (typeof actual != 'function') {
+          throw new Error('Actual is not a Function');
+        }
+
+        try {
+          actual();
+        } catch (e) {
+          threw = true;
+          thrown = e;
+        }
+
+        if (!threw) {
+          result.message = 'Expected function to throw an exception.';
+          return result;
+        }
+
+        if (arguments.length == 1) {
+          result.pass = true;
+          result.message = function() { return 'Expected function not to throw, but it threw ' + j$.pp(thrown) + '.'; };
+
+          return result;
+        }
+
+        if (util.equals(thrown, expected)) {
+          result.pass = true;
+          result.message = function() { return 'Expected function not to throw ' + j$.pp(expected) + '.'; };
+        } else {
+          result.message = function() { return 'Expected function to throw ' + j$.pp(expected) + ', but it threw ' +  j$.pp(thrown) + '.'; };
+        }
+
+        return result;
+      }
+    };
+  }
+
+  return toThrow;
+};
+
+getJasmineRequireObj().toThrowError = function(j$) {
+  function toThrowError (util) {
+    return {
+      compare: function(actual) {
+        var threw = false,
+          pass = {pass: true},
+          fail = {pass: false},
+          thrown;
+
+        if (typeof actual != 'function') {
+          throw new Error('Actual is not a Function');
+        }
+
+        var errorMatcher = getMatcher.apply(null, arguments);
+
+        try {
+          actual();
+        } catch (e) {
+          threw = true;
+          thrown = e;
+        }
+
+        if (!threw) {
+          fail.message = 'Expected function to throw an Error.';
+          return fail;
+        }
+
+        if (!(thrown instanceof Error)) {
+          fail.message = function() { return 'Expected function to throw an Error, but it threw ' + j$.pp(thrown) + '.'; };
+          return fail;
+        }
+
+        if (errorMatcher.hasNoSpecifics()) {
+          pass.message = 'Expected function not to throw an Error, but it threw ' + j$.fnNameFor(thrown) + '.';
+          return pass;
+        }
+
+        if (errorMatcher.matches(thrown)) {
+          pass.message = function() {
+            return 'Expected function not to throw ' + errorMatcher.errorTypeDescription + errorMatcher.messageDescription() + '.';
+          };
+          return pass;
+        } else {
+          fail.message = function() {
+            return 'Expected function to throw ' + errorMatcher.errorTypeDescription + errorMatcher.messageDescription() +
+              ', but it threw ' + errorMatcher.thrownDescription(thrown) + '.';
+          };
+          return fail;
+        }
+      }
+    };
+
+    function getMatcher() {
+      var expected = null,
+          errorType = null;
+
+      if (arguments.length == 2) {
+        expected = arguments[1];
+        if (isAnErrorType(expected)) {
+          errorType = expected;
+          expected = null;
+        }
+      } else if (arguments.length > 2) {
+        errorType = arguments[1];
+        expected = arguments[2];
+        if (!isAnErrorType(errorType)) {
+          throw new Error('Expected error type is not an Error.');
+        }
+      }
+
+      if (expected && !isStringOrRegExp(expected)) {
+        if (errorType) {
+          throw new Error('Expected error message is not a string or RegExp.');
+        } else {
+          throw new Error('Expected is not an Error, string, or RegExp.');
+        }
+      }
+
+      function messageMatch(message) {
+        if (typeof expected == 'string') {
+          return expected == message;
+        } else {
+          return expected.test(message);
+        }
+      }
+
+      return {
+        errorTypeDescription: errorType ? j$.fnNameFor(errorType) : 'an exception',
+        thrownDescription: function(thrown) {
+          var thrownName = errorType ? j$.fnNameFor(thrown.constructor) : 'an exception',
+              thrownMessage = '';
+
+          if (expected) {
+            thrownMessage = ' with message ' + j$.pp(thrown.message);
+          }
+
+          return thrownName + thrownMessage;
+        },
+        messageDescription: function() {
+          if (expected === null) {
+            return '';
+          } else if (expected instanceof RegExp) {
+            return ' with a message matching ' + j$.pp(expected);
+          } else {
+            return ' with message ' + j$.pp(expected);
+          }
+        },
+        hasNoSpecifics: function() {
+          return expected === null && errorType === null;
+        },
+        matches: function(error) {
+          return (errorType === null || error instanceof errorType) &&
+            (expected === null || messageMatch(error.message));
+        }
+      };
+    }
+
+    function isStringOrRegExp(potential) {
+      return potential instanceof RegExp || (typeof potential == 'string');
+    }
+
+    function isAnErrorType(type) {
+      if (typeof type !== 'function') {
+        return false;
+      }
+
+      var Surrogate = function() {};
+      Surrogate.prototype = type.prototype;
+      return (new Surrogate()) instanceof Error;
+    }
+  }
+
+  return toThrowError;
+};
+
+getJasmineRequireObj().interface = function(jasmine, env) {
+  var jasmineInterface = {
+    describe: function(description, specDefinitions) {
+      return env.describe(description, specDefinitions);
+    },
+
+    xdescribe: function(description, specDefinitions) {
+      return env.xdescribe(description, specDefinitions);
+    },
+
+    fdescribe: function(description, specDefinitions) {
+      return env.fdescribe(description, specDefinitions);
+    },
+
+    it: function() {
+      return env.it.apply(env, arguments);
+    },
+
+    xit: function() {
+      return env.xit.apply(env, arguments);
+    },
+
+    fit: function() {
+      return env.fit.apply(env, arguments);
+    },
+
+    beforeEach: function() {
+      return env.beforeEach.apply(env, arguments);
+    },
+
+    afterEach: function() {
+      return env.afterEach.apply(env, arguments);
+    },
+
+    beforeAll: function() {
+      return env.beforeAll.apply(env, arguments);
+    },
+
+    afterAll: function() {
+      return env.afterAll.apply(env, arguments);
+    },
+
+    expect: function(actual) {
+      return env.expect(actual);
+    },
+
+    pending: function() {
+      return env.pending.apply(env, arguments);
+    },
+
+    fail: function() {
+      return env.fail.apply(env, arguments);
+    },
+
+    spyOn: function(obj, methodName) {
+      return env.spyOn(obj, methodName);
+    },
+
+    jsApiReporter: new jasmine.JsApiReporter({
+      timer: new jasmine.Timer()
+    }),
+
+    jasmine: jasmine
+  };
+
+  jasmine.addCustomEqualityTester = function(tester) {
+    env.addCustomEqualityTester(tester);
+  };
+
+  jasmine.addMatchers = function(matchers) {
+    return env.addMatchers(matchers);
+  };
+
+  jasmine.clock = function() {
+    return env.clock;
+  };
+
+  return jasmineInterface;
+};
+
+getJasmineRequireObj().version = function() {
+  return '2.3.4';
+};
 
 (function() {
 	'use strict';

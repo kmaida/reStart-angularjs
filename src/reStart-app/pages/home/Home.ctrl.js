@@ -1,4 +1,4 @@
-(function() {
+(function () {
 	'use strict';
 
 	angular
@@ -87,5 +87,16 @@
 		function _exitMobile() {
 			home.viewformat = 'large';
 		}
+
+		function getView() {       //test code
+			return home.viewformat; //test code
+		}                           //test code
+
+		home.enterMobile = _enterMobile;      //test code
+		home.exitMobile = _exitMobile;        //test code
+		home.getJsonSucess = _getJsonSuccess; //test code
+		home.activate = _activate;            //test code
+		home.getView = getView;               //test code
+		return home;                          //test code
 	}
 }());

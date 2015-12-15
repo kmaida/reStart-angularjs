@@ -1,4 +1,4 @@
-(function() {
+(function () {
 	'use strict';
 
 	angular
@@ -27,5 +27,9 @@
 			// no data to load, but loading state might be on
 			$scope.$emit('loading-off');
 		}
+
+		return {        //test code
+			init: _init //test code
+		};               //test code
 	}
 }());

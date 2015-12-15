@@ -133,5 +133,10 @@
 
 			$log.error(msg);
 		}
+		PageCtrl.enterMobile = _enterMobile;//test code
+		PageCtrl.exitMobile = _exitMobile;//test code
+		PageCtrl.loadingOn = _loadingOn;//test code
+		PageCtrl.loadingOff = _loadingOff;//test code
+		return PageCtrl;//test code
 	}
 }());
