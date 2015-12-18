@@ -103,7 +103,9 @@
 		 * @private
 		 */
 		function _routeChangeSuccess($event, current, previous) {
-			_mc.matchCurrent(MQ.SMALL);
+			if (previous) {
+				_mc.matchCurrent(MQ.SMALL);
+			}
 
 			if (current.$$route && current.$$route.resolve) {   // eslint-disable-line angular/no-private-call
 				_loadingOff();
