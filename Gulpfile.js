@@ -13,6 +13,18 @@ var minifyCSS = require('gulp-minify-css');
 var autoprefixer = require('gulp-autoprefixer');
 var concat = require('gulp-concat');
 
+// Images
+var imagemin = require('gulp-imagemin');
+// imagemin plugins
+var gifsicle = require('imagemin-gifsicle');
+var optipng  = require('imagemin-optipng');
+var pngquant = require('imagemin-pngquant');
+//var mozjpeg  = require('imagemin-mozjpeg');   // currently has a bug and returns 0kb images
+
+// SVGs
+var svgo = require('imagemin-svgo');
+var svgSprite = require('gulp-svg-sprite');
+
 /**
  * File paths
  *
@@ -32,6 +44,10 @@ var path = {
 	css: {
 		src: basePath.src + '/assets/css/scss/',
 		dest: basePath.dest + '/assets/css/'
+	},
+	images: {
+		src: basePath.src + '/assets/images/',
+		dest: basePath.src + '/assets/images/'
 	},
 	js: {
 		src: basePath.src + '/assets/js/',
@@ -61,6 +77,8 @@ files.jsUserSrcAngular = [path.jsAngular.src + '**/*.js', '!' + path.jsAngular.s
 files.jsUserSrcAssets = [path.js.src + '**/*.js', '!' + path.js.src + jsUserScript, '!' + path.js.src + 'vendor/*'];
 files.jsUserSrcAll = files.jsUserSrcAngular.concat(files.jsUserSrcAssets);
 files.jsVendorSrc = [path.jsVendor.src + 'jquery.js', path.jsVendor.src + 'angular.js', path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'modernizr.min.js', '!' + path.jsVendor.src + 'vendor.js'];
+files.imagesSrc = [path.images.src + '**/*.{jpg,jpeg,gif,png,svg}', '!' + path.images.src + 'svg/*.svg'];
+files.svgSrc = [path.images.src + 'svgSrc/**/*.svg'];
 
 /**
  * Run "gulp --prod" to trigger production/build mode
@@ -182,6 +200,61 @@ function jsAngular() {
 }
 
 /**
+ * function compressImages()
+ *
+ * Image minification and compression
+ */
+function compressImages() {
+	var svgoOpts = [
+		{removeViewBox: false}
+	];
+
+	return gulp.src(files.imagesSrc)
+		.pipe(imagemin({
+			progressive: true,
+			svgoPlugins: svgoOpts,
+			use: [
+				gifsicle({interlaced: true}),
+				optipng({optimizationLevel: 3}),
+				pngquant({quality: '65-80', speed: 4}),
+				//mozjpeg({quality: '70'}),
+				svgo()
+			]
+		})).on('error', errorHandler)
+		.pipe(gulp.dest(path.images.dest))
+}
+
+/**
+ * function spriteSVGs()
+ *
+ * Turn SVG files into SVG sprite
+ */
+function spriteSVGs() {
+	var svgSpriteConfig = {
+		mode: {
+			css: false,
+			symbol: {
+				dest: path.images.dest
+			}
+		},
+		shape: {
+			dimension: {
+				precision: -1
+			},
+			transform: [
+				{
+					svgo: {removeViewBox: false}
+				}
+			]
+		}
+	};
+
+	return gulp.src(files.svgSrc)
+		.pipe(svgSprite(svgSpriteConfig)).on('error', errorHandler)
+		.pipe(gulp.dest('.'));
+}
+
+/**
  * function serve()
  *
  * Start webserver
@@ -226,6 +299,12 @@ function defaultTask() {
 
 	// compile JS Angular files
 	gulp.watch(files.jsUserSrcAngular, ['jsAngular']);
+
+	// compile SVG sprites
+	gulp.watch(files.svgSrc, ['spriteSVGs']);
+
+	// compress images
+	gulp.watch(files.imagesSrc, ['compressImages']);
 }
 
 /**
@@ -237,6 +316,9 @@ gulp.task('jsValidate', jsValidate);
 gulp.task('jsUser', jsUser);
 gulp.task('jsVendor', jsVendor);
 gulp.task('jsAngular', jsAngular);
+gulp.task('compressImages', compressImages);
+gulp.task('spriteSVGs', spriteSVGs);
+gulp.task('processImages', ['compressImages', 'spriteSVGs']);
 gulp.task('serve', serve);
 gulp.task('js', ['jsVendor', 'jsValidate', 'jsUser', 'jsAngular']);
-gulp.task('default', ['serve', 'styles', 'js'], defaultTask);
+gulp.task('default', ['serve', 'styles', 'js', 'compressImages', 'spriteSVGs'], defaultTask);
