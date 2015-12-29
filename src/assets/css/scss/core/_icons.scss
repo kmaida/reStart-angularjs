@@ -1,0 +1,33 @@
+/*--------------------
+	    ICONS
+--------------------*/
+
+/*
+	SVG icon styling:
+
+	- color dictates fill color
+	- stroke: $color-black;	only needed if the SVG has a stroke; if just a path, it will pick up color
+	- must set both height and width or icon will grow to default size (will not skew ratio, will just match smallest size)
+
+	HTML Example:
+
+	<svg class="icon caret-right">
+		<use xlink:href="/assets/images/svg/sprite.symbol.svg#caret-right" />
+	</svg>
+
+	- Replace the #caret-right with your icon's filename (the SVG ID)
+*/
+
+.icon {
+	color: $color-icon-default;
+	display: inline-block;
+	fill: currentColor;
+	height: 16px;	// default
+	width: 16px;	// default
+}
+.caret-up,
+.caret-down,
+.caret-left,
+.caret-right {
+	margin-bottom: -2px;
+}
