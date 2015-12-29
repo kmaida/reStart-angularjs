@@ -44,8 +44,8 @@
 				});
 
 				$scope.$on('$locationChangeStart', _$locationChangeStart);
-				$scope.$on('enter-mobile', _enterMobile);
-				$scope.$on('exit-mobile', _exitMobile);
+				$scope.$on('enter-large', _enterLarge);
+				$scope.$on('exit-large', _exitLarge);
 			}
 
 			/**
@@ -106,29 +106,29 @@
 			}
 
 			/**
-			 * Function to execute when entering mobile media query
-			 * Close nav and set up menu toggling functionality
-			 *
-			 * @private
-			 */
-			function _enterMobile(mq) {
-				_closeNav();
-
-				// bind function to toggle mobile navigation open/closed
-				$scope.nav.toggleNav = toggleNav;
-			}
-
-			/**
-			 * Function to execute when exiting mobile media query
+			 * Function to execute when entering large media query
 			 * Disable menu toggling and remove body classes
 			 *
 			 * @private
 			 */
-			function _exitMobile(mq) {
+			function _enterLarge(mq) {
 				// unbind function to toggle mobile navigation open/closed
 				$scope.nav.toggleNav = null;
 
 				_$body.removeClass('nav-closed nav-open');
+			}
+
+			/**
+			 * Function to execute when exiting large media query
+			 * Close nav and set up menu toggling functionality
+			 *
+			 * @private
+			 */
+			function _exitLarge(mq) {
+				_closeNav();
+
+				// bind function to toggle mobile navigation open/closed
+				$scope.nav.toggleNav = toggleNav;
 			}
 		}
 	}

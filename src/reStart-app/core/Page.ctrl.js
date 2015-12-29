@@ -16,9 +16,9 @@
 		var _mc = mediaCheck.init({
 			scope: $scope,
 			media: {
-				mq: MQ.SMALL,
-				enter: _enterMobile,
-				exit: _exitMobile
+				mq: MQ.LARGE,
+				enter: _enterLarge,
+				exit: _exitLarge
 			},
 			debounce: 200
 		});
@@ -45,8 +45,8 @@
 		 *
 		 * @private
 		 */
-		function _enterMobile() {
-			$scope.$broadcast('enter-mobile');
+		function _enterLarge() {
+			$scope.$broadcast('enter-large');
 		}
 
 		/**
@@ -55,8 +55,8 @@
 		 *
 		 * @private
 		 */
-		function _exitMobile() {
-			$scope.$broadcast('exit-mobile');
+		function _exitLarge() {
+			$scope.$broadcast('exit-large');
 		}
 
 		/**
@@ -103,8 +103,8 @@
 		 * @private
 		 */
 		function _routeChangeSuccess($event, current, previous) {
-			if (previous) {
-				_mc.matchCurrent(MQ.SMALL);
+			if (angular.isObject(previous)) {
+				_mc.matchCurrent(MQ.LARGE);
 			}
 
 			if (current.$$route && current.$$route.resolve) {   // eslint-disable-line angular/no-private-call

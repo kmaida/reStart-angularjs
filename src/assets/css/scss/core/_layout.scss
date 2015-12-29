@@ -19,7 +19,7 @@ body {
 	left: 0;
 	width: 100%;
 
-	@include mq($mq-large) {
+	@include mq($large) {
 		transition: none;
 		transform: none;
 	}
@@ -38,7 +38,7 @@ body {
 /*-- Header --*/
 
 .header-mobile-page {
-	@include mq($mq-large) {
+	@include mq($large) {
 		display: none;
 	}
 }
@@ -54,7 +54,7 @@ body {
 	top: 0;
 	width: 270px;
 
-	@include mq($mq-large) {
+	@include mq($large) {
 		display: block;
 		position: relative;
 		width: 100%;
@@ -66,7 +66,7 @@ body {
 	.csstransforms3d & {
 		transform: translate3d(-100%,0,0);
 
-		@include mq($mq-large) {
+		@include mq($large) {
 			transform: none;
 		}
 	}
@@ -76,7 +76,7 @@ body {
 	.no-csstransforms3d .nav-open & {
 		left: -270px;
 
-		@include mq($mq-large) {
+		@include mq($large) {
 			left: 0;
 		}
 	}

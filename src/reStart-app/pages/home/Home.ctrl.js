@@ -34,8 +34,8 @@
 			_activate();
 
 			// mediaquery events
-			$scope.$on('enter-mobile', _enterMobile);
-			$scope.$on('exit-mobile', _exitMobile);
+			$scope.$on('enter-large', _enterLarge);
+			$scope.$on('exit-large', _exitLarge);
 		}
 
 		/**
@@ -69,23 +69,23 @@
 		}
 
 		/**
-		 * Enter small mq
+		 * Enter large mq
 		 * Set home.viewformat
 		 *
 		 * @private
 		 */
-		function _enterMobile() {
-			home.viewformat = 'small';
+		function _enterLarge() {
+			home.viewformat = 'large';
 		}
 
 		/**
-		 * Exit small mq
+		 * Exit large mq
 		 * Set home.viewformat
 		 *
 		 * @private
 		 */
-		function _exitMobile() {
-			home.viewformat = 'large';
+		function _exitLarge() {
+			home.viewformat = 'small';
 		}
 	}
 }());

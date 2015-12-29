@@ -6,7 +6,7 @@
 	padding: $padding-screen-small;
 	text-align: center;
 
-	@include mq($mq-large) {
+	@include mq($large) {
 		padding: $padding-screen-large;
 	}
 }

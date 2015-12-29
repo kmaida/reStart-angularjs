@@ -4,8 +4,8 @@
 
 /*-- Variables --*/
 
-$mq-small: 'screen and (max-width: 767px)';
-$mq-large: 'screen and (min-width: 768px)';
+$small: 'screen and (max-width: 767px)';	// should not use this (default is mobile-first)
+$large: 'screen and (min-width: 768px)';
 
 /*-- Mixins --*/
 

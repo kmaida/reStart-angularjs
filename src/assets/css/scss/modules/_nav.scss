@@ -59,7 +59,7 @@
 	box-shadow: inset -8px 0 8px -6px rgba(0,0,0,0.2);
 	padding: $padding-screen-small;
 
-	@include mq($mq-large) {
+	@include mq($large) {
 		background: $color-nav-bg;
 		box-shadow: none;
 		padding: $padding-screen-large;
@@ -68,7 +68,7 @@
 	.active .nav-list-item-text {
 		font-weight: bold;
 
-		@include mq($mq-large) {
+		@include mq($large) {
 			border-bottom: 1px solid $color-disabled-rgba;
 		}
 	}
@@ -88,7 +88,7 @@
 			}
 		}
 
-		@include mq($mq-large) {
+		@include mq($large) {
 			display: flex;
 			flex-wrap: wrap;
 			justify-content: center;
