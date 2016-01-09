@@ -5,9 +5,9 @@
 		.module('reStart')
 		.controller('HomeCtrl', HomeCtrl);
 
-	HomeCtrl.$inject = ['$scope', 'Utils', 'Page', 'JSONData'];
+	HomeCtrl.$inject = ['$scope', 'Utils', 'Metadata', 'JSONData'];
 
-	function HomeCtrl($scope, Utils, Page, JSONData) {
+	function HomeCtrl($scope, Utils, Metadata, JSONData) {
 		// controllerAs ViewModel
 		var home = this;
 
@@ -28,7 +28,7 @@
 		 */
 		function _init() {
 			// set page <title>
-			Page.setTitle(home.title);
+			Metadata.set(home.title, 'reStart-angular, angularjs, javascript, boilerplate, spa, demo, app, application', 'reStart-angular demo application');
 
 			// activate controller
 			_activate();

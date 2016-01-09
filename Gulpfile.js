@@ -76,9 +76,34 @@ files.scssSrc = [path.css.src + '**/*.scss', '!' + path.css.src + '/vendor/**/*.
 files.jsUserSrcAngular = [path.jsAngular.src + '**/*.js', '!' + path.jsAngular.src + jsAngularScript];
 files.jsUserSrcAssets = [path.js.src + '**/*.js', '!' + path.js.src + jsUserScript, '!' + path.js.src + 'vendor/*'];
 files.jsUserSrcAll = files.jsUserSrcAngular.concat(files.jsUserSrcAssets);
-files.jsVendorSrc = [path.jsVendor.src + 'jquery.js', path.jsVendor.src + 'angular.js', path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'modernizr.min.js', '!' + path.jsVendor.src + 'vendor.js'];
-files.imagesSrc = [path.images.src + '**/*.{jpg,jpeg,gif,png,svg}', '!' + path.images.src + 'svg/*.svg'];
+files.jsVendorSrc = [path.jsVendor.src + 'jquery.js', path.jsVendor.src + 'angular.js', path.jsVendor.src + '**/*.js', '!' + path.jsVendor.src + 'modernizr.min.js', '!' + path.jsVendor.src + 'svg4everybody.min.js', '!' + path.jsVendor.src + 'vendor.js'];
+files.imagesSrc = [path.images.src + '**/*.{jpg,jpeg,gif,png,svg}', '!' + path.images.src + 'svgSrc/*.svg', '!' + path.images.src + 'svg/*.svg'];
 files.svgSrc = [path.images.src + 'svgSrc/**/*.svg'];
+
+/**
+ * Image compression settings variables
+ */
+var svgoOpts = [
+	{removeViewBox: false}
+];
+var svgSpriteConfig = {
+	mode: {
+		css: false,
+		symbol: {
+			dest: path.images.dest
+		}
+	},
+	shape: {
+		dimension: {
+			precision: -1
+		},
+		transform: [
+			{
+				svgo: {removeViewBox: false}
+			}
+		]
+	}
+};
 
 /**
  * Run "gulp --prod" to trigger production/build mode
@@ -205,10 +230,6 @@ function jsAngular() {
  * Image minification and compression
  */
 function compressImages() {
-	var svgoOpts = [
-		{removeViewBox: false}
-	];
-
 	return gulp.src(files.imagesSrc)
 		.pipe(imagemin({
 			progressive: true,
@@ -230,26 +251,14 @@ function compressImages() {
  * Turn SVG files into SVG sprite
  */
 function spriteSVGs() {
-	var svgSpriteConfig = {
-		mode: {
-			css: false,
-			symbol: {
-				dest: path.images.dest
-			}
-		},
-		shape: {
-			dimension: {
-				precision: -1
-			},
-			transform: [
-				{
-					svgo: {removeViewBox: false}
-				}
-			]
-		}
-	};
-
 	return gulp.src(files.svgSrc)
+		.pipe(imagemin({
+			progressive: true,
+			svgoPlugins: svgoOpts,
+			use: [
+				svgo()
+			]
+		})).on('error', errorHandler)
 		.pipe(svgSprite(svgSpriteConfig)).on('error', errorHandler)
 		.pipe(gulp.dest('.'));
 }
@@ -302,9 +311,6 @@ function defaultTask() {
 
 	// compile SVG sprites
 	gulp.watch(files.svgSrc, ['spriteSVGs']);
-
-	// compress images
-	gulp.watch(files.imagesSrc, ['compressImages']);
 }
 
 /**

@@ -5,9 +5,9 @@
 		.module('reStart')
 		.controller('Error404Ctrl', Error404Ctrl);
 
-	Error404Ctrl.$inject = ['$scope', 'Page'];
+	Error404Ctrl.$inject = ['$scope', 'Metadata'];
 
-	function Error404Ctrl($scope, Page) {
+	function Error404Ctrl($scope, Metadata) {
 		var e404 = this;
 
 		// bindable members
@@ -22,7 +22,7 @@
 		 */
 		function _init() {
 			// set page <title>
-			Page.setTitle(e404.title);
+			Metadata.set(e404.title, 'error', 'Error 404 - page not found');
 
 			// no data to load, but loading state might be on
 			$scope.$emit('loading-off');

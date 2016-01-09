@@ -5,9 +5,9 @@
 		.module('reStart')
 		.controller('PageCtrl', PageCtrl);
 
-	PageCtrl.$inject = ['Page', '$scope', 'MQ', 'mediaCheck', '$log'];
+	PageCtrl.$inject = ['Metadata', '$scope', 'MQ', 'mediaCheck', '$log'];
 
-	function PageCtrl(Page, $scope, MQ, mediaCheck, $log) {
+	function PageCtrl(Metadata, $scope, MQ, mediaCheck, $log) {
 		var page = this;
 
 		// private variables
@@ -32,7 +32,7 @@
 		 */
 		function _init() {
 			// associate page <title>
-			page.pageTitle = Page;
+			page.metadata = Metadata;
 
 			$scope.$on('$routeChangeStart', _routeChangeStart);
 			$scope.$on('$routeChangeSuccess', _routeChangeSuccess);

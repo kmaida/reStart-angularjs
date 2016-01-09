@@ -4,16 +4,18 @@
 <!--[if gt IE 9|!IE]><!--><html class="no-js" ng-app="reStart" ng-controller="PageCtrl as page" ng-cloak><!-- <![endif]-->
 	<head>
 		<meta charset="utf-8">
-		<title ng-bind="page.pageTitle.getTitle()"></title>
+		<title ng-bind="page.metadata.getTitle()"></title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta name="description" content="">
-		<meta name="author" content="">
+		<meta name="author" content="Kim Maida">
+		<meta name="keywords" content="{{page.metadata.getKeywords()}}">
+		<meta name="description" content="{{page.metadata.getDesc()}}">
 		<base href="/">
 
 		<!-- Stylesheets -->
 		<link href="/assets/css/styles.css" rel="stylesheet" media="all">
 
-		<!-- Modernizr -->
+		<!-- Early-load vendors -->
+		<script src="/assets/js/vendor/svg4everybody.min.js"></script>
 		<script src="/assets/js/vendor/modernizr.min.js"></script>
 	</head>
 

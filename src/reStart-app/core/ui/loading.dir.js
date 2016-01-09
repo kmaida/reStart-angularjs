@@ -65,8 +65,7 @@
 
 				if (loading.active) {
 					_$body.css({
-						height: _winHeight,
-						overflowY: 'hidden'
+						height: _winHeight
 					});
 				}
 			}
@@ -107,8 +106,8 @@
 			 */
 			function _close() {
 				_$body.css({
-					height: 'auto',
-					overflowY: 'auto'
+					height: '',
+					overflowY: ''
 				});
 			}
 		}
