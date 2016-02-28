@@ -27,7 +27,7 @@
 		 * @param newDesc {string}
 		 */
 		function set(newTitle, newKeywords, newDesc) {
-			pageTitle = newTitle;
+			pageTitle = ' | ' + newTitle;
 			keywords = newKeywords;
 			desc = newDesc;
 		}
@@ -39,7 +39,7 @@
 		 * @returns {string} site title + page title
 		 */
 		function getTitle() {
-			return siteTitle + ' | ' + pageTitle;
+			return siteTitle + pageTitle;
 		}
 
 		/**
