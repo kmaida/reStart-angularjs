@@ -8,7 +8,7 @@ releases, so the browser support may change over time.
 
 ## Dependencies
  
-* AngularJS v1.4.8
+* AngularJS v1.5.0
 * jQuery v2.1.4
 * Node >= v0.10 
 * Gulp 
@@ -50,6 +50,7 @@ Run `gulp --prod` to use the `production` flag, minifying files (no server, no `
 
 ## Changelog
 
+* 2/27/16: Upgrade to Angular 1.5.0
 * 12/04/15: Add ESLint and upgrade to Angular 1.4.8
 * 11/23/15: Rename module and folders for better scalability. Additional dependency upgrades and styleguide compliance edits.
 * 11/16/15: App-wide updates to greatly enhance base features, upgrade dependencies, and comply much more fully with John Papa's AngularJS styleguide
