@@ -25,7 +25,7 @@ window.helpers = (function() {
 		var chromeversion = null;
 		var $html = $('html');
 		
-		// Modernizr 2 bug: Chrome on Windows 8 gives a false negative for transforms3d support
+		// Modernizr bug: Chrome gives a false negative for csstransforms3d support
 		// Google does not plan to fix this; https://code.google.com/p/chromium/issues/detail?id=129004
 		if (chrome) {
 			chromeversion = ua.substr(ua.lastIndexOf('chrome/') + 7, 2);
