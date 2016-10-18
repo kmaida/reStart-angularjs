@@ -8,9 +8,9 @@ releases, so the browser support may change over time.
 
 ## Dependencies
  
-* AngularJS v1.5.0
-* jQuery v2.1.4
-* Node >= v0.10 
+* AngularJS v1.5.8
+* jQuery v3.1.1
+* Node >= v4 
 * Gulp 
 * Sass (Node/libsass, not Ruby)
 
@@ -50,6 +50,7 @@ Run `gulp --prod` to use the `production` flag, minifying files (no server, no `
 
 ## Changelog
 
+* 10/18/16: Upgrade to Angular 1.5.8. Upgrade jQuery to 3.1.1. Upgrade Modernizr to 3.3.1
 * 2/27/16: Upgrade to Angular 1.5.0
 * 12/04/15: Add ESLint and upgrade to Angular 1.4.8
 * 11/23/15: Rename module and folders for better scalability. Additional dependency upgrades and styleguide compliance edits.
