@@ -44822,6 +44822,8 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
 					 * Create listener for media query changes
 					 * Bind to orientation change
 					 * Unbind on $scope destruction
+					 * 
+					 * @returns {*} _mqChange function
 					 */
 					function _createListener() {
 						/**
@@ -44830,7 +44832,7 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
 						 * @returns {*} _mqChange function
 						 */
 						function _mqListListener() {
-							return _mqChange(mq)
+							return _mqChange(mq);
 						}
 
 						mq.addListener(_mqListListener);
@@ -44885,7 +44887,9 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
 							_timeoutFn(changeFn, mq);
 						}
 
-						return breakpoints[query] = mq.matches;
+						breakpoints[query] = mq.matches;
+
+						return breakpoints[query];
 					}
 
 					breakpoints[query] = null;
@@ -44986,7 +44990,7 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
 					throw new Error('Requested mediaquery not found in mediaCheck');
 				}
 			} else {
-				angular.forEach(matchMap, function(value, key) {
+				angular.forEach(matchMap, function(value) {
 					value();
 				});
 			}
@@ -45011,7 +45015,7 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
 			init: init
 		};
 	}
-})();
+}());
 (function() {
 	'use strict';
 

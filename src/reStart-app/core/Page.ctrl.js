@@ -40,8 +40,8 @@
 		}
 
 		/**
-		 * Enter mobile media query
-		 * $broadcast 'enter-mobile' event
+		 * Enter large media query
+		 * $broadcast 'enter-large' event
 		 *
 		 * @private
 		 */
@@ -50,8 +50,8 @@
 		}
 
 		/**
-		 * Exit mobile media query
-		 * $broadcast 'exit-mobile' event
+		 * Exit large media query
+		 * $broadcast 'exit-large' event
 		 *
 		 * @private
 		 */

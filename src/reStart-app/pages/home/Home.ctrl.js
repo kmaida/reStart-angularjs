@@ -5,11 +5,22 @@
 		.module('reStart')
 		.controller('HomeCtrl', HomeCtrl);
 
-	HomeCtrl.$inject = ['$scope', 'Utils', 'Metadata', 'JSONData'];
+	HomeCtrl.$inject = ['$scope', 'Utils', 'MQ', 'mediaCheck', 'Metadata', 'JSONData'];
 
-	function HomeCtrl($scope, Utils, Metadata, JSONData) {
+	function HomeCtrl($scope, Utils, MQ, mediaCheck, Metadata, JSONData) {
 		// controllerAs ViewModel
 		var home = this;
+
+		// Set up functionality to run on enter/exit of media query
+		var _mc = mediaCheck.init({
+			scope: $scope,
+			media: {
+				mq: MQ.LARGE,
+				enter: _enterLarge,
+				exit: _exitLarge
+			},
+			debounce: 200
+		});
 
 		// bindable members
 		home.title = 'Home';
@@ -32,10 +43,6 @@
 
 			// activate controller
 			_activate();
-
-			// mediaquery events
-			$scope.$on('enter-large', _enterLarge);
-			$scope.$on('exit-large', _exitLarge);
 		}
 
 		/**

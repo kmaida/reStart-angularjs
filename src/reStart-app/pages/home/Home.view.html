@@ -2,11 +2,13 @@
 	<section id="content-main" class="content-main home-content clearfix" ng-cloak>
 		<h1 class="content-heading" ng-bind="::home.title"></h1>
 
-		<p>
-			<label>Name:</label>
-			<input type="text" ng-model="home.name" />
-			<button ng-click="home.alertGreeting(home.name)">Greet</button>
-		</p>
+		<div class="input-group">
+			<span class="input-group-label middle">Name:</span>
+			<input type="text" ng-model="home.name" class="input-group-field" />
+			<div class="input-group-button">
+				<button ng-click="home.alertGreeting(home.name)" class="button">Greet</button>
+			</div>
+		</div>
 
 		<h2>{{::home.global.greeting}}, {{home.name}}!</h2>
 		
