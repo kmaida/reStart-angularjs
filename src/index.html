@@ -21,7 +21,10 @@
 
 	<body>
 		<div class="layout-overflow">
-			<div class="layout-canvas">
+			<div
+				class="layout-canvas"
+				nav-control
+				ng-class="{'nav-open': nav.navOpen, 'nav-closed': !nav.navOpen}">
 			
 			<!-- HEADER -->
 				<header id="header" class="header clearfix" ng-include="'reStart-app/modules/header/header.tpl.html'"></header>

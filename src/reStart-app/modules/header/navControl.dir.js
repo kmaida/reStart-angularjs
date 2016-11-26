@@ -18,15 +18,16 @@
 		 * navControl LINK function
 		 *
 		 * @param $scope
+		 * @param $element
 		 */
-		function navControlLink($scope) {
+		function navControlLink($scope, $element) {
 			// private variables
-			var _$body = angular.element('body');
-			var _layoutCanvas = _$body.find('.layout-canvas');
-			var _navOpen;
+			var _$layoutCanvas = $element;
 
 			// data model
 			$scope.nav = {};
+			$scope.nav.navOpen;
+			$scope.nav.toggleNav = toggleNav;
 
 			_init();
 
@@ -54,7 +55,7 @@
 			 * @private
 			 */
 			function _resized() {
-				_layoutCanvas.css({
+				_$layoutCanvas.css({
 					minHeight: $window.innerHeight + 'px'
 				});
 			}
@@ -65,11 +66,11 @@
 			 * @private
 			 */
 			function _openNav() {
-				_$body
+				_$layoutCanvas
 					.removeClass('nav-closed')
 					.addClass('nav-open');
 
-				_navOpen = true;
+				$scope.navOpen = true;
 			}
 
 			/**
@@ -78,18 +79,18 @@
 			 * @private
 			 */
 			function _closeNav() {
-				_$body
+				_$layoutCanvas
 					.removeClass('nav-open')
 					.addClass('nav-closed');
 
-				_navOpen = false;
+				$scope.navOpen = false;
 			}
 
 			/**
 			 * Toggle nav open/closed
 			 */
 			function toggleNav() {
-				if (!_navOpen) {
+				if (!$scope.navOpen) {
 					_openNav();
 				} else {
 					_closeNav();
@@ -100,7 +101,7 @@
 			 * When changing location, close the nav if it's open
 			 */
 			function _$locationChangeStart() {
-				if (_navOpen) {
+				if ($scope.navOpen) {
 					_closeNav();
 				}
 			}
@@ -115,7 +116,7 @@
 				// unbind function to toggle mobile navigation open/closed
 				$scope.nav.toggleNav = null;
 
-				_$body.removeClass('nav-closed nav-open');
+				_$layoutCanvas.removeClass('nav-closed nav-open');
 			}
 
 			/**

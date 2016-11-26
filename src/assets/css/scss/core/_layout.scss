@@ -27,10 +27,10 @@ body {
 		transition: transform 250ms ease;
 		transform: translate3d(0,0,0);
 	}
-	.csstransforms3d .nav-open & {
+	.csstransforms3d &.nav-open {
 		transform: translate3d(270px,0,0);
 	}
-	.no-csstransforms3d .nav-open & {
+	.no-csstransforms3d &.nav-open {
 		left: 270px;
 	}
 }
