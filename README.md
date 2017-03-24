@@ -1,9 +1,9 @@
-reStart-angular
+reStart-angularjs
 ==========
 
 A mobile-first, responsive boilerplate in AngularJS with all basic features needed to get a scalable single page application started.
 
-Currently supports modern browsers and IE9+. This boilerplate will attempt to stay in sync with latest Angular stable 
+Currently supports modern browsers and IE9+. This boilerplate will attempt to stay in sync with latest AngularJS stable 
 releases, so the browser support may change over time.
 
 ## Dependencies
@@ -50,6 +50,7 @@ Run `gulp --prod` to use the `production` flag, minifying files (no server, no `
 
 ## Changelog
 
+* 03/24/17: Rename repo to reStart-angularjs.
 * 10/18/16: Upgrade to Angular 1.5.8. Upgrade jQuery to 3.1.1. Upgrade Modernizr to 3.3.1
 * 2/27/16: Upgrade to Angular 1.5.0
 * 12/04/15: Add ESLint and upgrade to Angular 1.4.8

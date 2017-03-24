@@ -1,12 +1,12 @@
 {
-  "name": "restart-angular",
+  "name": "restart-angularjs",
   "version": "0.2.3",
   "author": "Kim Maida",
   "description": "Mobile first responsive AngularJS boilerplate",
   "main": "index.html",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kmaida/reStart-angular.git"
+    "url": "https://github.com/kmaida/reStart-angularjs.git"
   },
   "keywords": [
     "angular",
@@ -16,12 +16,12 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kmaida/reStart-angular/issues"
+    "url": "https://github.com/kmaida/reStart-angularjs/issues"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "homepage": "https://github.com/kmaida/reStart-angular",
+  "homepage": "https://github.com/kmaida/reStart-angularjs",
   "dependencies": {},
   "devDependencies": {
     "eslint-config-angular": "^0.4.0",
